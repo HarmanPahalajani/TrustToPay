@@ -72,14 +72,13 @@ services:
   # ---------------------------------------------------------------------------
   # TrustToPay React Frontend (Static Site)
   # ---------------------------------------------------------------------------
-  - type: static_site
+  - type: web
     name: trusttopay-frontend
-    region: oregon
-    plan: free
+    runtime: static
     branch: Harman
     rootDir: ./
-    buildCommand: npm install && npm --workspace frontend run build
-    publishDir: frontend/dist
+    buildCommand: npm run build --workspace=frontend
+    staticPublishPath: frontend/dist
     autoDeploy: true
     routes:
       - type: rewrite
