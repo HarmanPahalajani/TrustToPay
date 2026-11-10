@@ -29,7 +29,7 @@ function isAllowedOrigin(origin: string, req?: Request): boolean {
   if (allowed.has(origin)) return true;
   try {
     const parsed = new URL(origin);
-    if (parsed.hostname.endsWith(".run.app")) return true;
+    if (parsed.hostname.endsWith(".run.app") || parsed.hostname.endsWith(".onrender.com")) return true;
     if (req && req.get("host") && parsed.host === req.get("host")) return true;
   } catch {
     return false;

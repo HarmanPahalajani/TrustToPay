@@ -12,7 +12,31 @@ import type {
   VerificationRun,
 } from "./types";
 
-const BASE = "/api/v1";
+function getApiBase(): string {
+  const envUrl = (
+    import.meta.env.VITE_API_URL ||
+    import.meta.env.VITE_API_BASE_URL ||
+    ""
+  )
+    .trim()
+    .replace(/\/$/, "");
+
+  if (envUrl) {
+    return envUrl.endsWith("/api/v1") ? envUrl : `${envUrl}/api/v1`;
+  }
+
+  if (
+    typeof window !== "undefined" &&
+    (window.location.hostname.endsWith(".onrender.com") ||
+      window.location.hostname.includes("render"))
+  ) {
+    return "https://trusttopay-backend.onrender.com/api/v1";
+  }
+
+  return "/api/v1";
+}
+
+const BASE = getApiBase();
 const SESSION_TOKEN_KEY = "ttp_session_token";
 
 export function getStoredSessionToken(): string | null {
