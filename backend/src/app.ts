@@ -62,7 +62,11 @@ export function createApp() {
         service: "trusttopay-api",
         version: "1.0.0",
         uptimeSeconds: Math.round(process.uptime()),
-        database: { provider: "sqlite", ok: databaseOk, error: databaseError },
+        database: {
+          provider: process.env.DATABASE_URL?.startsWith("postgres") ? "postgresql" : "sqlite",
+          ok: databaseOk,
+          error: databaseError,
+        },
         ai: {
           mode: config.aiConfigured ? "provider" : "demo",
           provider: config.aiProvider,

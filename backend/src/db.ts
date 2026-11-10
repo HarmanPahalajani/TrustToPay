@@ -1,5 +1,10 @@
 import { PrismaClient, type Prisma } from "@prisma/client";
 
+// Normalize and sanitize DATABASE_URL if provided with wrapping quotes or whitespace
+if (process.env.DATABASE_URL) {
+  process.env.DATABASE_URL = process.env.DATABASE_URL.trim().replace(/^["']|["']$/g, "").trim();
+}
+
 /**
  * A single Prisma client is reused for the process. Tests point DATABASE_URL at
  * a disposable SQLite file before importing this module.
