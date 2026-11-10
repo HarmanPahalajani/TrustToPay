@@ -42,7 +42,7 @@ Two pre-configured demo accounts are available for evaluation:
 | **Reviewer (Human Specialist)** | `reviewer@demo.trusttopay.dev` | Browses marketplace offers, accepts tasks, and submits verified solutions. |
 
 > [!NOTE]
-> Demo account passwords and access credentials are provided separately in the official Smart India Hackathon submission portal and presentation documents.
+> Demo account passwords and access credentials are provided separately in the official submission materials and evaluation guide.
 
 ---
 
@@ -154,5 +154,5 @@ TrustToPay includes a fully functional **PayPal Sandbox integration** demonstrat
 
 ---
 
-*TrustToPay — Smart India Hackathon Submission*  
+*TrustToPay — Autonomous Agent Escalation & Verification Protocol*  
 *Hosted Live on Render (Frontend + Node.js Backend API + Managed PostgreSQL)*
