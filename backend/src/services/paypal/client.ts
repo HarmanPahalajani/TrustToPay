@@ -33,6 +33,8 @@ export type CreateOrderInput = {
   referenceId: string;
   description: string;
   requestId: string;
+  returnUrl?: string;
+  cancelUrl?: string;
 };
 
 export type CreatePayoutInput = {
@@ -326,6 +328,12 @@ export class PayPalApiClient implements PayPalGateway {
               brand_name: "TrustToPay",
               shipping_preference: "NO_SHIPPING",
               user_action: "PAY_NOW",
+              return_url:
+                input.returnUrl ??
+                `https://trusttopay-frontend.onrender.com/app/tasks/${encodeURIComponent(input.referenceId)}`,
+              cancel_url:
+                input.cancelUrl ??
+                `https://trusttopay-frontend.onrender.com/app/tasks/${encodeURIComponent(input.referenceId)}`,
             },
           },
         },

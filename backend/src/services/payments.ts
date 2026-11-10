@@ -224,6 +224,8 @@ export async function createFundingOrder(actor: PaymentActor, taskId: string, re
       referenceId: task.id,
       description: `TrustToPay review funding ${task.id}`.slice(0, 127),
       requestId: existing.idempotencyKey,
+      returnUrl: `${config.frontendUrl}/app/tasks/${encodeURIComponent(task.id)}?paypal=approved`,
+      cancelUrl: `${config.frontendUrl}/app/tasks/${encodeURIComponent(task.id)}?paypal=cancelled`,
     });
 
     const updated = await prisma.paymentTransaction.update({
