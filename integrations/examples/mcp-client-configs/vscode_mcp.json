@@ -1,0 +1,25 @@
+{
+  "servers": {
+    "trusttopay": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/packages/trusttopay-mcp/dist/index.js",
+        "--transport",
+        "stdio"
+      ],
+      "env": {
+        "TRUSTTOPAY_API_BASE_URL": "http://127.0.0.1:3000",
+        "TRUSTTOPAY_AGENT_API_KEY": "${input:trusttopayAgentApiKey}"
+      }
+    }
+  },
+  "inputs": [
+    {
+      "id": "trusttopayAgentApiKey",
+      "type": "promptString",
+      "description": "TrustToPay Agent API Key (ttp_test_... or ttp_live_...)",
+      "password": true
+    }
+  ]
+}

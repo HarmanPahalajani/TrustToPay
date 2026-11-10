@@ -1,0 +1,45 @@
+{
+  "name": "trusttopay",
+  "version": "1.0.0",
+  "private": true,
+  "description": "TrustToPay: confidence-triggered human verification with evidence-based checks and conditional PayPal rewards.",
+  "license": "MIT",
+  "workspaces": [
+    "backend",
+    "frontend",
+    "packages/trusttopay-mcp"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "setup": "node scripts/setup.mjs",
+    "prebuild": "node scripts/ensure-setup.mjs",
+    "predev": "node scripts/ensure-setup.mjs",
+    "dev": "concurrently -k -p \"[{name}]\" -n \"api,web\" -c \"blue,magenta\" \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:api": "npm --workspace backend run dev",
+    "dev:web": "npm --workspace frontend run dev",
+    "dev:mcp": "npm --workspace @trusttopay/mcp-server run dev",
+    "build": "npm --workspace @trusttopay/mcp-server run build && npm --workspace backend run build && npm --workspace frontend run build",
+    "build:mcp": "npm --workspace @trusttopay/mcp-server run build",
+    "lint": "npm --workspace @trusttopay/mcp-server run typecheck && npm --workspace backend run build && npm --workspace frontend run build",
+    "start": "npm --workspace backend run start",
+    "test": "npm --workspace backend run test && npm --workspace frontend run test",
+    "test:api": "npm --workspace backend run test",
+    "test:web": "npm --workspace frontend run test",
+    "test:integrations": "node scripts/verify_integrations.mjs",
+    "db:generate:postgres": "npm --workspace backend run db:generate:postgres",
+    "db:generate:sqlite": "npm --workspace backend run db:generate:sqlite",
+    "db:migrate:postgres": "npm --workspace backend run db:migrate:postgres",
+    "db:provision:judges": "node scripts/link_judge_accounts.mjs",
+    "db:validate": "npm --workspace backend run db:validate",
+    "db:reset": "npm --workspace backend run db:reset"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "dependencies": {
+    "@google/genai": "^2.32.0",
+    "@modelcontextprotocol/sdk": "^1.32.2"
+  }
+}

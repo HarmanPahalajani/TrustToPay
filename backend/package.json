@@ -1,0 +1,60 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "npm run db:generate:postgres && tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "db:generate": "prisma generate --schema=prisma/schema.prisma",
+    "db:generate:postgres": "prisma generate --schema=prisma/schema.prisma",
+    "db:generate:sqlite": "prisma generate --schema=prisma/schema.sqlite.prisma",
+    "db:migrate": "prisma migrate deploy --schema=prisma/schema.prisma",
+    "db:migrate:postgres": "prisma migrate deploy --schema=prisma/schema.prisma",
+    "db:provision:judges": "node ../scripts/link_judge_accounts.mjs",
+    "db:validate": "node ../scripts/validate_schemas.mjs",
+    "db:push": "dotenv -e ../.env -- prisma db push",
+    "db:migrate:dev": "dotenv -e ../.env -- prisma migrate dev",
+    "db:reset": "dotenv -e ../.env -- prisma migrate reset --force --skip-generate && npm run seed",
+    "seed": "dotenv -e ../.env -- tsx prisma/seed.ts",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@elastic/elasticsearch": "^8.16.3",
+    "@google/genai": "^1.0.0",
+    "@prisma/client": "^6.2.1",
+    "@supabase/supabase-js": "^2.119.0",
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "swagger-ui-express": "^5.0.1",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cookie-parser": "^1.4.8",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/node": "^22.10.5",
+    "@types/supertest": "^6.0.2",
+    "@types/swagger-ui-express": "^4.1.7",
+    "dotenv-cli": "^8.0.0",
+    "prisma": "^6.2.1",
+    "supertest": "^7.0.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "vitest": "^2.1.8"
+  }
+}

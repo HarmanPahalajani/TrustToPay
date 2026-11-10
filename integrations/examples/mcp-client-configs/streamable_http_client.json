@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "trusttopay-remote": {
+      "type": "streamable-http",
+      "url": "http://127.0.0.1:3100/mcp",
+      "headers": {
+        "Authorization": "Bearer ttp_test_replace_with_your_agent_api_key_000000"
+      }
+    }
+  }
+}

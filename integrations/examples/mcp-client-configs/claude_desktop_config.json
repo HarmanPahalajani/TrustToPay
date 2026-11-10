@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "trusttopay": {
+      "command": "node",
+      "args": [
+        "/ABSOLUTE/PATH/TO/trusttopay/packages/trusttopay-mcp/dist/index.js",
+        "--transport",
+        "stdio"
+      ],
+      "env": {
+        "TRUSTTOPAY_API_BASE_URL": "http://127.0.0.1:3000",
+        "TRUSTTOPAY_AGENT_API_KEY": "ttp_test_replace_with_your_agent_api_key_000000",
+        "TRUSTTOPAY_MCP_MIN_BUDGET_MINOR": "500",
+        "TRUSTTOPAY_MCP_MAX_BUDGET_MINOR": "50000"
+      }
+    }
+  }
+}
