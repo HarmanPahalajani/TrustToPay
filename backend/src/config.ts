@@ -28,6 +28,17 @@ function int(value: string | undefined, fallback: number): number {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+function cleanSecret(value: string | undefined): string {
+  const trimmed = (value ?? "").trim();
+  if (
+    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+    (trimmed.startsWith("'") && trimmed.endsWith("'"))
+  ) {
+    return trimmed.slice(1, -1).replace(/[\r\n]+/g, "").trim();
+  }
+  return trimmed.replace(/[\r\n]+/g, "").trim();
+}
+
 const ephemeralDevSecret = crypto.randomBytes(48).toString("hex");
 let warnedAboutSecret = false;
 
@@ -129,10 +140,21 @@ export const config = {
     return value;
   },
   get geminiApiKey(): string {
-    return (process.env.GEMINI_API_KEY ?? "").trim();
+    return cleanSecret(process.env.GEMINI_API_KEY);
   },
   get geminiModel(): string {
     return (process.env.GEMINI_MODEL ?? "gemini-3.8-flash").trim() || "gemini-3.8-flash";
+  },
+  get geminiThinkingBudget(): number {
+    return int(process.env.GEMINI_THINKING_BUDGET, 0);
+  },
+  get geminiFallbackModels(): string[] {
+    const raw = process.env.GEMINI_FALLBACK_MODELS;
+    if (raw === undefined) return ["gemini-3.6-flash", "gemini-3.7-flash"];
+    return raw
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
   },
   get geminiConfigured(): boolean {
     return this.geminiApiKey.length > 0;
@@ -145,6 +167,18 @@ export const config = {
   },
   get codeReviewTimeoutMs(): number {
     return Math.max(100, int(process.env.CODE_REVIEW_TIMEOUT_MS, 30_000));
+  },
+  get codeReviewMaxRetries(): number {
+    return Math.max(0, Math.min(4, int(process.env.CODE_REVIEW_MAX_RETRIES, 2)));
+  },
+  get codeReviewRetryBaseMs(): number {
+    return Math.max(25, Math.min(10_000, int(process.env.CODE_REVIEW_RETRY_BASE_MS, 750)));
+  },
+  get codeReviewMaxChunkChars(): number {
+    return Math.max(2_000, Math.min(100_000, int(process.env.CODE_REVIEW_MAX_CHUNK_CHARS, 20_000)));
+  },
+  get codeReviewMaxChunks(): number {
+    return Math.max(1, Math.min(20, int(process.env.CODE_REVIEW_MAX_CHUNKS, 8)));
   },
   get paypalEnv(): string {
     return (process.env.PAYPAL_ENV ?? "sandbox").toLowerCase();
@@ -217,10 +251,11 @@ export const config = {
     return this.jinaApiKey.length > 0 && this.jinaEmbeddingModel.length > 0;
   },
   get resendApiKey(): string {
-    return (process.env.RESEND_API_KEY ?? "").trim();
+    return cleanSecret(process.env.RESEND_API_KEY);
   },
   get resendFromEmail(): string {
-    return (process.env.RESEND_FROM_EMAIL ?? "TrustToPay <notifications@trusttopay.com>").trim();
+    const raw = cleanSecret(process.env.RESEND_FROM_EMAIL);
+    return raw || "TrustToPay <onboarding@resend.dev>";
   },
   get resendConfigured(): boolean {
     return this.resendApiKey.length > 0;

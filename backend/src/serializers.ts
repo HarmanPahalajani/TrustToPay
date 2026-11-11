@@ -241,5 +241,19 @@ export function publicIntegrationStatus() {
       maxDisplay: formatMinorUnits(config.rewardMaxMinor),
       currency: config.paypalCurrency,
     },
+    securityGate: {
+      enabled: config.codeReviewEnabled,
+      failClosed: config.codeReviewFailClosed,
+      model: config.geminiModel,
+      timeoutMs: config.codeReviewTimeoutMs,
+      maxRetries: config.codeReviewMaxRetries,
+    },
+    email: {
+      provider: "resend",
+      configured: config.resendConfigured,
+      mode: config.resendConfigured ? "RESEND_API" : "SIMULATED",
+      fromEmail: config.resendFromEmail,
+      sandboxSender: config.resendFromEmail.includes("onboarding@resend.dev"),
+    },
   };
 }

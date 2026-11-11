@@ -109,8 +109,9 @@ async function testSupabase() {
 }
 
 async function testGemini() {
-  const apiKey = (process.env.GEMINI_API_KEY || "").trim();
+  const apiKey = (process.env.GEMINI_API_KEY || "").trim().replace(/^['"]|['"]$/g, "");
   const model = (process.env.GEMINI_MODEL || "gemini-3.8-flash").trim();
+  const timeoutMs = Math.max(10_000, Number.parseInt(process.env.CODE_REVIEW_TIMEOUT_MS || "30000", 10) || 30_000);
 
   if (!apiKey) {
     results.push({
@@ -125,66 +126,109 @@ async function testGemini() {
 
   const start = Date.now();
   try {
-    // Dynamic import of GoogleGenAI SDK
     const { GoogleGenAI, Type } = await import("@google/genai");
     const ai = new GoogleGenAI({
       apiKey,
       httpOptions: {
         headers: { "User-Agent": "trusttopay-staging-verifier" },
-        timeout: 10000,
+        timeout: timeoutMs,
       },
     });
 
-    // Test with 4-second timeout
-    const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("Request timed out after 4000ms")), 4000),
-    );
+    const candidateModels = Array.from(new Set([model, "gemini-3.6-flash", "gemini-3.7-flash"]));
+    let lastErr = null;
+    let primaryNote = "";
 
-    const callPromise = ai.models.generateContent({
-      model,
-      contents: "Inspect deliverable and reply with JSON: {\"verdict\":\"PASS\",\"riskLevel\":\"LOW\"}",
-      config: {
-        temperature: 0.1,
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            verdict: { type: Type.STRING },
-            riskLevel: { type: Type.STRING },
-          },
-          required: ["verdict", "riskLevel"],
-        },
-      },
-    });
+    for (let mIdx = 0; mIdx < candidateModels.length; mIdx++) {
+      const candidateModel = candidateModels[mIdx];
+      const thinkingConfig = candidateModel.includes("3.6")
+        ? { thinkingLevel: "MINIMAL" }
+        : { thinkingBudget: 0 };
 
-    const response = await Promise.race([callPromise, timeoutPromise]);
-    const elapsed = Date.now() - start;
-    const parsed = JSON.parse(response.text?.trim() || "{}");
+      for (let attempt = 1; attempt <= 2; attempt++) {
+        const controller = new AbortController();
+        let timer;
+        try {
+          const timeoutPromise = new Promise((_, reject) => {
+            timer = setTimeout(() => {
+              const err = new Error(`Request timed out after ${timeoutMs}ms`);
+              err.name = "TimeoutError";
+              controller.abort(err);
+              reject(err);
+            }, timeoutMs);
+          });
 
-    if (parsed.verdict && parsed.riskLevel) {
-      results.push({
-        provider: "Google Gemini",
-        configured: true,
-        status: "VERIFIED",
-        endpoint: `Model: ${model}`,
-        notes: `Structured schema verified (${elapsed}ms) - Verdict: ${parsed.verdict}`,
-      });
-    } else {
-      results.push({
-        provider: "Google Gemini",
-        configured: true,
-        status: "FAILED",
-        endpoint: `Model: ${model}`,
-        notes: `Response schema mismatch: ${response.text?.slice(0, 100)}`,
-      });
+          const callPromise = ai.models.generateContent({
+            model: candidateModel,
+            contents: "Inspect deliverable: export const add = (a: number, b: number) => a + b;",
+            config: {
+              systemInstruction: "Classify deliverable security risk as JSON only.",
+              temperature: 0.1,
+              maxOutputTokens: 512,
+              responseMimeType: "application/json",
+              abortSignal: controller.signal,
+              thinkingConfig,
+              responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                  verdict: { type: Type.STRING, enum: ["PASS", "BLOCK", "NEEDS_HUMAN_REVIEW"] },
+                  riskLevel: { type: Type.STRING, enum: ["LOW", "MEDIUM", "HIGH", "CRITICAL"] },
+                },
+                required: ["verdict", "riskLevel"],
+              },
+            },
+          });
+
+          const response = await Promise.race([callPromise, timeoutPromise]);
+          clearTimeout(timer);
+          const elapsed = Date.now() - start;
+          const parsed = JSON.parse(response.text?.trim() || "{}");
+
+          if (parsed.verdict && parsed.riskLevel) {
+            results.push({
+              provider: "Google Gemini",
+              configured: true,
+              status: "VERIFIED",
+              endpoint: primaryNote ? `Fallback: ${candidateModel}` : `Model: ${candidateModel}`,
+              notes: `${primaryNote ? `${primaryNote}; ` : ""}Verified (${elapsed}ms, attempt ${attempt}) - Verdict: ${parsed.verdict}`,
+            });
+          } else {
+            results.push({
+              provider: "Google Gemini",
+              configured: true,
+              status: "FAILED",
+              endpoint: `Model: ${candidateModel}`,
+              notes: `Response schema mismatch: ${response.text?.slice(0, 100)}`,
+            });
+          }
+          return;
+        } catch (err) {
+          clearTimeout(timer);
+          lastErr = err;
+          const msg = String(err?.message || "");
+          const isRateLimit = err?.status === 429 || /\b429\b|RESOURCE_EXHAUSTED|quota/i.test(msg);
+          const isTransient = err?.status === 503 || err?.status === 504 || /503|504|DEADLINE_EXCEEDED|UNAVAILABLE/i.test(msg);
+
+          if (isTransient && attempt < 2) {
+            await new Promise((r) => setTimeout(r, 750));
+            continue;
+          }
+          if ((isRateLimit || isTransient) && mIdx < candidateModels.length - 1) {
+            primaryNote = `${candidateModel} hit HTTP ${err?.status ?? (isRateLimit ? 429 : 504)}`;
+            break;
+          }
+          throw err;
+        }
+      }
     }
+    throw lastErr;
   } catch (err) {
     results.push({
       provider: "Google Gemini",
       configured: true,
       status: "FAILED",
       endpoint: `Model: ${model}`,
-      notes: `API call failed: ${err.message?.slice(0, 120)}`,
+      notes: `API call failed (${err?.status ?? "err"}): ${String(err?.message || err).slice(0, 140)}`,
     });
   }
 }
@@ -283,8 +327,8 @@ async function testPayPalSandbox() {
 }
 
 async function testResend() {
-  const apiKey = (process.env.RESEND_API_KEY || "").trim();
-  const fromEmail = (process.env.RESEND_FROM_EMAIL || "TrustToPay <notifications@trusttopay.com>").trim();
+  const apiKey = (process.env.RESEND_API_KEY || "").trim().replace(/^['"]|['"]$/g, "");
+  const fromEmail = (process.env.RESEND_FROM_EMAIL || "TrustToPay <onboarding@resend.dev>").trim();
 
   if (!apiKey) {
     results.push({
@@ -299,16 +343,16 @@ async function testResend() {
 
   const start = Date.now();
   try {
-    // Probe Resend API key validity via domains list endpoint
-    const res = await fetch("https://api.resend.com/domains", {
+    // 1. Probe domains endpoint (full-access keys return 200; sending-only keys return 401 restricted_api_key)
+    const domRes = await fetch("https://api.resend.com/domains", {
       headers: {
         Authorization: `Bearer ${apiKey}`,
       },
     });
 
     const elapsed = Date.now() - start;
-    if (res.ok) {
-      const domainsData = await res.json();
+    if (domRes.ok) {
+      const domainsData = await domRes.json();
       const verifiedDomains = Array.isArray(domainsData.data)
         ? domainsData.data.map((d) => `${d.name} (${d.status})`).join(", ")
         : "None";
@@ -318,18 +362,66 @@ async function testResend() {
         configured: true,
         status: "VERIFIED",
         endpoint: "https://api.resend.com/domains",
-        notes: `API Auth valid (${elapsed}ms). From: ${fromEmail}. Verified domains: [${verifiedDomains}]`,
+        notes: `Full-access key OK (${elapsed}ms). From: ${fromEmail}. Domains: [${verifiedDomains}]`,
       });
-    } else {
-      const errText = await res.text();
-      results.push({
-        provider: "Resend Email",
-        configured: true,
-        status: "FAILED",
-        endpoint: "https://api.resend.com",
-        notes: `HTTP ${res.status}: ${errText.slice(0, 140)}`,
-      });
+      return;
     }
+
+    const domErrText = await domRes.text();
+    let domErrJson = {};
+    try {
+      domErrJson = JSON.parse(domErrText);
+    } catch {
+      // non-JSON response
+    }
+
+    // 2. Sending-only keys cannot call /domains; validate directly with Resend's safe test sink delivered@resend.dev
+    if (domRes.status === 401 && domErrJson.name === "restricted_api_key") {
+      const sendStart = Date.now();
+      const sendRes = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: fromEmail,
+          to: ["delivered@resend.dev"],
+          subject: "TrustToPay Integration Probe",
+          html: "<p>Live Resend sending-only key check to delivered@resend.dev.</p>",
+        }),
+      });
+      const sendElapsed = Date.now() - sendStart;
+
+      if (sendRes.ok) {
+        const sendData = await sendRes.json().catch(() => ({}));
+        results.push({
+          provider: "Resend Email",
+          configured: true,
+          status: "VERIFIED",
+          endpoint: "https://api.resend.com/emails",
+          notes: `Sending-only key OK (${sendElapsed}ms, id=${sendData.id || "ok"}). From: ${fromEmail} (test/verified recipients)`,
+        });
+      } else {
+        const sendErrText = await sendRes.text();
+        results.push({
+          provider: "Resend Email",
+          configured: true,
+          status: "FAILED",
+          endpoint: "https://api.resend.com/emails",
+          notes: `Sending-only key failed POST /emails HTTP ${sendRes.status}: ${sendErrText.slice(0, 140)}`,
+        });
+      }
+      return;
+    }
+
+    results.push({
+      provider: "Resend Email",
+      configured: true,
+      status: "FAILED",
+      endpoint: "https://api.resend.com",
+      notes: `HTTP ${domRes.status}: ${domErrText.slice(0, 140)}`,
+    });
   } catch (err) {
     results.push({
       provider: "Resend Email",

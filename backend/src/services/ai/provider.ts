@@ -1,7 +1,7 @@
 import { Type } from "@google/genai";
 import { AppError } from "../../lib/errors.js";
 import { config } from "../../config.js";
-import { getGeminiClient } from "../../lib/gemini.js";
+import { buildGeminiThinkingConfig, getGeminiClient } from "../../lib/gemini.js";
 import { analysisOutputSchema, type AnalysisInput, type AnalysisOutput } from "./schema.js";
 
 const SYSTEM_PROMPT = `You are the analysis engine for TrustToPay, a service that sends uncertain AI answers to qualified human reviewers.
@@ -189,41 +189,76 @@ async function runGeminiAnalysis(input: AnalysisInput): Promise<{
 
   const contents = `<evidence_and_context>\n${JSON.stringify(userPayload, null, 2)}\n</evidence_and_context>`;
   const modelName = config.geminiModel;
-  const timeoutMs = 45_000;
+  const timeoutMs = Math.max(config.codeReviewTimeoutMs, 45_000);
+  const maxRetries = config.codeReviewMaxRetries;
+  const thinkingConfig = buildGeminiThinkingConfig(modelName);
 
-  let timer: ReturnType<typeof setTimeout> | undefined;
+  const generateFn = testGeminiGenerator
+    ? testGeminiGenerator
+    : async (params: { model: string; contents: string; config?: Record<string, unknown> }) => {
+        const res = await client!.models.generateContent({
+          model: params.model,
+          contents: params.contents,
+          config: params.config,
+        });
+        return { text: res.text };
+      };
+
+  const invokeWithRetry = async () => {
+    const totalAttempts = 1 + maxRetries;
+    let lastErr: unknown;
+
+    for (let attempt = 1; attempt <= totalAttempts; attempt++) {
+      const controller = new AbortController();
+      let timer: ReturnType<typeof setTimeout> | undefined;
+
+      try {
+        return await Promise.race([
+          generateFn({
+            model: modelName,
+            contents,
+            config: {
+              systemInstruction: SYSTEM_PROMPT,
+              temperature: 0.1,
+              maxOutputTokens: 2048,
+              responseMimeType: "application/json",
+              responseSchema: GEMINI_ANALYSIS_RESPONSE_SCHEMA,
+              abortSignal: controller.signal,
+              ...(thinkingConfig ? { thinkingConfig } : {}),
+            },
+          }),
+          new Promise<never>((_resolve, reject) => {
+            timer = setTimeout(() => {
+              const timeoutErr = new Error(`Gemini analysis timed out after ${timeoutMs}ms.`);
+              timeoutErr.name = "TimeoutError";
+              controller.abort(timeoutErr);
+              reject(timeoutErr);
+            }, timeoutMs);
+          }),
+        ]);
+      } catch (err) {
+        lastErr = err;
+        const msg = err instanceof Error ? err.message : String(err);
+        const status =
+          err && typeof err === "object" && "status" in err ? (err as { status?: number }).status : undefined;
+        const isTransient =
+          status === 503 || status === 504 || /\b503\b|\b504\b|DEADLINE_EXCEEDED|UNAVAILABLE/i.test(msg);
+
+        if (isTransient && attempt < totalAttempts) {
+          const delay = Math.min(4000, config.codeReviewRetryBaseMs * 2 ** (attempt - 1));
+          await new Promise((r) => setTimeout(r, delay));
+          continue;
+        }
+        throw err;
+      } finally {
+        if (timer) clearTimeout(timer);
+      }
+    }
+    throw lastErr;
+  };
 
   try {
-    const generateFn = testGeminiGenerator
-      ? testGeminiGenerator
-      : async (params: { model: string; contents: string; config?: Record<string, unknown> }) => {
-          const res = await client!.models.generateContent({
-            model: params.model,
-            contents: params.contents,
-            config: params.config,
-          });
-          return { text: res.text };
-        };
-
-    const response = await Promise.race([
-      generateFn({
-        model: modelName,
-        contents,
-        config: {
-          systemInstruction: SYSTEM_PROMPT,
-          temperature: 0.1,
-          responseMimeType: "application/json",
-          responseSchema: GEMINI_ANALYSIS_RESPONSE_SCHEMA,
-        },
-      }),
-      new Promise<never>((_resolve, reject) => {
-        timer = setTimeout(() => {
-          const timeoutErr = new Error(`Gemini analysis timed out after ${timeoutMs}ms.`);
-          timeoutErr.name = "TimeoutError";
-          reject(timeoutErr);
-        }, timeoutMs);
-      }),
-    ]);
+    const response = await invokeWithRetry();
 
     const rawText = response.text?.trim() ?? "";
     if (!rawText) {
@@ -288,8 +323,6 @@ async function runGeminiAnalysis(input: AnalysisInput): Promise<{
       "AI_PROVIDER_ERROR",
       `The Gemini AI provider rejected the request. ${safeMsg}`,
     );
-  } finally {
-    if (timer) clearTimeout(timer);
   }
 }
 
