@@ -1,4 +1,5 @@
-import fs from "fs";
+import fs from "node:fs";
+import path from "node:path";
 
 const qbContent = fs.readFileSync("backend/src/services/skills/questionBanks.ts", "utf-8");
 const skills = JSON.parse(qbContent.replace(/^[\s\S]*?DEMO_QUESTION_BANKS: SeedSkillDefinition\[\] =\s*/, "").replace(/;[\s\n]*$/, ""));
@@ -121,5 +122,7 @@ markdown += `
 5. **Specialist Matching Verification:** Tasks requiring verified skill proficiency exclusively check \`UserSkillLevel\` and \`ReviewerSkill\` database records; self-reported or unassessed skills receive zero matching weight.
 `;
 
-fs.writeFileSync("docs/audit/ASSESSMENT_COVERAGE_MATRIX.md", markdown);
-console.log("Wrote docs/audit/ASSESSMENT_COVERAGE_MATRIX.md");
+const outputPath = process.argv[2] || path.join("docs", "ASSESSMENT_COVERAGE_MATRIX.md");
+fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+fs.writeFileSync(outputPath, markdown);
+console.log(`Wrote ${outputPath}`);

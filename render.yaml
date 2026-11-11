@@ -7,7 +7,7 @@ services:
     runtime: node
     region: oregon
     plan: free
-    branch: Harman
+    branch: main
     rootDir: ./
     buildCommand: npm ci --include=dev && npm run db:generate:postgres && npm run build --workspace=backend
     startCommand: npm --workspace backend run start
@@ -75,7 +75,7 @@ services:
   - type: web
     name: trusttopay-frontend
     runtime: static
-    branch: Harman
+    branch: main
     rootDir: ./
     buildCommand: npm run build --workspace=frontend
     staticPublishPath: frontend/dist

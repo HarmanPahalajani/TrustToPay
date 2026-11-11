@@ -12,6 +12,12 @@ coverage/
 !.env.example
 backend/.env
 frontend/.env
+packages/trusttopay-mcp/.env
+JUDGE_ACCESS.md
+JUDGE_ACCESS.*.md
+*.pem
+*.key
+secrets/
 
 # Databases
 *.db
@@ -22,9 +28,10 @@ backend/prisma/dev.db
 backend/prisma/test.db
 backend/prisma/test-*.db
 
-# Test artifacts
+# Test & cache artifacts
 playwright-report/
 test-results/
+.cache/
 .vite/
 .turbo/
 
