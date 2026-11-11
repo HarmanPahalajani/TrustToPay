@@ -38,7 +38,6 @@ import type {
 } from "@/lib/types";
 import { useAuth } from "@/context/AuthContext";
 import { PageHeader, SectionHeading, DataRow } from "@/components/common";
-import { PaymentModeBanner } from "@/components/payment-mode-banner";
 import { PayPalCheckout } from "@/components/paypal-checkout";
 import {
   ModeBadge,
@@ -228,7 +227,6 @@ export default function TaskDetailPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Escalated Task Detail"
         breadcrumbs={[
           {
             label: user?.role === "REVIEWER" ? "Marketplace" : "Escalated Tasks",
@@ -248,7 +246,7 @@ export default function TaskDetailPage() {
             {latestVerification ? (
               <Button asChild variant="outline">
                 <Link to={`/app/tasks/${task.id}/verification`}>
-                  <FileCheck2 className="size-4 text-[#4263EB]" /> Verification record
+                  <FileCheck2 className="size-4 text-[#4263EB]" /> Verification report
                 </Link>
               </Button>
             ) : null}
@@ -256,7 +254,6 @@ export default function TaskDetailPage() {
         }
       />
 
-      <PaymentModeBanner compact />
       {error ? <Alert tone="danger">{error}</Alert> : null}
 
       <div className="flex flex-wrap items-center gap-2">
@@ -265,42 +262,42 @@ export default function TaskDetailPage() {
         <Badge tone="neutral">{categoryLabel(task.category)}</Badge>
         {task.fundedAt ? (
           <Badge tone="success" dot>
-            Escrow Funded
+            Payment ready
           </Badge>
         ) : null}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1.45fr_1fr]">
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           {/* Task Requirements & Supplied Evidence */}
           <Card>
             <CardHeader className="border-b border-[#E4E9F2] pb-3.5">
               <CardTitle className="flex items-center gap-2 text-base">
-                <ClipboardCheck className="size-4 text-[#4263EB]" /> Escalation specification &amp; criteria
+                <ClipboardCheck className="size-4 text-[#4263EB]" /> Task details &amp; requirements
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 pt-4">
               {task.question ? (
                 <div>
-                  <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#68738A]">
-                    Original agent blocker
+                  <p className="text-xs font-semibold text-[#68738A]">
+                    What the AI agent needed help with
                   </p>
                   <p className="mt-1 whitespace-pre-line text-sm leading-6 text-[#141B2D]">{task.question}</p>
                 </div>
               ) : null}
 
               <div>
-                <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#68738A]">
+                <p className="text-xs font-semibold text-[#68738A]">
                   Acceptance criteria
                 </p>
-                <div className="mt-1.5 rounded-xl border border-[#E4E9F2] bg-[#F5F7FC] p-3.5 whitespace-pre-line text-xs leading-6 text-[#141B2D]">
+                <div className="mt-1.5 rounded-xl bg-[#F5F7FC] p-3.5 whitespace-pre-line text-xs leading-6 text-[#141B2D]">
                   {task.acceptanceCriteria}
                 </div>
               </div>
 
               {task.requiredSkills && task.requiredSkills.length > 0 ? (
                 <div>
-                  <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#68738A]">
+                  <p className="text-xs font-semibold text-[#68738A]">
                     Required specialist skills
                   </p>
                   <div className="mt-1.5 flex flex-wrap gap-1.5">
@@ -425,32 +422,32 @@ export default function TaskDetailPage() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-3 pt-4 text-xs">
-                <div className="grid gap-2.5 rounded-xl border border-[#E4E9F2] bg-[#F5F7FC] p-3.5">
+                <div className="grid gap-2.5 rounded-xl bg-[#F5F7FC] p-4">
                   <div>
                     <span className="font-semibold text-[#68738A]">
-                      Artifact v{handbackPreview.handback.artifact.version} SHA-256:{" "}
+                      File v{handbackPreview.handback.artifact.version} integrity (SHA-256):{" "}
                     </span>
                     <span className="break-all font-mono text-[11px] text-[#141B2D]">
                       {handbackPreview.handback.artifact.sha256Digest}
                     </span>
                   </div>
                   <div>
-                    <span className="font-semibold text-[#68738A]">X-TrustToPay-Signature: </span>
+                    <span className="font-semibold text-[#68738A]">Secure digital signature: </span>
                     <span className="break-all font-mono text-[11px] text-[#141B2D]">
                       {handbackPreview.signature.header}
                     </span>
                   </div>
                   <div>
-                    <span className="font-semibold text-[#68738A]">Handoff Idempotency Key: </span>
+                    <span className="font-semibold text-[#68738A]">Result reference key: </span>
                     <span className="break-all font-mono text-[11px] text-[#141B2D]">
                       {handbackPreview.handback.handoffIdempotencyKey}
                     </span>
                   </div>
                 </div>
 
-                <details className="rounded-xl border border-[#1E293B] bg-[#10172A] p-3.5 text-[#E2E8F0]">
-                  <summary className="cursor-pointer font-mono text-[11px] font-semibold text-[#20BCE5]">
-                    Inspect JSON Handback Payload
+                <details className="rounded-xl bg-[#10172A] p-4 text-[#E2E8F0]">
+                  <summary className="cursor-pointer font-mono text-xs font-semibold text-[#20BCE5]">
+                    Inspect JSON Agent Result Payload
                   </summary>
                   <pre className="mt-2 max-h-64 overflow-auto font-mono text-[11px] leading-5">
                     {JSON.stringify(handbackPreview.handback, null, 2)}
@@ -463,7 +460,7 @@ export default function TaskDetailPage() {
           {/* Workflow Timeline */}
           <Card>
             <CardHeader className="border-b border-[#E4E9F2] pb-3">
-              <CardTitle className="text-sm">Workflow audit timeline</CardTitle>
+              <CardTitle className="text-sm">Task activity history</CardTitle>
             </CardHeader>
             <CardContent className="pt-4">
               <TaskTimeline events={task.events ?? []} />
@@ -472,7 +469,7 @@ export default function TaskDetailPage() {
         </div>
 
         {/* Right Sticky Action & Ledger Column */}
-        <aside className="space-y-5">
+        <aside className="min-w-0 space-y-5">
           <ActionCard
             task={task}
             userRole={user?.role}
@@ -522,7 +519,7 @@ export default function TaskDetailPage() {
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm">Task metadata</CardTitle>
+              <CardTitle className="text-sm">Task details</CardTitle>
             </CardHeader>
             <CardContent>
               <dl>
@@ -531,7 +528,7 @@ export default function TaskDetailPage() {
                 <DataRow label="Reward status">
                   {task.reward ? <Badge tone="neutral">{humanize(task.reward.status)}</Badge> : "—"}
                 </DataRow>
-                <DataRow label="Payout mode">
+                <DataRow label="Payout status">
                   <PayoutAvailabilityBadge availability={task.payoutAvailability} />
                 </DataRow>
                 <DataRow label="Created">{formatDate(task.createdAt)}</DataRow>
@@ -555,21 +552,21 @@ export default function TaskDetailPage() {
               </CardHeader>
               <CardContent className="space-y-2 text-xs">
                 {task.reviewerPayout.consent && task.reviewerPayout.email ? (
-                  <div className="flex items-start gap-2 rounded-lg border border-[#12A875]/30 bg-[#12A875]/[0.07] p-3 text-[#141B2D]">
+                  <div className="flex items-start gap-2 rounded-lg bg-[#12A875]/[0.08] p-3 text-[#141B2D]">
                     <BadgeCheck className="mt-0.5 size-4 shrink-0 text-[#12A875]" />
                     <div className="min-w-0">
                       <p className="font-semibold text-[#0B7D56]">Payout consent recorded</p>
-                      <p className="mt-0.5 truncate font-mono text-[11px] text-[#141B2D]">
+                      <p className="mt-0.5 truncate text-xs text-[#141B2D]">
                         {task.reviewerPayout.email}
                       </p>
                     </div>
                   </div>
                 ) : (
                   <Alert tone="warning">
-                    Payout details incomplete. The specialist must configure a PayPal email and record consent.
+                    Payout details incomplete. The specialist must add a PayPal email and confirm payout consent.
                   </Alert>
                 )}
-                <p className="font-mono text-[11px] text-[#68738A]">Provider: {task.reviewerPayout.provider}</p>
+                <p className="text-xs text-[#68738A]">Provider: {task.reviewerPayout.provider}</p>
               </CardContent>
             </Card>
           ) : null}
@@ -678,14 +675,14 @@ function MatchingProgressCard({
 
         {offers.length === 0 ? (
           <p className="text-xs text-[#68738A]">
-            No specialist offers dispatched yet. Dispatch offers once funding is captured to notify the top 5 matches.
+            No specialist offers sent yet. Send invites after funding to notify the top 5 matches.
           </p>
         ) : (
-          <div className="space-y-2">
+          <div className="divide-y divide-[#E4E9F2]">
             {offers.map((offer) => (
               <div
                 key={offer.id}
-                className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[#E4E9F2] bg-[#F5F7FC] px-3 py-2 text-xs"
+                className="flex flex-wrap items-center justify-between gap-2 py-2.5 text-xs first:pt-0 last:pb-0"
               >
                 <div className="flex min-w-0 items-center gap-2">
                   <Badge tone="neutral">Rank #{offer.rank}</Badge>
@@ -694,7 +691,7 @@ function MatchingProgressCard({
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-[11px] text-[#4E596E]">{offer.score} pts</span>
+                  <span className="text-xs font-medium text-[#4E596E] tabular-nums">{offer.score} pts</span>
                   <Badge
                     tone={
                       offer.status === "ACCEPTED"
@@ -829,12 +826,12 @@ function ActionCard({
         ) : null}
 
         {["FUNDED", "OFFERED"].includes(task.status) && (isRequester || isAdmin) && !task.assignment ? (
-          <div className="space-y-2 rounded-xl border border-[#E4E9F2] bg-[#F5F7FC] p-3 text-xs">
-            <p className="font-semibold text-[#141B2D]">Specialist Offer Broadcast</p>
+          <div className="space-y-2 rounded-xl bg-[#F5F7FC] p-3.5 text-xs">
+            <p className="font-semibold text-[#141B2D]">Notify matched specialists</p>
             <p className="text-[#68738A]">
               {task.offers && task.offers.length > 0
-                ? `${task.offers.filter((o) => o.status === "PENDING").length} pending offer(s) active.`
-                : "Rank qualified specialists (L1–L3) and dispatch up to 5 offers."}
+                ? `${task.offers.filter((o) => o.status === "PENDING").length} specialist invite(s) waiting for a response.`
+                : "Invite up to 5 top-matched verified specialists to claim this task."}
             </p>
             <Button
               variant="outline"
@@ -843,7 +840,7 @@ function ActionCard({
               onClick={onDispatchOffers}
               loading={dispatchingOffers}
             >
-              <Sparkles className="size-3.5 text-[#4263EB]" /> Dispatch top-5 specialist offers
+              <Sparkles className="size-3.5 text-[#4263EB]" /> Send specialist invites
             </Button>
           </div>
         ) : null}
@@ -851,25 +848,25 @@ function ActionCard({
         {isOpenMarket ? (
           <>
             {pendingMyOffer ? (
-              <div className="space-y-1.5 rounded-xl border border-[#4263EB]/35 bg-[#4263EB]/[0.06] p-3 text-xs">
+              <div className="space-y-1.5 rounded-xl bg-[#4263EB]/[0.07] p-3.5 text-xs">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-bold text-[#2E4CCB]">
-                    Top-5 Offer #{pendingMyOffer.rank} ({pendingMyOffer.score} pts)
+                  <span className="font-semibold text-[#2E4CCB] tabular-nums">
+                    Direct offer #{pendingMyOffer.rank} ({pendingMyOffer.score} pts)
                   </span>
                   <Badge tone="indigo">Batch #{pendingMyOffer.batchNumber}</Badge>
                 </div>
-                <p className="text-[11px] text-[#4E596E]">
-                  Expires {formatDate(pendingMyOffer.expiresAt)}. Claim atomically to start review.
+                <p className="text-xs text-[#4E596E] tabular-nums">
+                  Expires {formatDate(pendingMyOffer.expiresAt)}. Accept to start working on this task.
                 </p>
               </div>
             ) : (
               <p className="text-xs leading-5 text-[#68738A]">
-                This funded task is available in the marketplace. First eligible specialist to claim owns the task.
+                This funded task is open in the marketplace. Claim it to begin work.
               </p>
             )}
             <div className="flex gap-2">
               <Button size="sm" className="flex-1" onClick={onAccept} loading={accepting}>
-                <ClipboardCheck className="size-3.5" /> Accept review task
+                <ClipboardCheck className="size-3.5" /> Accept task
               </Button>
               {pendingMyOffer ? (
                 <Button size="sm" variant="outline" onClick={onDeclineOffer} loading={decliningOffer}>
@@ -882,31 +879,31 @@ function ActionCard({
 
         {isAssignedReviewer && ["REVIEWER_ASSIGNED", "ASSIGNED", "IN_PROGRESS"].includes(task.status) ? (
           <p className="text-xs leading-5 text-[#68738A]">
-            You claimed this task. Submit your resolution and artifact files in the workbench on the left.
+            You claimed this task. Submit your work and notes in the submission panel.
           </p>
         ) : null}
 
         {task.status === "VERIFICATION_PENDING" ? (
-          <div className="flex items-center gap-2 rounded-lg border border-[#E4E9F2] bg-[#F5F7FC] p-3 text-xs font-medium text-[#141B2D]">
-            <Loader2 className="size-4 animate-spin text-[#4263EB]" /> Independent verification running…
+          <div className="flex items-center gap-2 rounded-lg bg-[#F5F7FC] p-3 text-xs font-medium text-[#141B2D]">
+            <Loader2 className="size-4 animate-spin text-[#4263EB]" /> Security and quality checks running…
           </div>
         ) : null}
 
         {payable ? (
           <>
-            <div className="rounded-xl border border-[#12A875]/35 bg-[#12A875]/[0.07] p-3 text-xs leading-5 text-[#141B2D]">
+            <div className="rounded-xl bg-[#12A875]/[0.08] p-3.5 text-xs leading-5 text-[#141B2D]">
               <div className="flex flex-wrap items-center justify-between gap-1.5">
-                <p className="font-bold text-[#0B7D56]">Verified and authorized</p>
+                <p className="font-semibold text-[#0B7D56]">Verified and ready for payout</p>
                 <PayoutAvailabilityBadge availability={task.payoutAvailability} />
               </div>
-              <p className="mt-1 text-[#4E596E]">
+              <p className="mt-1 text-[#4E596E] tabular-nums">
                 Release {formatMoney(task.rewardMinor, task.currency)} to{" "}
                 {task.assignment?.reviewer.name ?? "the specialist"}.{" "}
                 {task.payoutAvailability === "DEMO_SIMULATED"
-                  ? "Recorded as a labelled simulated payout in demo mode."
+                  ? "Recorded as a simulated payout in practice mode."
                   : task.payoutAvailability === "PAYOUT_UNAVAILABLE"
-                    ? "PayPal Payouts is disabled for Indian Sandbox merchant accounts unless configured."
-                    : "Calls PayPal Sandbox Payouts v1."}
+                    ? "Automated specialist payouts are currently unavailable for this merchant account."
+                    : "Sent via PayPal test mode."}
               </p>
             </div>
 
@@ -919,14 +916,14 @@ function ActionCard({
             >
               <Wallet className="size-3.5" />
               {task.payoutAvailability === "PAYOUT_UNAVAILABLE"
-                ? "Payout Unavailable (Sandbox Restriction)"
+                ? "Payout unavailable right now"
                 : task.payoutAvailability === "DEMO_SIMULATED"
-                  ? "Release Simulated Payout"
+                  ? "Record Simulated Payout"
                   : "Release Specialist Payout"}
             </Button>
 
             {!task.reviewerPayout?.consent || !task.reviewerPayout.email ? (
-              <Alert tone="warning">The specialist has not saved payout consent and a PayPal email.</Alert>
+              <Alert tone="warning">The specialist needs to add a PayPal email and payout consent in their profile.</Alert>
             ) : null}
           </>
         ) : null}
@@ -939,14 +936,14 @@ function ActionCard({
             onClick={() => onReconcile(processingPayout.id)}
             loading={reconciling}
           >
-            <RefreshCw className="size-3.5" /> Reconcile payout
+            <RefreshCw className="size-3.5" /> Refresh payout status
           </Button>
         ) : null}
 
         {task.status === "PAYMENT_PAID" ? (
-          <div className="rounded-xl border border-[#12A875]/35 bg-[#12A875]/[0.07] p-3 text-xs">
-            <p className="font-bold text-[#0B7D56]">Specialist paid</p>
-            <p className="mt-0.5 text-[#4E596E]">The verified deliverable is unlocked for the AI agent.</p>
+          <div className="rounded-xl bg-[#12A875]/[0.08] p-3.5 text-xs">
+            <p className="font-semibold text-[#0B7D56]">Specialist paid</p>
+            <p className="mt-0.5 text-[#4E596E]">The verified result is ready to return to your agent.</p>
           </div>
         ) : null}
 
@@ -958,7 +955,7 @@ function ActionCard({
             onClick={onFetchHandback}
             loading={fetchingHandback}
           >
-            <ShieldCheck className="size-3.5 text-[#12A875]" /> Retrieve signed Agent Handback
+            <ShieldCheck className="size-3.5 text-[#12A875]" /> Preview signed agent result
           </Button>
         ) : null}
 
@@ -983,7 +980,7 @@ function ActionCard({
         {userRole === "REQUESTER" &&
         ["AWAITING_FUNDING", "FUNDING_FAILED", "FUNDED", "OFFERED"].includes(task.status) ? (
           <Button variant="ghost" size="sm" className="w-full text-[#E5484D] hover:bg-[#E5484D]/10" onClick={onOpenCancel}>
-            Cancel review task
+            Cancel task
           </Button>
         ) : null}
 
@@ -1019,36 +1016,38 @@ function PaymentsCard({
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-sm">
-          <Banknote className="size-4 text-[#4263EB]" /> Payment ledger
+          <Banknote className="size-4 text-[#4263EB]" /> Payment history
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-2.5">
+      <CardContent className="divide-y divide-[#E4E9F2] pt-1">
         {visible.length === 0 ? (
-          <p className="text-xs text-[#68738A]">No payment transactions yet.</p>
+          <p className="py-2 text-xs text-[#68738A]">No payment transactions yet.</p>
         ) : (
           visible.map((payment) => (
-            <div key={payment.id} className="rounded-xl border border-[#E4E9F2] bg-[#F5F7FC] p-3">
+            <div key={payment.id} className="py-3 first:pt-1 last:pb-1">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="text-xs font-bold text-[#141B2D]">{humanize(payment.type)}</span>
+                  <span className="text-xs font-semibold text-[#141B2D]">
+                    {payment.type === "FUNDING" ? "Task funding" : "Specialist payout"}
+                  </span>
                   <PaymentStatusBadge status={payment.status} />
                   <ModeBadge mode={payment.mode} />
                 </div>
-                <span className="font-display text-xs font-bold text-[#141B2D] tabular-nums">
+                <span className="text-sm font-bold text-[#141B2D] tabular-nums">
                   {payment.amountDisplay}
                 </span>
               </div>
-              <p className="mt-1 text-[11px] text-[#68738A]">
+              <p className="mt-1 text-xs text-[#68738A] tabular-nums">
                 {payment.provider} · {formatDate(payment.createdAt)}
               </p>
               {payment.orderId ? (
-                <p className="truncate font-mono text-[10px] text-[#68738A]">Order: {payment.orderId}</p>
+                <p className="mt-0.5 truncate font-mono text-[11px] text-[#68738A]">Order: {payment.orderId}</p>
               ) : null}
               {payment.payoutBatchId ? (
-                <p className="truncate font-mono text-[10px] text-[#68738A]">Batch: {payment.payoutBatchId}</p>
+                <p className="mt-0.5 truncate font-mono text-[11px] text-[#68738A]">Batch: {payment.payoutBatchId}</p>
               ) : null}
               {payment.failureMessage ? (
-                <p className="mt-1 text-[11px] font-medium text-[#E5484D]">{payment.failureMessage}</p>
+                <p className="mt-1 text-xs font-medium text-[#E5484D]">{payment.failureMessage}</p>
               ) : null}
               {(isAdmin || isRequester) && ["FAILED", "PROCESSING", "PENDING"].includes(payment.status) ? (
                 <div className="mt-2 flex flex-wrap gap-1.5">
@@ -1058,7 +1057,7 @@ function PaymentsCard({
                     onClick={() => onReconcile(payment.id)}
                     loading={reconciling}
                   >
-                    <RefreshCw className="size-3" /> Reconcile
+                    <RefreshCw className="size-3.5" /> Refresh status
                   </Button>
                   {isAdmin && payment.status === "FAILED" ? (
                     <Button variant="ghost" size="sm" onClick={() => onRetry(payment.id)} loading={retrying}>
@@ -1096,7 +1095,7 @@ function VerificationCard({
       <CardHeader className="border-b border-[#E4E9F2] pb-3.5">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <CardTitle className="flex items-center gap-2 text-base">
-            <Award className="size-4 text-[#12A875]" /> Independent verification certificate
+            <Award className="size-4 text-[#12A875]" /> Work verification report
           </CardTitle>
           <div className="flex flex-wrap items-center gap-1.5">
             <VerificationBadge status={verification.status} />
@@ -1104,7 +1103,7 @@ function VerificationCard({
               <SecurityVerdictBadge verdict={verification.securityVerdict} />
             ) : null}
             {verification.artifactVersion ? (
-              <Badge tone="neutral">Artifact v{verification.artifactVersion}</Badge>
+              <Badge tone="neutral">Submission v{verification.artifactVersion}</Badge>
             ) : null}
           </div>
         </div>
@@ -1113,24 +1112,24 @@ function VerificationCard({
         <p className="text-sm leading-6 text-[#141B2D]">{verification.decisionReason}</p>
 
         {verification.artifactSha256 ? (
-          <div className="rounded-xl border border-[#E4E9F2] bg-[#F5F7FC] p-3 text-xs">
-            <span className="font-semibold text-[#68738A]">Immutable Artifact SHA-256: </span>
+          <div className="rounded-xl bg-[#F5F7FC] p-3.5 text-xs">
+            <span className="font-semibold text-[#68738A]">File integrity check (SHA-256): </span>
             <span className="break-all font-mono text-[11px] text-[#141B2D]">{verification.artifactSha256}</span>
           </div>
         ) : null}
 
         {verification.securityReview ? (
-          <div className="space-y-2 rounded-xl border border-[#E4E9F2] bg-[#F5F7FC] p-3.5 text-xs">
+          <div className="space-y-2 rounded-xl bg-[#F5F7FC] p-3.5 text-xs">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="flex items-center gap-1.5 font-bold text-[#141B2D]">
-                <ShieldCheck className="size-4 text-[#4263EB]" /> Layered Security Gate
+              <p className="flex items-center gap-1.5 font-semibold text-[#141B2D]">
+                <ShieldCheck className="size-4 text-[#4263EB]" /> Security checks
               </p>
               <SecurityVerdictBadge verdict={verification.securityReview.verdict} />
             </div>
             <p className="leading-5 text-[#4E596E]">{verification.securityReview.summary}</p>
             {verification.securityReview.gemini ? (
-              <p className="font-mono text-[11px] text-[#68738A]">
-                Gemini ({verification.securityReview.gemini.model}) · Confidence:{" "}
+              <p className="text-xs text-[#68738A] tabular-nums">
+                AI review ({verification.securityReview.gemini.model}) · Confidence:{" "}
                 {Math.round(verification.securityReview.gemini.confidence * 100)}%
               </p>
             ) : null}
@@ -1138,10 +1137,10 @@ function VerificationCard({
         ) : null}
 
         {verification.executionSummary ? (
-          <div className="space-y-2 rounded-xl border border-[#E4E9F2] bg-[#F5F7FC] p-3.5 text-xs">
+          <div className="space-y-2 rounded-xl bg-[#F5F7FC] p-3.5 text-xs">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="flex items-center gap-1.5 font-bold text-[#141B2D]">
-                <Terminal className="size-4 text-[#4263EB]" /> Isolated Execution Runner
+              <p className="flex items-center gap-1.5 font-semibold text-[#141B2D]">
+                <Terminal className="size-4 text-[#4263EB]" /> Work execution summary
               </p>
               <div className="flex items-center gap-1.5">
                 <Badge tone={verification.executionSummary.passed ? "success" : "danger"} dot>
@@ -1152,7 +1151,7 @@ function VerificationCard({
             </div>
             <p className="leading-5 text-[#4E596E]">{verification.executionSummary.summary}</p>
             {verification.executionSummary.stdout ? (
-              <pre className="max-h-36 overflow-auto rounded-lg border border-[#1E293B] bg-[#10172A] p-3 font-mono text-[11px] text-[#E2E8F0]">
+              <pre className="max-h-36 overflow-auto rounded-lg bg-[#10172A] p-3 font-mono text-[11px] text-[#E2E8F0]">
                 {verification.executionSummary.stdout}
               </pre>
             ) : null}
@@ -1161,19 +1160,19 @@ function VerificationCard({
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <p className="mb-2 font-mono text-[10px] font-semibold uppercase tracking-wider text-[#68738A]">
+            <p className="mb-2 text-xs font-semibold text-[#68738A]">
               Passed checks ({verification.checksPassed.length})
             </p>
             <div className="space-y-2">
               {verification.checksPassed.map((check) => (
                 <div
                   key={check.id}
-                  className="flex gap-2 rounded-lg border border-[#12A875]/30 bg-[#12A875]/[0.06] p-2.5"
+                  className="flex gap-2 rounded-lg bg-[#12A875]/[0.07] p-3"
                 >
                   <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#12A875]" />
                   <div>
-                    <p className="text-xs font-bold text-[#141B2D]">{check.label}</p>
-                    <p className="mt-0.5 text-[11px] leading-4 text-[#4E596E]">{check.detail}</p>
+                    <p className="text-xs font-semibold text-[#141B2D]">{check.label}</p>
+                    <p className="mt-0.5 text-xs leading-4 text-[#4E596E]">{check.detail}</p>
                   </div>
                 </div>
               ))}
@@ -1181,11 +1180,11 @@ function VerificationCard({
           </div>
 
           <div>
-            <p className="mb-2 font-mono text-[10px] font-semibold uppercase tracking-wider text-[#68738A]">
+            <p className="mb-2 text-xs font-semibold text-[#68738A]">
               Failed checks ({verification.checksFailed.length})
             </p>
             {verification.checksFailed.length === 0 ? (
-              <p className="rounded-lg border border-[#E4E9F2] bg-[#F5F7FC] p-3 text-xs text-[#68738A]">
+              <p className="rounded-lg bg-[#F5F7FC] p-3 text-xs text-[#68738A]">
                 No failed checks.
               </p>
             ) : (
@@ -1194,10 +1193,10 @@ function VerificationCard({
                   <div
                     key={check.id}
                     className={cn(
-                      "flex gap-2 rounded-lg border p-2.5",
+                      "flex gap-2 rounded-lg p-3",
                       check.severity === "HARD"
-                        ? "border-[#E5484D]/35 bg-[#E5484D]/[0.06]"
-                        : "border-[#F5A623]/40 bg-[#F5A623]/[0.08]",
+                        ? "bg-[#E5484D]/[0.07]"
+                        : "bg-[#F5A623]/[0.1]",
                     )}
                   >
                     <ShieldAlert
@@ -1207,8 +1206,8 @@ function VerificationCard({
                       )}
                     />
                     <div>
-                      <p className="text-xs font-bold text-[#141B2D]">{check.label}</p>
-                      <p className="mt-0.5 text-[11px] leading-4 text-[#4E596E]">{check.detail}</p>
+                      <p className="text-xs font-semibold text-[#141B2D]">{check.label}</p>
+                      <p className="mt-0.5 text-xs leading-4 text-[#4E596E]">{check.detail}</p>
                     </div>
                   </div>
                 ))}
@@ -1218,26 +1217,26 @@ function VerificationCard({
         </div>
 
         {verification.evidenceReferences.length > 0 ? (
-          <div>
-            <p className="mb-2 font-mono text-[10px] font-semibold uppercase tracking-wider text-[#68738A]">
+          <div className="border-t border-[#E4E9F2] pt-3">
+            <p className="mb-2 text-xs font-semibold text-[#68738A]">
               Evidence references
             </p>
-            <div className="space-y-1.5">
+            <div className="divide-y divide-[#E4E9F2]">
               {verification.evidenceReferences.map((reference, index) => (
-                <div key={`${reference.label}-${index}`} className="rounded-lg border border-[#E4E9F2] bg-[#FFFFFF] p-3 text-xs">
+                <div key={`${reference.label}-${index}`} className="py-2.5 text-xs first:pt-0 last:pb-0">
                   <p className="font-semibold text-[#141B2D]">{reference.label}</p>
                   {reference.url ? (
                     <a
                       href={reference.url}
                       target="_blank"
                       rel="noreferrer"
-                      className="mt-0.5 inline-flex items-center gap-1 text-[11px] font-medium text-[#4263EB] underline underline-offset-2"
+                      className="mt-0.5 inline-flex items-center gap-1 text-xs font-medium text-[#4263EB] underline underline-offset-2"
                     >
                       {reference.url} <ExternalLink className="size-3" />
                     </a>
                   ) : null}
                   {reference.quote ? (
-                    <p className="mt-1 text-[11px] italic text-[#4E596E]">“{reference.quote}”</p>
+                    <p className="mt-1 text-xs italic text-[#4E596E]">“{reference.quote}”</p>
                   ) : null}
                 </div>
               ))}
@@ -1318,24 +1317,28 @@ function SubmissionCard({
         </CardHeader>
         <CardContent className="space-y-4 pt-4">
           {artifact ? (
-            <div className="space-y-2.5 rounded-xl border border-[#E4E9F2] bg-[#F5F7FC] p-3.5 text-xs">
+            <div className="space-y-2.5 rounded-xl bg-[#F5F7FC] p-4 text-xs">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="flex items-center gap-1.5 font-bold text-[#141B2D]">
-                  <Database className="size-3.5 text-[#4263EB]" /> Immutable Artifact (v{artifact.version})
+                <p className="flex items-center gap-1.5 font-semibold text-[#141B2D]">
+                  <Database className="size-3.5 text-[#4263EB]" /> Submitted files (v{artifact.version})
                 </p>
-                <span className="font-mono text-[11px] text-[#68738A]">
+                <span className="text-xs text-[#68738A] tabular-nums">
                   {artifact.fileCount} file{artifact.fileCount === 1 ? "" : "s"} · {artifact.totalSizeBytes} bytes
                 </span>
               </div>
-              <p className="break-all font-mono text-[11px] text-[#4E596E]">SHA-256: {artifact.sha256Digest}</p>
+              <p className="break-all font-mono text-[11px] text-[#4E596E]">
+                Integrity check (SHA-256): {artifact.sha256Digest}
+              </p>
 
               {artifact.files && artifact.files.length > 0 ? (
-                <div className="space-y-2 pt-1">
+                <div className="divide-y divide-[#E4E9F2] pt-1">
                   {artifact.files.map((file) => (
-                    <details key={file.path} className="rounded-lg border border-[#E4E9F2] bg-[#FFFFFF] p-2.5">
+                    <details key={file.path} className="py-2 first:pt-1 last:pb-0">
                       <summary className="flex cursor-pointer items-center justify-between gap-2 font-mono text-xs font-semibold text-[#141B2D]">
                         <span>{file.path}</span>
-                        <span className="text-[11px] text-[#68738A]">{file.sizeBytes} B</span>
+                        <span className="font-sans text-[11px] font-normal text-[#68738A] tabular-nums">
+                          {file.sizeBytes} B
+                        </span>
                       </summary>
                       <pre className="mt-2 max-h-56 overflow-auto rounded-lg bg-[#10172A] p-3 font-mono text-[11px] text-[#E2E8F0]">
                         {file.content}
@@ -1346,7 +1349,7 @@ function SubmissionCard({
               ) : null}
 
               {artifact.patchText ? (
-                <details className="rounded-lg border border-[#E4E9F2] bg-[#FFFFFF] p-2.5">
+                <details className="border-t border-[#E4E9F2] pt-2">
                   <summary className="cursor-pointer font-mono text-xs font-semibold text-[#141B2D]">
                     Unified Git Diff Patch
                   </summary>
@@ -1359,14 +1362,12 @@ function SubmissionCard({
           ) : null}
 
           <div>
-            <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#68738A]">Answer</p>
+            <p className="text-xs font-semibold text-[#68738A]">Submitted answer</p>
             <p className="mt-1 whitespace-pre-line text-sm leading-6 text-[#141B2D]">{submission.answer}</p>
           </div>
 
           <div>
-            <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#68738A]">
-              Technical explanation
-            </p>
+            <p className="text-xs font-semibold text-[#68738A]">Explanation</p>
             <p className="mt-1 whitespace-pre-line text-xs leading-6 text-[#4E596E]">{submission.explanation}</p>
           </div>
 
@@ -1382,10 +1383,8 @@ function SubmissionCard({
           ) : null}
 
           {submission.evidenceNotes ? (
-            <div className="rounded-xl border border-[#E4E9F2] bg-[#F5F7FC] p-3">
-              <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#68738A]">
-                Evidence notes
-              </p>
+            <div className="rounded-xl bg-[#F5F7FC] p-3.5">
+              <p className="text-xs font-semibold text-[#68738A]">Evidence notes</p>
               <p className="mt-1 whitespace-pre-line text-xs leading-5 text-[#141B2D]">{submission.evidenceNotes}</p>
             </div>
           ) : null}
@@ -1586,9 +1585,9 @@ function SubmissionForm({
             />
           </Field>
 
-          <div className="space-y-3 rounded-xl border border-[#E4E9F2] bg-[#F5F7FC] p-4">
-            <p className="font-mono text-[11px] font-semibold uppercase tracking-wider text-[#68738A]">
-              Optional Code Artifact &amp; Unified Diff
+          <div className="space-y-3 rounded-xl bg-[#F5F7FC] p-4">
+            <p className="text-xs font-semibold text-[#141B2D]">
+              Optional file or code patch
             </p>
             <Field label="Target file path" htmlFor="submission-file-path">
               <Input

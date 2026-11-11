@@ -58,7 +58,7 @@ export default function SkillAssessmentPage() {
     passingScore: number;
   }>({
     skillName: "TypeScript",
-    levelName: "Level 1 â€” Foundation",
+    levelName: "Level 1 — Foundation",
     passingScore: 80,
   });
   const [questions, setQuestions] = useState<SkillAssessmentQuestion[]>([]);
@@ -357,17 +357,17 @@ export default function SkillAssessmentPage() {
             <ArrowLeft className="h-4 w-4" />
             Back to Skill Catalogue
           </Link>
-          <span className="font-mono text-xs text-[#68738A] uppercase">
-            Proctoring Pre-Flight Gate
+          <span className="text-xs font-medium text-[#68738A]">
+            Proctoring check
           </span>
         </div>
 
         <div className="rounded-2xl border border-[#E4E9F2] bg-[#FFFFFF] p-6 shadow-sm sm:p-8">
           <div className="border-b border-[#E4E9F2] pb-5">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#4263EB]/30 bg-[#4263EB]/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#4263EB]">
+            <span className="inline-flex items-center gap-2 rounded-full bg-[#4263EB]/10 px-3 py-1 text-xs font-semibold text-[#4263EB]">
               <ShieldCheck className="h-4 w-4" />
-              Proctored Credential Verification
-            </div>
+              Proctored Skill Verification
+            </span>
             <h1 className="font-heading mt-3 text-2xl font-bold tracking-tight text-[#141B2D] sm:text-3xl">
               Pre-Flight Proctoring Setup: {skillSlug.toUpperCase()} (Level {levelNum})
             </h1>
@@ -600,13 +600,13 @@ export default function SkillAssessmentPage() {
           </div>
 
           <span
-            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wider ${
+            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
               isPassed
                 ? "border border-[#12A875]/30 bg-[#12A875]/10 text-[#0B7D56]"
                 : "border border-amber-300 bg-amber-50 text-amber-800"
             }`}
           >
-            {isPassed ? "Assessment Certified" : "Assessment Completed â€” Needs Retake"}
+            {isPassed ? "Assessment Certified" : "Assessment Completed — Needs Retake"}
           </span>
 
           <h1 className="font-heading mt-4 text-3xl font-extrabold text-[#141B2D]">
@@ -723,8 +723,8 @@ export default function SkillAssessmentPage() {
       {/* Stream Interruption Full Modal Overlay */}
       {isInterrupted && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="max-w-md w-full rounded-2xl border border-red-300 bg-[#FFFFFF] p-6 text-center shadow-2xl">
-            <AlertTriangle className="mx-auto mb-3 h-10 w-10 text-red-600 animate-bounce" />
+          <div className="max-w-md w-full rounded-2xl border border-[#E5484D]/35 bg-[#FFFFFF] p-6 text-center shadow-2xl">
+            <AlertTriangle className="mx-auto mb-3 h-10 w-10 text-[#E5484D]" />
             <h3 className="font-heading text-lg font-bold text-[#141B2D]">
               Proctoring Stream Interrupted
             </h3>
@@ -733,12 +733,12 @@ export default function SkillAssessmentPage() {
               have been paused to preserve test integrity.
             </p>
 
-            <div className="my-4 rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-900">
+            <div className="my-4 rounded-xl bg-[#E5484D]/[0.08] p-3 text-xs font-semibold text-[#9F1D22]">
               Grace Period Remaining:{" "}
-              <span className="font-mono text-base text-red-700">{interruptionGraceSeconds}s</span>
+              <span className="text-base font-bold text-[#C1282D] tabular-nums">{interruptionGraceSeconds}s</span>
             </div>
 
-            <p className="text-[11px] text-[#68738A]">
+            <p className="text-xs text-[#68738A]">
               Restore camera and screen access before the grace period expires to resume your assessment.
             </p>
 
@@ -780,32 +780,32 @@ export default function SkillAssessmentPage() {
 
       {/* Tab Switch Alert Banner */}
       {!isTabFocused && (
-        <div className="mb-4 flex items-center justify-between rounded-xl border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900 animate-pulse">
+        <div className="mb-4 flex items-center justify-between rounded-xl border border-[#F5A623]/40 bg-[#F5A623]/[0.1] p-3 text-xs text-[#9A6100]">
           <div className="flex items-center gap-2">
-            <AlertTriangle className="h-4 w-4 text-amber-600" />
+            <AlertTriangle className="h-4 w-4 text-[#D9820B]" />
             <span>
               <strong>Warning:</strong> Assessment window lost focus ({tabSwitchWarnings} warning
               {tabSwitchWarnings === 1 ? "" : "s"}). Switching tabs is logged by the proctoring engine.
             </span>
           </div>
-          <span className="font-semibold text-amber-700">Flagged</span>
+          <span className="font-semibold text-[#9A6100]">Flagged</span>
         </div>
       )}
 
       {/* Sticky Assessment Header Bar */}
       <div className="sticky top-0 z-30 mb-6 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-[#E4E9F2] bg-[#FFFFFF]/95 p-4 shadow-sm backdrop-blur">
         <div className="flex items-center gap-3">
-          <span className="rounded-md border border-[#E4E9F2] bg-[#F5F7FC] px-2.5 py-1 text-xs font-semibold text-[#141B2D]">
+          <span className="rounded-md bg-[#F5F7FC] px-2.5 py-1 text-xs font-semibold text-[#141B2D]">
             {skillInfo.skillName}
           </span>
           <span className="text-xs text-[#68738A]">{skillInfo.levelName}</span>
           <span className="text-[#E4E9F2]">|</span>
           <span className="inline-flex items-center gap-1.5 text-xs font-medium text-[#0B7D56]">
-            <span className="h-2 w-2 rounded-full bg-[#12A875] animate-ping" />
+            <span className="h-2 w-2 rounded-full bg-[#12A875]" />
             Proctored Active
           </span>
           {tabSwitchWarnings > 0 && (
-            <span className="inline-flex items-center gap-1 rounded bg-amber-100 px-2 py-0.5 text-[11px] font-medium text-amber-800">
+            <span className="inline-flex items-center gap-1 rounded bg-[#F5A623]/15 px-2 py-0.5 text-xs font-medium text-[#9A6100] tabular-nums">
               <AlertTriangle className="h-3 w-3" /> {tabSwitchWarnings} Warning{tabSwitchWarnings === 1 ? "" : "s"}
             </span>
           )}
@@ -813,7 +813,7 @@ export default function SkillAssessmentPage() {
 
         <div className="flex items-center gap-4">
           {/* Timer Display */}
-          <div className="flex items-center gap-1.5 rounded-lg border border-[#E4E9F2] bg-[#F5F7FC] px-3 py-1 font-mono text-sm font-semibold text-[#141B2D]">
+          <div className="flex items-center gap-1.5 rounded-lg bg-[#F5F7FC] px-3 py-1.5 text-sm font-semibold text-[#141B2D] tabular-nums">
             <Clock className="h-4 w-4 text-[#4263EB]" />
             <span>{formatTimer(timeRemainingSeconds)}</span>
           </div>
@@ -827,7 +827,7 @@ export default function SkillAssessmentPage() {
               playsInline
               className="h-full w-full object-cover"
             />
-            <span className="absolute bottom-0 right-0 bg-[#141B2D]/80 px-1 text-[9px] font-mono text-white">
+            <span className="absolute bottom-0 right-0 bg-[#141B2D]/85 px-1 text-[10px] font-semibold text-white">
               REC
             </span>
           </div>
@@ -900,7 +900,7 @@ export default function SkillAssessmentPage() {
           {/* Question Title & Points Header */}
           <div className="flex items-start justify-between gap-4 border-b border-[#E4E9F2] pb-4">
             <div>
-              <span className="text-xs font-semibold uppercase tracking-wider text-[#4263EB]">
+              <span className="text-xs font-semibold text-[#4263EB]">
                 Question {currentQuestionIndex + 1} of {questions.length}
               </span>
               <h2 className="font-heading mt-1 text-lg font-bold text-[#141B2D]">
@@ -908,7 +908,7 @@ export default function SkillAssessmentPage() {
               </h2>
             </div>
 
-            <div className="rounded-md border border-[#E4E9F2] bg-[#F5F7FC] px-2.5 py-1 text-xs font-medium text-[#68738A]">
+            <div className="rounded-md bg-[#F5F7FC] px-2.5 py-1 text-xs font-medium text-[#68738A] tabular-nums">
               Weight: <strong>{currentQuestion.weight} pts</strong>
             </div>
           </div>

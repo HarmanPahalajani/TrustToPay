@@ -9,7 +9,8 @@ import {
   Wallet,
 } from "lucide-react";
 import type { TaskEvent } from "@/lib/types";
-import { formatDate, humanize } from "@/lib/format";
+import { formatDate } from "@/lib/format";
+import { taskEventLabel } from "@/lib/status-labels";
 import { cn } from "@/lib/utils";
 
 function eventStyle(type: string): { icon: React.ReactNode; ring: string } {
@@ -63,7 +64,7 @@ function eventStyle(type: string): { icon: React.ReactNode; ring: string } {
 
 export function TaskTimeline({ events, dense = false }: { events: TaskEvent[]; dense?: boolean }) {
   if (!events || events.length === 0) {
-    return <p className="text-xs text-[#68738A]">No workflow events recorded yet.</p>;
+    return <p className="text-sm text-[#68738A]">No activity updates recorded yet.</p>;
   }
 
   return (
@@ -71,20 +72,20 @@ export function TaskTimeline({ events, dense = false }: { events: TaskEvent[]; d
       {events.map((event) => {
         const style = eventStyle(event.type);
         return (
-          <li key={event.id} className={cn("relative pl-10", dense ? "text-xs" : "text-xs")}>
+          <li key={event.id} className={cn("relative pl-10", dense ? "text-xs" : "text-[13px]")}>
             <span
               className={cn(
-                "absolute left-0 top-0.5 flex size-8 items-center justify-center rounded-full border",
+                "absolute left-0 top-1 flex size-8 items-center justify-center rounded-full border",
                 style.ring,
               )}
               aria-hidden="true"
             >
               {style.icon}
             </span>
-            <div className="min-w-0 rounded-lg border border-[#E4E9F2] bg-[#FFFFFF] px-3.5 py-2.5 shadow-surface">
+            <div className="min-w-0 border-b border-[#E4E9F2] pb-3 last:border-b-0">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="font-semibold text-[#141B2D]">{humanize(event.type)}</span>
-                <span className="font-mono text-[11px] text-[#68738A] tabular-nums">{formatDate(event.createdAt)}</span>
+                <span className="font-semibold text-[#141B2D]">{taskEventLabel(event.type)}</span>
+                <span className="text-xs text-[#68738A] tabular-nums">{formatDate(event.createdAt)}</span>
               </div>
               <p className="mt-1 leading-5 text-[#4E596E]">{event.message}</p>
             </div>

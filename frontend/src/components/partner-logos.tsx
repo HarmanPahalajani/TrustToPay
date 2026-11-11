@@ -113,7 +113,7 @@ export function RenderLogo({ className, tone = "default" }: LogoProps) {
       <text
         x="32"
         y="22"
-        fontFamily="Space Grotesk, Manrope, Inter, Arial, sans-serif"
+        fontFamily="Manrope, Inter, Arial, sans-serif"
         fontWeight="700"
         fontSize="19.5"
         letterSpacing="-0.5"

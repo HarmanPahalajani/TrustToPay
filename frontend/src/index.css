@@ -4,77 +4,96 @@
 
 @layer base {
   :root {
-    --background: 223 54% 97.5%;
+    --background: 223 54% 97%;
     --foreground: 223 38% 13%;
     --card: 0 0% 100%;
     --card-foreground: 223 38% 13%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 223 38% 13%;
     --primary: 228 81% 59%;
     --primary-foreground: 0 0% 100%;
     --secondary: 220 33% 95%;
     --secondary-foreground: 223 38% 13%;
     --muted: 220 33% 95%;
-    --muted-foreground: 220 14% 45%;
+    --muted-foreground: 220 14% 47%;
     --accent: 250 89% 65%;
     --accent-foreground: 0 0% 100%;
     --destructive: 358 75% 59%;
     --destructive-foreground: 0 0% 100%;
-    --border: 219 36% 92%;
-    --input: 219 36% 92%;
+    --border: 219 37% 92%;
+    --input: 219 37% 92%;
     --ring: 228 81% 59%;
-    --radius: 0.625rem;
+    --radius: 0.75rem;
+
+    --ttp-navy: #10172A;
+    --ttp-cobalt: #4263EB;
+    --ttp-indigo: #7057F5;
+    --ttp-cyan: #20BCE5;
+    --ttp-emerald: #12A875;
+    --ttp-amber: #F5A623;
+    --ttp-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  * {
+    @apply border-border;
   }
 
   html {
-    background-color: #F5F7FC;
-    color: #141B2D;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
     scroll-behavior: smooth;
-    overflow-x: clip;
+    color-scheme: light;
+    caret-color: #4263EB;
   }
 
   body {
     background-color: #F5F7FC;
     color: #141B2D;
-    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    line-height: 1.5;
+    font-family: "Inter", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
     overflow-x: clip;
   }
 
   h1, h2, h3, h4 {
-    font-family: "Manrope", "Space Grotesk", "Inter", sans-serif;
+    font-family: "Manrope", "Inter", ui-sans-serif, system-ui, sans-serif;
     text-wrap: balance;
     letter-spacing: -0.02em;
   }
 
-  p {
-    text-wrap: pretty;
-  }
-
-  pre, code {
-    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  }
-
-  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
-    outline: 2px solid #4263EB;
-    outline-offset: 2px;
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    &:focus-visible {
+      outline: 2px solid #4263EB;
+      outline-offset: 2px;
+    }
   }
 }
 
 .tabular-nums {
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
 }
 
-/* Subtle dot-grid texture using solid dot pattern — no gradients */
-.ttp-grid-dots {
-  background-image: radial-gradient(rgba(16, 23, 42, 0.08) 1px, transparent 1px);
-  background-size: 20px 20px;
+@keyframes ttpFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.ttp-grid-dots-dark {
-  background-image: radial-gradient(rgba(228, 233, 242, 0.1) 1px, transparent 1px);
-  background-size: 22px 22px;
+.ttp-phrase-enter {
+  animation: ttpFadeIn 300ms var(--ttp-ease-out) both;
+}
+
+.animate-fade-in {
+  animation: ttpFadeIn 220ms var(--ttp-ease-out) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -82,24 +101,32 @@
     scroll-behavior: auto;
   }
 
+  .ttp-phrase-enter,
   .animate-fade-in {
     animation: none;
+    transform: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
   }
 }
 
-/* Clean custom scrollbar */
+/* Custom thin scrollbars */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: #EDF0F6;
 }
 
 ::-webkit-scrollbar-thumb {
   background: #CBD5E1;
-  border-radius: 4px;
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {

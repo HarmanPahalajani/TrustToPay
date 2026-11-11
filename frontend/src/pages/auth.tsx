@@ -29,7 +29,6 @@ import { SupabaseLogo } from "@/components/partner-logos";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/input";
 import { Alert } from "@/components/ui/alert";
-import { PaymentModeBanner } from "@/components/payment-mode-banner";
 import { cn } from "@/lib/utils";
 
 const loginSchema = z.object({
@@ -324,8 +323,8 @@ export default function AuthPage({
 
   return (
     <div className="grid min-h-dvh bg-[#F5F7FC] text-[#141B2D] lg:grid-cols-[1.02fr_1fr]">
-      {/* Left Solid Deep Navy Architectural Panel (#10172A, zero blue gradients) */}
-      <div className="ttp-grid-dots-dark hidden flex-col justify-between border-r border-[#1E293B] bg-[#10172A] p-8 text-white lg:flex xl:p-12">
+      {/* Left Solid Deep Navy Panel (#10172A, zero gradients) */}
+      <div className="hidden flex-col justify-between border-r border-[#1E293B] bg-[#10172A] p-8 text-white lg:flex xl:p-12">
         <div className="flex items-center justify-between">
           <Brand tone="inverse" />
           <Link
@@ -337,33 +336,28 @@ export default function AuthPage({
         </div>
 
         <div className="my-auto max-w-lg space-y-6 py-8">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#2B3754] bg-[#162038] px-3 py-1 text-[11px] font-semibold text-[#CBD5E1]">
-            <span className="size-1.5 rounded-full bg-[#12A875]" />
-            <span>Authenticated Execution Infrastructure</span>
-          </div>
-
-          <h1 className="font-display text-3xl font-extrabold leading-[1.15] tracking-tight text-white xl:text-[34px]">
-            Deterministic verification between AI agents and human specialists.
+          <h1 className="font-display text-3xl font-bold leading-[1.15] tracking-tight text-white xl:text-[36px]">
+            When AI gets stuck, verified specialists move work forward.
           </h1>
 
-          <p className="text-sm leading-6 text-[#94A3B8]">
-            Route bounded blockers to proctored domain experts, verify deliverables through static scanners and Google
-            Gemini, and settle work with PayPal.
+          <p className="text-[15px] leading-6 text-[#CBD5E1]">
+            Hand off blocked tasks to skilled human reviewers, run automated security checks on every deliverable, and
+            track payments cleanly.
           </p>
 
-          {/* Compact Pipeline Diagram */}
+          {/* Compact Flow Preview */}
           <div className="rounded-xl border border-[#1E293B] bg-[#162038] p-4">
-            <div className="flex items-center justify-between font-mono text-[11px]">
+            <div className="flex items-center justify-between text-xs font-medium">
               <span className="inline-flex items-center gap-1.5 text-[#20BCE5]">
-                <Bot className="size-3.5" /> Agent Blocker
+                <Bot className="size-4" /> AI Task
               </span>
               <span className="text-[#475569]">→</span>
               <span className="inline-flex items-center gap-1.5 text-white">
-                <Code2 className="size-3.5 text-[#4263EB]" /> Assessed Human
+                <Code2 className="size-4 text-[#4263EB]" /> Human Specialist
               </span>
               <span className="text-[#475569]">→</span>
               <span className="inline-flex items-center gap-1.5 text-[#12A875]">
-                <FileCheck2 className="size-3.5" /> Signed Result
+                <FileCheck2 className="size-4" /> Verified Result
               </span>
             </div>
           </div>
@@ -371,16 +365,16 @@ export default function AuthPage({
           <div className="space-y-3 border-t border-[#1E293B] pt-5">
             {[
               {
-                title: "Supabase PKCE Authentication",
-                desc: "Email confirmation, recovery callbacks, and server-verified role claims.",
+                title: "Verified Account Access",
+                desc: "Protected email confirmation and password recovery powered by Supabase.",
               },
               {
-                title: "Proctored Skill Verification",
-                desc: "Compulsory webcam & screen-share checks across Foundation (L1) to Advanced (L3) tracks.",
+                title: "Structured Skill Verification",
+                desc: "Specialists qualify through sequential assessments before claiming matching tasks.",
               },
               {
-                title: "Strict Role Isolation",
-                desc: "Partitioned Requester and Specialist workspaces with zero elevated backdoors.",
+                title: "Role-Separated Workspaces",
+                desc: "Dedicated experiences for Requesters submitting tasks and Specialists completing work.",
               },
             ].map((item) => (
               <div key={item.title} className="flex items-start gap-2.5 text-xs text-[#CBD5E1]">
@@ -396,7 +390,9 @@ export default function AuthPage({
 
         <div className="flex items-center justify-between border-t border-[#1E293B] pt-4 text-xs text-[#94A3B8]">
           <SupabaseLogo tone="inverse" className="h-5" />
-          <span className="font-mono text-[11px]">{isSupabaseAuth ? "Supabase Auth Active" : "Local Auth Mode"}</span>
+          <span className="text-xs text-[#94A3B8]">
+            {isSupabaseAuth ? "Protected by Supabase Auth" : "Session Auth"}
+          </span>
         </div>
       </div>
 
@@ -561,8 +557,8 @@ export default function AuthPage({
 
                   {!isSupabaseAuth ? (
                     <div className="border-t border-[#E4E9F2] pt-4">
-                      <p className="mb-2.5 text-center text-[11px] font-semibold uppercase tracking-wider text-[#68738A]">
-                        Instant Local Sandbox Demo
+                      <p className="mb-2.5 text-center text-xs font-medium text-[#68738A]">
+                        Quick demo sign in
                       </p>
                       <div className="grid grid-cols-2 gap-2">
                         <Button
@@ -892,14 +888,12 @@ export default function AuthPage({
               )}
             </div>
 
-            <PaymentModeBanner compact />
-
             <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[#E4E9F2] pt-3 text-xs text-[#68738A]">
               <span className="inline-flex items-center gap-1.5">
-                <ShieldCheck className="size-3.5 text-[#12A875]" /> Role-separated JWT &amp; Supabase PKCE
+                <ShieldCheck className="size-3.5 text-[#12A875]" /> Protected session authentication
               </span>
               <Link to="/app/docs" className="inline-flex items-center gap-1 font-medium text-[#4263EB] hover:underline">
-                <Terminal className="size-3.5" /> Architecture docs <ArrowRight className="size-3" />
+                <Terminal className="size-3.5" /> API &amp; MCP Docs <ArrowRight className="size-3" />
               </Link>
             </div>
           </div>

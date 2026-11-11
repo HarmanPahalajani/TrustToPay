@@ -15,7 +15,6 @@ import {
 import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { PageHeader, SectionHeading } from "@/components/common";
-import { PaymentModeBanner } from "@/components/payment-mode-banner";
 import { TaskRowCard } from "@/components/task-card";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -24,37 +23,35 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input, Select } from "@/components/ui/input";
 import { EmptyState, ErrorState, LoadingBlock } from "@/components/ui/states";
 import { CATEGORY_VALUES, categoryLabel } from "@/lib/categories";
-import { formatMoney, humanize } from "@/lib/format";
+import { formatMoney } from "@/lib/format";
+import { taskStatusLabel } from "@/lib/status-labels";
 
 type Mode = "marketplace" | "reviews" | "requests";
 
 const MODE_COPY: Record<
   Mode,
-  { eyebrow: string; title: string; description: string; emptyTitle: string; emptyBody: string }
+  { title: string; description: string; emptyTitle: string; emptyBody: string }
 > = {
   marketplace: {
-    eyebrow: "Specialist Marketplace",
-    title: "Funded escalations matched to your skills",
+    title: "Available tasks matched to your skills",
     description:
-      "Tasks enter the specialist pool only after escrow funding is captured. Review top-5 targeted offers or claim open matching requests.",
+      "Tasks enter this pool once payment is ready. Accept priority offers sent directly to you or claim open matching tasks.",
     emptyTitle: "No open tasks match your filters",
-    emptyBody: "Clear filters or wait for new funded tasks from AI agent workflows.",
+    emptyBody: "Clear your filters or check back as new funded tasks arrive.",
   },
   reviews: {
-    eyebrow: "Specialist Workbench",
-    title: "Your claimed tasks and verification results",
+    title: "My active tasks and verification updates",
     description:
-      "Every assignment, artifact upload, verification run, and payout ledger entry for tasks you claimed.",
+      "Manage the tasks you have claimed, submit files and explanations, and track automatic security checks.",
     emptyTitle: "You have not claimed a task yet",
-    emptyBody: "Accept a targeted offer or claim a funded task from the Marketplace.",
+    emptyBody: "Accept an offer or claim an available task to get started.",
   },
   requests: {
-    eyebrow: "Requester Tasks",
-    title: "Escalated tasks from your AI agents",
+    title: "My escalated tasks",
     description:
-      "Track Elastic + Jina matching progress, fund open tasks via PayPal, inspect independent security scans, and resume blocked sessions.",
-    emptyTitle: "You have not created a review task",
-    emptyBody: "Submit a blocker in the Agent Workspace and escalate it after running analysis.",
+      "Track specialist matching, authorize test payments, monitor security checks, and retrieve verified answers.",
+    emptyTitle: "You have not created a task yet",
+    emptyBody: "Submit a request in the AI Workspace to create your first specialist task.",
   },
 };
 
@@ -137,7 +134,6 @@ export default function TaskBrowserPage({ mode }: { mode: Mode }) {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow={copy.eyebrow}
         title={copy.title}
         description={copy.description}
         actions={
@@ -159,23 +155,21 @@ export default function TaskBrowserPage({ mode }: { mode: Mode }) {
         }
       />
 
-      <PaymentModeBanner compact />
       {offerNotice ? <Alert tone="success">{offerNotice}</Alert> : null}
       {offerError ? <Alert tone="danger">{offerError}</Alert> : null}
 
-      {/* Top-5 Targeted Specialist Offers */}
+      {/* Direct Specialist Offers */}
       {mode === "marketplace" && pendingOffers.length > 0 ? (
         <div className="space-y-3">
           <SectionHeading
-            eyebrow="Top-5 Ranked Dispatch"
-            title={`Pending direct offers (${pendingOffers.length})`}
-            description="Selected via Jina AI + Elasticsearch similarity and PostgreSQL skill verification."
+            title={`Direct offers for you (${pendingOffers.length})`}
+            description="Matched to your verified skills and recent availability."
           />
           <div className="grid gap-3 md:grid-cols-2">
             {pendingOffers.map((task) => {
               const offer = task.myOffer!;
               return (
-                <Card key={offer.id} className="border-[#4263EB]/35 p-4">
+                <Card key={offer.id} className="border-[#4263EB]/35 p-5">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-1.5">
                       <Badge tone="cobalt" dot>
@@ -185,13 +179,13 @@ export default function TaskBrowserPage({ mode }: { mode: Mode }) {
                         <Sparkles className="size-3" /> {Math.round(offer.score * 100)}% Match
                       </Badge>
                     </div>
-                    <span className="font-display text-sm font-bold text-[#141B2D] tabular-nums">
+                    <span className="text-base font-bold text-[#141B2D] tabular-nums">
                       {formatMoney(task.rewardMinor, task.currency)}
                     </span>
                   </div>
                   <Link
                     to={`/app/tasks/${task.id}`}
-                    className="mt-2.5 block font-display text-sm font-bold text-[#141B2D] hover:text-[#4263EB]"
+                    className="mt-2.5 block font-heading text-base font-semibold text-[#141B2D] hover:text-[#4263EB]"
                   >
                     {task.title}
                   </Link>
@@ -295,7 +289,7 @@ export default function TaskBrowserPage({ mode }: { mode: Mode }) {
                 <option value="">All statuses</option>
                 {STATUS_OPTIONS.map((s) => (
                   <option key={s} value={s}>
-                    {humanize(s)}
+                    {taskStatusLabel(s)}
                   </option>
                 ))}
               </Select>

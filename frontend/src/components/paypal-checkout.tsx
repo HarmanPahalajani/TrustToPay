@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Lock, CheckCircle2, CreditCard } from "lucide-react";
+import { CheckCircle2, CreditCard, Lock } from "lucide-react";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
@@ -80,7 +80,7 @@ export function PayPalCheckoutCard({
     script.dataset.paypalSdk = "true";
     script.onload = () => setSdkReady(true);
     script.onerror = () =>
-      setSdkError("Could not load PayPal JavaScript SDK. Use direct sandbox capture below.");
+      setSdkError("PayPal checkout could not load in this frame. You can complete test funding below.");
     document.body.appendChild(script);
   }, [resolvedEnabled, resolvedClientId, currency]);
 
@@ -93,7 +93,7 @@ export function PayPalCheckoutCard({
         layout: "horizontal",
         color: "gold",
         shape: "rect",
-        height: 40,
+        height: 44,
         tagline: false,
       },
       createOrder: async () => {
@@ -105,19 +105,19 @@ export function PayPalCheckoutCard({
         setBusy(true);
         try {
           await api.payments.capture(data.orderID);
-          setMessage("PayPal Sandbox order captured and verified.");
+          setMessage("Payment authorized and ready for task work.");
           await onCompleted();
         } finally {
           setBusy(false);
         }
       },
       onError: (err) => {
-        setSdkError(err instanceof Error ? err.message : "PayPal widget encountered an error.");
+        setSdkError(err instanceof Error ? err.message : "PayPal checkout could not complete.");
       },
     });
 
     buttons.render(containerRef.current).catch(() => {
-      setSdkError("PayPal Buttons could not initialize in this frame.");
+      setSdkError("PayPal Buttons could not initialize here. Use direct checkout below.");
     });
   }, [sdkReady, taskId, onCompleted]);
 
@@ -130,47 +130,50 @@ export function PayPalCheckoutCard({
       if (order.paypal.orderId) {
         await api.payments.capture(order.paypal.orderId);
       }
-      setMessage(`Order captured (${order.paypal.mode}).`);
+      setMessage("Payment confirmed. Task is now ready for specialist matching.");
       await onCompleted();
     } catch (error) {
-      setSdkError(error instanceof Error ? error.message : "Payment execution failed.");
+      setSdkError(error instanceof Error ? error.message : "Payment could not complete.");
     } finally {
       setBusy(false);
     }
   }
 
   return (
-    <div className="space-y-3 rounded-xl border border-[#E4E9F2] bg-[#FFFFFF] p-4 shadow-surface">
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#E4E9F2] pb-3">
-        <div className="flex items-center gap-2.5">
+    <div className="space-y-4 rounded-xl border border-[#E4E9F2] bg-[#FFFFFF] p-5 shadow-surface">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E4E9F2] pb-4">
+        <div className="space-y-1">
           <PayPalLogo className="h-5" />
-          <span className="text-xs font-semibold text-[#141B2D]">
-            {label || "Escrow Funding Checkout"}
-          </span>
+          <p className="text-sm font-semibold text-[#141B2D]">
+            {label || "Task reward payment"}
+          </p>
         </div>
-        <span className="font-mono text-xs font-bold text-[#141B2D] tabular-nums">
-          {amountDisplay} {currency}
-        </span>
+        <div className="text-right">
+          <div className="font-sans text-[28px] font-bold leading-none tracking-tight text-[#141B2D] tabular-nums">
+            {amountDisplay}
+          </div>
+          <span className="text-xs font-medium text-[#68738A]">{currency}</span>
+        </div>
       </div>
 
       {resolvedEnabled && resolvedClientId ? (
         <div className="space-y-2">
-          <div ref={containerRef} className="min-h-[42px]" />
+          <div ref={containerRef} className="min-h-[44px]" />
           {!sdkReady && !sdkError ? (
-            <div className="text-[11px] text-[#68738A]">Initializing PayPal Sandbox Buttons…</div>
+            <div className="text-xs text-[#68738A]">Loading PayPal checkout…</div>
           ) : null}
         </div>
       ) : null}
 
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[#E4E9F2] bg-[#F5F7FC] p-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-[#F5F7FC] p-3.5">
         <p className="min-w-0 flex-1 text-xs leading-5 text-[#4E596E]">
           {resolvedEnabled
-            ? "Creates a PayPal Sandbox Order v2 and records verified funding into the task ledger."
-            : "Demo mode: creates and captures a labelled simulated funding order in the task ledger."}
+            ? "Authorize your task reward through PayPal before matching begins."
+            : "Authorize this test reward to notify matching specialists."}
         </p>
-        <Button size="sm" variant="default" loading={busy} onClick={handleServerSideFlow}>
-          <CreditCard className="size-3.5" />
-          {resolvedEnabled ? "Capture Sandbox Order" : "Simulate Escrow Funding"}
+        <Button size="default" variant="default" loading={busy} onClick={handleServerSideFlow}>
+          <CreditCard className="size-4" />
+          {resolvedEnabled ? "Complete Test Payment" : "Complete Simulated Payment"}
         </Button>
       </div>
 
@@ -182,13 +185,9 @@ export function PayPalCheckoutCard({
         </Alert>
       ) : null}
 
-      <div className="flex items-center gap-1.5 text-[11px] text-[#68738A]">
+      <div className="flex items-center gap-2 text-xs text-[#68738A]">
         <Lock className="size-3.5 shrink-0 text-[#4263EB]" />
-        <span>
-          {resolvedEnabled
-            ? "PayPal Sandbox Environment · No real funds are charged."
-            : "Deterministic Local Escrow · Labelled as Simulated."}
-        </span>
+        <span>Test payment — no real money will be charged.</span>
       </div>
     </div>
   );

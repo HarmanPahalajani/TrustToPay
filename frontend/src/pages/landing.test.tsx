@@ -15,7 +15,7 @@ vi.mock("@/context/AuthContext", () => ({
   }),
 }));
 
-describe("LandingPage SaaS redesign, partner strip, and interactive workflow", () => {
+describe("LandingPage SaaS redesign, partner strip, and workflow", () => {
   it("renders the core headline, POWERED BY partner strip, and primary navigation links", () => {
     render(
       <MemoryRouter>
@@ -54,36 +54,41 @@ describe("LandingPage SaaS redesign, partner strip, and interactive workflow", (
     expect(screen.queryByText(/Smart India Hackathon/i)).not.toBeInTheDocument();
   });
 
-  it("renders all 6 architecture workflow tabs and updates the synchronized inspector on selection", () => {
+  it("renders the 6-step From request to verified result workflow and updates the detail panel on selection", () => {
     render(
       <MemoryRouter>
         <LandingPage />
       </MemoryRouter>,
     );
 
+    expect(
+      screen.getByRole("heading", { name: /From request to verified result/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Six simple steps take every task from the first request to the completed result\./i),
+    ).toBeInTheDocument();
+
     const expectedSteps = [
-      "Agent Escalates Task",
-      "Semantic Matching",
-      "Eligibility & Ranking",
-      "Human Execution",
-      "Security & Verification",
-      "Signed Result & Payment",
+      "Request & Task Setup",
+      "Specialist Matching",
+      "Eligibility & Priority Dispatch",
+      "Human Work & Evidence",
+      "Security & Quality Checks",
+      "Verified Result & Payment",
     ];
 
     for (const stepTitle of expectedSteps) {
       expect(screen.getAllByText(stepTitle).length).toBeGreaterThanOrEqual(1);
     }
 
-    // Select Security & Verification tab
-    const securityTab = screen.getByRole("tab", { name: /Security & Verification/i });
+    const securityTab = screen.getByRole("tab", { name: /Security & Quality Checks/i });
     fireEvent.click(securityTab);
     expect(securityTab).toHaveAttribute("aria-selected", "true");
-    expect(screen.getByText(/Layered Verification Gate/i)).toBeInTheDocument();
+    expect(screen.getByText(/Step 05/i)).toBeInTheDocument();
 
-    // Select Signed Result & Payment tab
-    const paymentTab = screen.getByRole("tab", { name: /Signed Result & Payment/i });
-    fireEvent.click(paymentTab);
-    expect(paymentTab).toHaveAttribute("aria-selected", "true");
-    expect(screen.getByText(/GET \/api\/v1\/tasks\/:id\/handback/i)).toBeInTheDocument();
+    const resultTab = screen.getByRole("tab", { name: /Verified Result & Payment/i });
+    fireEvent.click(resultTab);
+    expect(resultTab).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByText(/Step 06/i)).toBeInTheDocument();
   });
 });

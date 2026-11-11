@@ -12,20 +12,17 @@ import {
   Wallet,
 } from "lucide-react";
 import { api } from "@/lib/api";
-import { useAuth } from "@/context/AuthContext";
 import { PageHeader, StatCard, SectionHeading } from "@/components/common";
-import { PaymentModeBanner } from "@/components/payment-mode-banner";
 import { ModeBadge, PaymentStatusBadge, StatusBadge } from "@/components/status-badges";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState, ErrorState, LoadingBlock } from "@/components/ui/states";
-import { formatDate, formatMoney, humanize } from "@/lib/format";
+import { formatDate, formatMoney } from "@/lib/format";
+import { paymentStatusLabel } from "@/lib/status-labels";
 
 export default function EarningsPage() {
-  const { user } = useAuth();
-
   const dashboard = useQuery({
     queryKey: ["dashboard", "reviewer"],
     queryFn: api.dashboards.reviewer,
@@ -53,9 +50,8 @@ export default function EarningsPage() {
   return (
     <div className="space-y-5">
       <PageHeader
-        eyebrow="Reviewer earnings"
         title="Rewards and payout history"
-        description="A reward becomes payable only after independent verification passes and the task is authorized. Every row is labelled Simulated or PayPal Sandbox."
+        description="Track completed payouts and authorized rewards once submitted work passes security and quality checks."
         actions={
           <>
             <Button asChild variant="outline">
@@ -72,12 +68,10 @@ export default function EarningsPage() {
         }
       />
 
-      <PaymentModeBanner compact />
-
       {!profileReady ? (
         <Alert tone="warning" icon={<Wallet className="size-4" />} title="Payout details are incomplete">
-          Add a PayPal email and record consent on your profile. Without both, the server will not create a payout
-          and a verified reward stays authorized instead of being marked paid.
+          Add a PayPal email and confirm payout consent on your profile so verified rewards can be released when
+          payouts are enabled.
         </Alert>
       ) : null}
 
@@ -153,14 +147,14 @@ export default function EarningsPage() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-semibold tabular-nums">
+                      <p className="text-sm font-semibold text-[#141B2D] tabular-nums">
                         {row.reward ? formatMoney(row.reward.amountMinor, row.reward.currency) : "-"}
                       </p>
-                      <p className="text-[10px] text-muted-foreground">
+                      <p className="text-xs text-[#68738A]">
                         {payout?.paidAt
                           ? `Paid ${formatDate(payout.paidAt)}`
                           : payout
-                            ? humanize(payout.status)
+                            ? paymentStatusLabel(payout.status)
                             : "No payout yet"}
                       </p>
                     </div>
@@ -173,7 +167,7 @@ export default function EarningsPage() {
           <SectionHeading
             className="mt-6"
             title="Payout transactions"
-            description="The same ledger the requester and administrators see, scoped to your payouts."
+            description="Your specialist payout ledger across completed tasks."
             actions={
               <Button asChild variant="ghost" size="sm">
                 <Link to="/app/payments">
@@ -190,34 +184,34 @@ export default function EarningsPage() {
             <EmptyState
               icon={<Wallet className="size-5" />}
               title="No payout transactions"
-              description="Once a verified reward is released, the payout transaction appears here with its provider reference."
+              description="Once a verified reward is released, the payout entry appears here with its payment reference."
             />
           ) : (
-            <Card className="divide-y divide-border">
+            <Card className="divide-y divide-[#E4E9F2]">
               {payoutRows.map((payment) => (
-                <div key={payment.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
+                <div key={payment.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3.5">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-1.5">
                       <PaymentStatusBadge status={payment.status} />
                       <ModeBadge mode={payment.mode} />
-                      <span className="text-[10px] text-muted-foreground">{humanize(payment.provider)}</span>
+                      <span className="text-xs text-[#68738A]">{payment.provider}</span>
                     </div>
-                    <p className="mt-1 truncate text-xs text-muted-foreground">
+                    <p className="mt-1 truncate text-xs text-[#68738A]">
                       {payment.task ? (
-                        <Link to={`/app/tasks/${payment.task.id}`} className="hover:text-primary">
+                        <Link to={`/app/tasks/${payment.task.id}`} className="font-medium text-[#141B2D] hover:text-[#4263EB]">
                           {payment.task.title}
                         </Link>
                       ) : (
                         payment.taskId
                       )}
                     </p>
-                    <p className="truncate font-mono text-[9px] text-muted-foreground">
+                    <p className="mt-0.5 truncate font-mono text-xs text-[#68738A]">
                       {payment.payoutBatchId ?? payment.id}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-semibold tabular-nums">{payment.amountDisplay}</p>
-                    <p className="text-[10px] text-muted-foreground">
+                    <p className="text-sm font-semibold text-[#141B2D] tabular-nums">{payment.amountDisplay}</p>
+                    <p className="text-xs text-[#68738A] tabular-nums">
                       {payment.paidAt ? `Paid ${formatDate(payment.paidAt)}` : formatDate(payment.createdAt)}
                     </p>
                   </div>
@@ -227,29 +221,29 @@ export default function EarningsPage() {
           )}
         </div>
 
-        <aside className="space-y-4">
+        <aside className="min-w-0 space-y-4">
           <Card className={profileReady ? "border-[#12A875]/35" : "border-[#F5A623]/40"}>
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-sm">
-                <BadgeCheck className="size-4 text-primary" /> Payout profile
+                <BadgeCheck className="size-4 text-[#4263EB]" /> Payout profile
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-xs">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-muted-foreground">Status</span>
+                <span className="text-[#68738A]">Status</span>
                 <Badge tone={profileReady ? "success" : "warning"} dot>
                   {profileReady ? "Ready" : "Incomplete"}
                 </Badge>
               </div>
               <div className="flex items-center justify-between gap-2">
-                <span className="text-muted-foreground">PayPal email</span>
-                <span className="max-w-[180px] truncate font-medium">
+                <span className="text-[#68738A]">PayPal email</span>
+                <span className="max-w-[180px] truncate font-medium text-[#141B2D]">
                   {data.payoutProfile?.email ?? "Not set"}
                 </span>
               </div>
               <div className="flex items-center justify-between gap-2">
-                <span className="text-muted-foreground">Consent</span>
-                <span className="font-medium">{data.payoutProfile?.consent ? "Recorded" : "Not given"}</span>
+                <span className="text-[#68738A]">Consent</span>
+                <span className="font-medium text-[#141B2D]">{data.payoutProfile?.consent ? "Recorded" : "Not given"}</span>
               </div>
               <Button asChild size="sm" variant="outline" className="mt-1 w-full">
                 <Link to="/app/profile">Update payout details</Link>
@@ -260,35 +254,35 @@ export default function EarningsPage() {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-sm">
-                <FlaskConical className="size-4 text-[#9A6100]" /> What the labels mean
+                <FlaskConical className="size-4 text-[#9A6100]" /> Payment labels explained
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 text-[11px] leading-5 text-muted-foreground">
+            <CardContent className="space-y-2 text-xs leading-5 text-[#68738A]">
               <p>
-                <span className="font-semibold text-foreground">Simulated</span> rows were created in demo mode. No
-                PayPal money moved and no Sandbox API call was made.
+                <span className="font-semibold text-[#141B2D]">Practice mode</span> rows run locally for testing and
+                never move real money.
               </p>
               <p>
-                <span className="font-semibold text-foreground">PayPal Sandbox</span> rows were created against the
-                genuine Sandbox API. No real money is involved, but the provider references come from PayPal.
+                <span className="font-semibold text-[#141B2D]">PayPal test mode</span> rows use PayPal&apos;s test
+                environment—no real money is transferred.
               </p>
               <p>
-                A failed payout never deletes the verified answer. It stays visible and can be reconciled by an
-                administrator.
+                If a payout fails or payouts are unavailable on the merchant account, your verified task and answer
+                stay safely recorded.
               </p>
             </CardContent>
           </Card>
 
-          <Card className="border-dashed">
-            <CardContent className="space-y-2 p-4 text-[11px] leading-5 text-muted-foreground">
-              <p className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
-                <ExternalLink className="size-3.5 text-primary" /> Reviewer economy
+          <Card>
+            <CardContent className="space-y-2 p-4 text-xs leading-5 text-[#68738A]">
+              <p className="flex items-center gap-1.5 text-xs font-semibold text-[#141B2D]">
+                <ExternalLink className="size-3.5 text-[#4263EB]" /> How rewards work
               </p>
               <p>
-                Your reward is funded by the requester before anyone can accept the task. Funding and payout are two
-                separate money movements, so an unfunded task can never become payable.
+                Task funding is reserved before any specialist accepts the task. Verification and payout run as separate
+                steps after submission.
               </p>
-              <p className="font-mono text-[10px]">
+              <p className="text-xs font-medium text-[#141B2D] tabular-nums">
                 {data.availableCount} available · {data.assignments.total} assigned · {data.submissionCount} submitted
               </p>
               <Button asChild size="sm" variant="ghost" className="w-full">

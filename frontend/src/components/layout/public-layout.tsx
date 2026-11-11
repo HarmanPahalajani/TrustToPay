@@ -47,7 +47,6 @@ export function TrustToPayLogoMark({ className }: { className?: string }) {
 
 export function Brand({
   to = "/",
-  compact = false,
   tone = "default",
 }: {
   to?: string;
@@ -60,26 +59,14 @@ export function Brand({
       className="inline-flex items-center gap-2.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4263EB]"
     >
       <TrustToPayLogoMark />
-      <div className="leading-tight">
-        <span
-          className={cn(
-            "font-display text-[17px] font-extrabold tracking-tight",
-            tone === "inverse" ? "text-white" : "text-[#141B2D]",
-          )}
-        >
-          TrustToPay
-        </span>
-        {!compact ? (
-          <span
-            className={cn(
-              "block font-mono text-[9.5px] font-medium uppercase tracking-[0.14em]",
-              tone === "inverse" ? "text-[#94A3B8]" : "text-[#68738A]",
-            )}
-          >
-            Human Execution Layer
-          </span>
-        ) : null}
-      </div>
+      <span
+        className={cn(
+          "font-display text-[18px] font-bold tracking-tight",
+          tone === "inverse" ? "text-white" : "text-[#141B2D]",
+        )}
+      >
+        TrustToPay
+      </span>
     </Link>
   );
 }
@@ -111,7 +98,7 @@ export function PublicHeader() {
                 key={item.label}
                 to={item.to}
                 className={cn(
-                  "rounded-lg px-3 py-2 text-[13px] font-medium transition-colors hover:bg-[#EDF0F6] hover:text-[#141B2D]",
+                  "rounded-lg px-3.5 py-2 text-[14px] font-medium transition-colors hover:bg-[#EDF0F6] hover:text-[#141B2D]",
                   active ? "bg-[#EDF0F6] font-semibold text-[#4263EB]" : "text-[#4E596E]",
                 )}
               >
@@ -125,7 +112,7 @@ export function PublicHeader() {
           {user ? (
             <Button asChild size="default">
               <Link to="/app">
-                Open Workspace <ArrowRight className="size-3.5" />
+                Open Workspace <ArrowRight className="size-4" />
               </Link>
             </Button>
           ) : (
@@ -135,7 +122,7 @@ export function PublicHeader() {
               </Button>
               <Button asChild variant="default" size="default">
                 <Link to="/register">
-                  Get Started <ArrowRight className="size-3.5" />
+                  Get Started <ArrowRight className="size-4" />
                 </Link>
               </Button>
             </>
@@ -147,7 +134,7 @@ export function PublicHeader() {
           aria-label={mobileOpen ? "Close menu" : "Open menu"}
           aria-expanded={mobileOpen}
           onClick={() => setMobileOpen((prev) => !prev)}
-          className="inline-flex size-10 items-center justify-center rounded-lg border border-[#E4E9F2] bg-[#FFFFFF] text-[#141B2D] hover:bg-[#EDF0F6] lg:hidden"
+          className="inline-flex size-11 items-center justify-center rounded-lg border border-[#E4E9F2] bg-[#FFFFFF] text-[#141B2D] hover:bg-[#EDF0F6] lg:hidden"
         >
           {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
         </button>
@@ -167,7 +154,7 @@ export function PublicHeader() {
               </Link>
             ))}
           </nav>
-          <div className="mt-4 grid grid-cols-1 gap-2 border-t border-[#E4E9F2] pt-4 sm:grid-cols-2">
+          <div className="mt-4 grid grid-cols-1 gap-2.5 border-t border-[#E4E9F2] pt-4 sm:grid-cols-2">
             {user ? (
               <Button asChild size="lg" className="w-full">
                 <Link to="/app" onClick={() => setMobileOpen(false)}>
@@ -202,10 +189,9 @@ export function MarketingFooter() {
         <div className="grid gap-10 lg:grid-cols-[1.4fr_repeat(3,1fr)]">
           <div className="space-y-4">
             <Brand tone="inverse" />
-            <p className="max-w-sm text-xs leading-6 text-[#94A3B8]">
-              The secure human execution layer for AI agents. Hybrid retrieval routes blockers to verified human
-              specialists, deterministic scanners and Gemini inspect deliverables, and PayPal supports checkout and
-              settlement tracking.
+            <p className="max-w-sm text-sm leading-6 text-[#94A3B8]">
+              Human expertise for AI workflows. Connect blocked requests with vetted specialists, verify every result,
+              and track payments transparently.
             </p>
             <div className="flex flex-wrap items-center gap-5 pt-1">
               <PayPalLogo tone="inverse" className="h-5" />
@@ -214,9 +200,9 @@ export function MarketingFooter() {
             </div>
           </div>
 
-          <div className="space-y-2.5 text-xs">
-            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-white">Platform</p>
-            <ul className="space-y-2 text-[#94A3B8]">
+          <div className="space-y-3 text-sm">
+            <p className="font-display text-sm font-semibold text-white">Platform</p>
+            <ul className="space-y-2.5 text-[13px] text-[#94A3B8]">
               <li>
                 <Link to="/#workflow" className="transition-colors hover:text-white">
                   How It Works
@@ -234,43 +220,36 @@ export function MarketingFooter() {
               </li>
               <li>
                 <Link to="/#security" className="transition-colors hover:text-white">
-                  Security Architecture
+                  Security &amp; Verification
                 </Link>
               </li>
             </ul>
           </div>
 
-          <div className="space-y-2.5 text-xs">
-            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-white">
-              Infrastructure
-            </p>
-            <ul className="space-y-2 text-[#94A3B8]">
+          <div className="space-y-3 text-sm">
+            <p className="font-display text-sm font-semibold text-white">Resources</p>
+            <ul className="space-y-2.5 text-[13px] text-[#94A3B8]">
               <li>
                 <Link to="/app/docs" className="transition-colors hover:text-white">
-                  MCP &amp; REST Documentation
-                </Link>
-              </li>
-              <li>
-                <Link to="/app/integrations" className="transition-colors hover:text-white">
-                  Live Integration Status
+                  MCP &amp; API Docs
                 </Link>
               </li>
               <li>
                 <Link to="/privacy" className="transition-colors hover:text-white">
-                  Data Governance &amp; Privacy
+                  Privacy &amp; Data Handling
                 </Link>
               </li>
               <li>
                 <Link to="/contact" className="transition-colors hover:text-white">
-                  Support &amp; Security Ops
+                  Support &amp; Security
                 </Link>
               </li>
             </ul>
           </div>
 
-          <div className="space-y-2.5 text-xs">
-            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-white">Workspace</p>
-            <ul className="space-y-2 text-[#94A3B8]">
+          <div className="space-y-3 text-sm">
+            <p className="font-display text-sm font-semibold text-white">Workspace</p>
+            <ul className="space-y-2.5 text-[13px] text-[#94A3B8]">
               <li>
                 <Link to="/login" className="transition-colors hover:text-white">
                   Sign In
@@ -283,27 +262,24 @@ export function MarketingFooter() {
               </li>
               <li>
                 <Link to="/app/marketplace" className="transition-colors hover:text-white">
-                  Specialist Marketplace
+                  Available Tasks
                 </Link>
               </li>
               <li>
                 <Link to="/app/workspace" className="transition-colors hover:text-white">
-                  Agent Workspace
+                  Request Help
                 </Link>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-10 flex flex-col gap-3 border-t border-[#1E293B] pt-6 text-[11px] text-[#94A3B8] sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-10 flex flex-col gap-3 border-t border-[#1E293B] pt-6 text-xs text-[#94A3B8] sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
             <ShieldCheck className="size-4 shrink-0 text-[#12A875]" />
-            <span>
-              PayPal Sandbox environment with explicit simulated demo fallback labels. SHA-256 artifact digests &amp;
-              HMAC-SHA256 signed handbacks.
-            </span>
+            <span>Automatic security checks and verified deliverables before results return.</span>
           </div>
-          <p className="shrink-0 font-mono text-[11px]">© {new Date().getFullYear()} TrustToPay</p>
+          <p className="shrink-0">© {new Date().getFullYear()} TrustToPay</p>
         </div>
       </div>
     </footer>

@@ -1,11 +1,18 @@
 import { Badge } from "@/components/ui/badge";
-import { humanize, paymentTone, taskStatusTone, verificationTone } from "@/lib/format";
+import { paymentTone, taskStatusTone, verificationTone } from "@/lib/format";
+import {
+  paymentStatusLabel,
+  riskLevelLabel,
+  securityVerdictLabel,
+  taskStatusLabel,
+  verificationStatusLabel,
+} from "@/lib/status-labels";
 import type { PayoutAvailability } from "@/lib/types";
 
 export function StatusBadge({ status, dot = true }: { status: string; dot?: boolean }) {
   return (
     <Badge tone={taskStatusTone(status)} dot={dot}>
-      {humanize(status)}
+      {taskStatusLabel(status)}
     </Badge>
   );
 }
@@ -17,7 +24,7 @@ export function UrgencyBadge({ urgency }: { urgency?: string }) {
   const tone = value === "CRITICAL" ? "danger" : value === "HIGH" ? "warning" : "neutral";
   return (
     <Badge tone={tone} dot>
-      {humanize(value)}
+      {riskLevelLabel(value)}
     </Badge>
   );
 }
@@ -25,7 +32,7 @@ export function UrgencyBadge({ urgency }: { urgency?: string }) {
 export function VerificationBadge({ status }: { status: string }) {
   return (
     <Badge tone={verificationTone(status)} dot>
-      {humanize(status)}
+      {verificationStatusLabel(status)}
     </Badge>
   );
 }
@@ -33,7 +40,7 @@ export function VerificationBadge({ status }: { status: string }) {
 export function PaymentStatusBadge({ status }: { status: string }) {
   return (
     <Badge tone={paymentTone(status)} dot>
-      {humanize(status)}
+      {paymentStatusLabel(status)}
     </Badge>
   );
 }
@@ -41,7 +48,7 @@ export function PaymentStatusBadge({ status }: { status: string }) {
 export function ModeBadge({ mode }: { mode: "SIMULATED" | "SANDBOX" }) {
   return (
     <Badge tone={mode === "SIMULATED" ? "warning" : "info"}>
-      {mode === "SIMULATED" ? "Simulated" : "PayPal Sandbox"}
+      {mode === "SIMULATED" ? "Practice Mode" : "PayPal Test Mode"}
     </Badge>
   );
 }
@@ -56,7 +63,7 @@ export function PayoutAvailabilityBadge({
   const value = availability ?? "DEMO_SIMULATED";
   const label =
     value === "SANDBOX_ENABLED"
-      ? "Sandbox Payouts Ready"
+      ? "Test Payouts Ready"
       : value === "PAYOUT_UNAVAILABLE"
         ? "Payout Unavailable"
         : "Simulated Payouts";
@@ -77,18 +84,16 @@ export function SecurityVerdictBadge({
   className?: string;
 }) {
   const upper = verdict.toUpperCase();
-  const label =
-    upper === "PASS" || upper === "PASSED"
-      ? "Passed"
-      : upper === "BLOCK" || upper === "BLOCKED"
-        ? "Blocked"
-        : humanize(verdict);
+  const label = securityVerdictLabel(upper);
   const tone =
     upper === "PASS" || upper === "PASSED" || upper === "CLEAN"
       ? "success"
-      : upper === "BLOCK" || upper === "BLOCKED"
+      : upper === "BLOCK" || upper === "BLOCKED" || upper === "SAFETY_REJECTED"
         ? "danger"
-        : upper === "REVIEW" || upper === "WARN" || upper === "WARNING" || upper === "NEEDS_HUMAN_REVIEW"
+        : upper === "REVIEW" ||
+            upper === "WARN" ||
+            upper === "WARNING" ||
+            upper === "NEEDS_HUMAN_REVIEW"
           ? "warning"
           : "neutral";
   return (
@@ -101,7 +106,7 @@ export function SecurityVerdictBadge({
 export function RiskBadge({ risk }: { risk: string }) {
   const tone =
     risk === "HIGH" || risk === "CRITICAL" ? "danger" : risk === "MEDIUM" ? "warning" : "success";
-  return <Badge tone={tone}>{humanize(risk)} risk</Badge>;
+  return <Badge tone={tone}>{riskLevelLabel(risk)}</Badge>;
 }
 
 export function skillLevelLabel(level: number): string {
@@ -114,7 +119,7 @@ export function SkillLevelBadge({ name, level }: { name?: string; level: number 
   const tone = level >= 3 ? "indigo" : level === 2 ? "cobalt" : "success";
   return (
     <Badge tone={tone} dot>
-      {name ? `${name} · L${level}` : `L${level} ${skillLevelLabel(level)}`}
+      {name ? `${name} · Level ${level}` : `Level ${level} ${skillLevelLabel(level)}`}
     </Badge>
   );
 }

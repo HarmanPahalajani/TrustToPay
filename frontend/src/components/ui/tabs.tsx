@@ -94,7 +94,7 @@ export function TabsBar<T extends string = string>({
             {typeof item.count === "number" ? (
               <span
                 className={cn(
-                  "rounded-full px-1.5 py-0.5 font-mono text-[10px] font-semibold tabular-nums",
+                  "rounded-full px-1.5 py-0.5 font-sans text-[11px] font-semibold tabular-nums",
                   active ? "bg-[#4263EB]/10 text-[#2E4CCB]" : "bg-[#E4E9F2] text-[#4E596E]",
                 )}
               >

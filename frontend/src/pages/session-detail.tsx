@@ -17,7 +17,6 @@ import {
 import { api, ApiError } from "@/lib/api";
 import type { AnalysisOutput, Conflict, EvidenceSource } from "@/lib/types";
 import { PageHeader, SectionHeading } from "@/components/common";
-import { PaymentModeBanner } from "@/components/payment-mode-banner";
 import { TaskRowCard } from "@/components/task-card";
 import { RiskBadge, StatusBadge } from "@/components/status-badges";
 import { Alert } from "@/components/ui/alert";
@@ -99,9 +98,8 @@ export default function SessionDetailPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Agent Session"
         breadcrumbs={[
-          { label: "Agent Workspace", to: "/app/workspace" },
+          { label: "AI Workspace", to: "/app/workspace" },
           { label: session.title },
         ]}
         title={session.title}
@@ -110,7 +108,7 @@ export default function SessionDetailPage() {
           <>
             <Button asChild variant="outline">
               <Link to="/app/workspace">
-                <ArrowLeft className="size-4" /> Workspace
+                <ArrowLeft className="size-4" /> Back to Workspace
               </Link>
             </Button>
             <Button variant="outline" onClick={() => analyze.mutate()} loading={analyze.isPending}>
@@ -118,21 +116,20 @@ export default function SessionDetailPage() {
             </Button>
             {canResume ? (
               <Button onClick={() => resume.mutate()} loading={resume.isPending}>
-                <CheckCircle2 className="size-4" /> Resume AI session
+                <CheckCircle2 className="size-4" /> Complete &amp; Resume
               </Button>
             ) : null}
           </>
         }
       />
 
-      <PaymentModeBanner compact />
       {error ? <Alert tone="danger">{error}</Alert> : null}
       {notice ? <Alert tone="success">{notice}</Alert> : null}
 
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2.5">
         <StatusBadge status={session.status} />
         <Badge tone="neutral">{categoryLabel(session.category)}</Badge>
-        <span className="font-mono text-xs text-[#68738A]">Created {formatDate(session.createdAt)}</span>
+        <span className="text-xs text-[#68738A] tabular-nums">Created {formatDate(session.createdAt)}</span>
         {session.resolvedAt ? (
           <Badge tone="success" dot>
             Resolved {formatDate(session.resolvedAt)}
@@ -155,8 +152,8 @@ export default function SessionDetailPage() {
               <Bot className="mx-auto size-7 text-[#4263EB]" />
               <h3 className="mt-2 font-display text-sm font-bold text-[#141B2D]">No analysis run yet</h3>
               <p className="mx-auto mt-1 max-w-md text-xs leading-5 text-[#68738A]">
-                Run the deterministic or configured AI analyzer to inspect confidence, detect evidence conflicts, and
-                compute suggested specialist skills and escrow reward.
+                Run the initial analysis to check confidence scores, detect conflicting notes, and prepare suggested
+                specialist skills and reward amounts.
               </p>
               <Button size="sm" className="mt-4" onClick={() => analyze.mutate()} loading={analyze.isPending}>
                 <Sparkles className="size-3.5" /> Run AI analysis
@@ -167,8 +164,8 @@ export default function SessionDetailPage() {
           {tasks.length > 0 ? (
             <div className="space-y-3">
               <SectionHeading
-                title={`Escalated review tasks (${tasks.length})`}
-                description="Inspect specialist matching offers, PayPal escrow capture, verification runs, and handbacks."
+                title={`Specialist tasks (${tasks.length})`}
+                description="Track specialist matching, payment authorization, security checks, and verified results."
               />
               {tasks.map((task) => (
                 <TaskRowCard key={task.id} task={task} />
@@ -197,8 +194,8 @@ export default function SessionDetailPage() {
             </CardHeader>
             <CardContent className="space-y-3 text-xs">
               <div>
-                <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#68738A]">
-                  Target Systems / Models
+                <p className="text-xs font-medium text-[#68738A]">
+                  Systems &amp; tools mentioned
                 </p>
                 {session.productModels.length === 0 ? (
                   <p className="mt-1 text-[#68738A]">None specified.</p>
@@ -214,8 +211,8 @@ export default function SessionDetailPage() {
               </div>
 
               <div className="border-t border-[#E4E9F2] pt-3">
-                <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#68738A]">
-                  Constraints ({session.specifications.length})
+                <p className="text-xs font-medium text-[#68738A]">
+                  Requirements ({session.specifications.length})
                 </p>
                 {session.specifications.length === 0 ? (
                   <p className="mt-1 text-[#68738A]">No constraints provided.</p>
@@ -261,8 +258,8 @@ function AnalysisCard({
             <Badge tone={actionTone} dot>
               {humanize(output.recommendedAction)}
             </Badge>
-            <Badge tone={latest.demo ? "warning" : "success"}>
-              {latest.demo ? "Deterministic Engine" : "Configured AI"}
+            <Badge tone={latest.demo ? "info" : "success"}>
+              {latest.demo ? "Automatic analysis" : "AI analysis"}
             </Badge>
           </div>
         </div>
@@ -270,20 +267,18 @@ function AnalysisCard({
       <CardContent className="space-y-5 pt-5">
         <p className="text-sm leading-6 text-[#141B2D]">{output.summary}</p>
 
-        <div className="grid gap-3 sm:grid-cols-[160px_1fr]">
-          <div className="rounded-xl border border-[#E4E9F2] bg-[#F5F7FC] p-3.5">
-            <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#68738A]">
-              Confidence score
-            </p>
+        <div className="grid gap-4 sm:grid-cols-[170px_1fr]">
+          <div className="rounded-xl bg-[#F5F7FC] p-4">
+            <p className="text-xs font-medium text-[#68738A]">Confidence score</p>
             <p
               className={cn(
-                "mt-1 font-display text-2xl font-bold tabular-nums",
+                "mt-1 font-sans text-[28px] font-bold leading-none tabular-nums",
                 confidence >= 75 ? "text-[#12A875]" : confidence >= 50 ? "text-[#9A6100]" : "text-[#E5484D]",
               )}
             >
               {confidence}%
             </p>
-            <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-[#E4E9F2]">
+            <div className="mt-2.5 h-2 w-full overflow-hidden rounded-full bg-[#E4E9F2]">
               <div
                 className={cn(
                   "h-full rounded-full",
@@ -292,16 +287,14 @@ function AnalysisCard({
                 style={{ width: `${Math.max(4, confidence)}%` }}
               />
             </div>
-            <p className="mt-1.5 font-mono text-[10px] text-[#68738A]">
-              Threshold {Math.round(latest.threshold * 100)}%
+            <p className="mt-1.5 text-xs text-[#68738A] tabular-nums">
+              Target {Math.round(latest.threshold * 100)}%
             </p>
           </div>
 
-          <div className="rounded-xl border border-[#E4E9F2] bg-[#FFFFFF] p-3.5">
-            <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#68738A]">
-              Escalation rationale
-            </p>
-            <p className="mt-1 text-xs font-medium leading-5 text-[#141B2D]">{output.escalationReason}</p>
+          <div className="rounded-xl bg-[#F5F7FC] p-4">
+            <p className="text-xs font-medium text-[#68738A]">Why review is suggested</p>
+            <p className="mt-1 text-sm font-medium leading-5 text-[#141B2D]">{output.escalationReason}</p>
             <p className="mt-2 text-xs leading-5 text-[#68738A]">{output.reasoningSummary}</p>
           </div>
         </div>
@@ -363,13 +356,13 @@ function AnalysisCard({
           </div>
         </div>
 
-        <div className="rounded-xl border border-[#E4E9F2] bg-[#F5F7FC] p-4">
+        <div className="rounded-xl bg-[#F5F7FC] p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#68738A]">
+              <p className="text-xs font-medium text-[#68738A]">
                 Suggested escrow reward
               </p>
-              <p className="mt-0.5 font-display text-lg font-bold text-[#141B2D]">
+              <p className="mt-0.5 text-lg font-bold text-[#141B2D] tabular-nums">
                 {formatMoney(output.suggestedReward.amountMinor, output.suggestedReward.currency)}
               </p>
             </div>

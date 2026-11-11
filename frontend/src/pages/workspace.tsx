@@ -14,7 +14,6 @@ import {
 import { api, ApiError, type CreateSessionInput } from "@/lib/api";
 import type { AgentSession } from "@/lib/types";
 import { PageHeader, SectionHeading } from "@/components/common";
-import { PaymentModeBanner } from "@/components/payment-mode-banner";
 import { StatusBadge } from "@/components/status-badges";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -153,9 +152,8 @@ export default function WorkspacePage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Agent Workspace"
-        title="Escalate what your AI agent should not guess"
-        description="Submit a technical blocker, architectural conflict, or verification task with supporting context. The analysis run determines confidence and prepares a bounded escalation task."
+        title="Create a task when your AI gets stuck"
+        description="Submit the blocker and supporting notes. TrustToPay checks confidence, identifies matching specialists, and prepares a clear review task."
         actions={
           showForm ? (
             <Button variant="outline" onClick={closeForm}>
@@ -163,13 +161,11 @@ export default function WorkspacePage() {
             </Button>
           ) : (
             <Button onClick={openForm}>
-              <Plus className="size-4" /> New question
+              <Plus className="size-4" /> New Request
             </Button>
           )
         }
       />
-
-      <PaymentModeBanner compact />
 
       {showForm ? (
         <Card>
@@ -394,8 +390,8 @@ export default function WorkspacePage() {
       {/* Sessions list & filter */}
       <div className="space-y-4">
         <SectionHeading
-          title={`Agent sessions (${sessions.length})`}
-          description="Select a session to run analysis, inspect evidence conflicts, create a review task, or resume an unblocked workflow."
+          title={`AI Requests (${sessions.length})`}
+          description="Select a request to inspect analysis results, create a specialist task, or collect verified answers."
           actions={
             <div className="relative w-full sm:w-72">
               <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#68738A]" />
@@ -464,9 +460,9 @@ function SessionRow({ session }: { session: AgentSession }) {
           <p className="text-xs leading-5 text-[#68738A]">{truncate(session.question, 180)}</p>
         </div>
         <div className="flex shrink-0 items-center justify-between gap-3 sm:flex-col sm:items-end">
-          <span className="font-mono text-[11px] text-[#68738A]">{timeAgo(session.createdAt)}</span>
+          <span className="text-xs text-[#68738A] tabular-nums">{timeAgo(session.createdAt)}</span>
           <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#4263EB]">
-            Inspect <ArrowRight className="size-3.5" />
+            Open <ArrowRight className="size-3.5" />
           </span>
         </div>
       </div>

@@ -9,76 +9,66 @@ export default function PrivacyPage() {
     <div className="min-h-dvh bg-[#F5F7FC] text-[#141B2D]">
       <PublicHeader />
       <main className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
-        <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-[#4263EB]">
-          Data Governance &amp; Privacy
-        </p>
-        <h1 className="mt-2 font-display text-3xl font-bold tracking-tight text-[#141B2D]">
-          Privacy &amp; Data Handling Notice
-        </h1>
-        <p className="mt-2 text-sm leading-6 text-[#68738A]">
-          This notice documents the data models, session credentials, and external provider payloads processed by the
-          TrustToPay platform during operation.
-        </p>
+        <div className="space-y-2">
+          <h1 className="font-display text-3xl font-bold tracking-tight text-[#141B2D]">
+            Privacy &amp; Data Handling
+          </h1>
+          <p className="text-[15px] leading-6 text-[#4E596E]">
+            How TrustToPay handles account records, submitted work, security checks, and payment references.
+          </p>
+        </div>
 
         <div className="mt-8 space-y-4">
           <Card>
             <CardContent className="space-y-3 p-6">
-              <h2 className="flex items-center gap-2 font-display text-base font-bold text-[#141B2D]">
-                <Database className="size-4 text-[#4263EB]" /> Data stored by the platform
+              <h2 className="flex items-center gap-2 font-display text-base font-semibold text-[#141B2D]">
+                <Database className="size-4 text-[#4263EB]" /> Information stored on the platform
               </h2>
               <ul className="list-disc space-y-1.5 pl-5 text-sm leading-6 text-[#4E596E]">
-                <li>Account records: name, email, role, authentication claims, specialist certification levels, and profile metadata.</li>
-                <li>Specialist payout profile: PayPal Sandbox recipient email, explicit consent flag, and provider type.</li>
-                <li>Agent sessions: technical prompts, system specifications, supplied evidence documents, and structured analysis runs.</li>
-                <li>Escalated tasks: acceptance criteria, immutable SHA-256 code artifacts, submissions, verification checklists, security scan reports, and timeline events.</li>
-                <li>Payment ledger metadata: local transaction IDs, PayPal order/batch identifiers, minor-unit amounts, currencies, statuses, and reconciliation logs.</li>
+                <li>Account profile details: name, email address, account role, and verified skill levels.</li>
+                <li>Task requests: questions, requirements, attached context files, and acceptance criteria.</li>
+                <li>Specialist submissions: uploaded code or explanations, file integrity checks, and review history.</li>
+                <li>Payment records: PayPal test order references, currency, amounts, and task status updates.</li>
               </ul>
               <p className="text-sm leading-6 text-[#68738A]">
-                Payment card numbers and bank credentials are never collected or stored by TrustToPay. In PayPal Sandbox
-                mode, PayPal hosts the checkout flow and the server records only the order and payout batch references
-                required for reconciliation.
+                Payment card numbers and bank credentials are never collected or stored by TrustToPay. PayPal handles
+                the checkout experience directly.
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="space-y-3 p-6">
-              <h2 className="flex items-center gap-2 font-display text-base font-bold text-[#141B2D]">
-                <Lock className="size-4 text-[#4263EB]" /> Authentication &amp; session storage
+              <h2 className="flex items-center gap-2 font-display text-base font-semibold text-[#141B2D]">
+                <Lock className="size-4 text-[#4263EB]" /> Sign-in and session security
               </h2>
               <p className="text-sm leading-6 text-[#4E596E]">
-                TrustToPay authenticates requests via Supabase PKCE tokens or server-signed session cookies backed by{" "}
-                <code className="rounded bg-[#EDF0F6] px-1.5 py-0.5 font-mono text-xs text-[#141B2D]">httpOnly</code>{" "}
-                storage. The platform does not load third-party advertising trackers or behavioral analytics. The official
-                PayPal JS SDK loads only on demand when a PayPal Sandbox checkout dialog is opened.
+                Authentication uses secure Supabase sign-in flows and protected server-signed session cookies. TrustToPay
+                does not run third-party advertising trackers.
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="space-y-3 p-6">
-              <h2 className="flex items-center gap-2 font-display text-base font-bold text-[#141B2D]">
-                <Trash2 className="size-4 text-[#4263EB]" /> Retention &amp; environment isolation
+              <h2 className="flex items-center gap-2 font-display text-base font-semibold text-[#141B2D]">
+                <Trash2 className="size-4 text-[#4263EB]" /> Safe content guidelines
               </h2>
               <p className="text-sm leading-6 text-[#4E596E]">
-                Application records persist in the PostgreSQL database configured by{" "}
-                <code className="rounded bg-[#EDF0F6] px-1.5 py-0.5 font-mono text-xs text-[#141B2D]">DATABASE_URL</code>.
-                Do not submit live production secrets, regulated personal data, or live financial credentials into a
-                Sandbox or evaluation deployment.
+                Do not upload production passwords, private API keys, or regulated personal financial data inside task
+                descriptions or attached code artifacts.
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="space-y-3 p-6">
-              <h2 className="flex items-center gap-2 font-display text-base font-bold text-[#141B2D]">
-                <ShieldCheck className="size-4 text-[#12A875]" /> External service integrations
+              <h2 className="flex items-center gap-2 font-display text-base font-semibold text-[#141B2D]">
+                <ShieldCheck className="size-4 text-[#12A875]" /> Connected platform services
               </h2>
               <p className="text-sm leading-6 text-[#4E596E]">
-                When PayPal Sandbox mode is enabled, order creation, order capture, and payout batch calls communicate
-                only with PayPal Sandbox endpoints. Jina AI and Elasticsearch process non-sensitive skill and task
-                summaries for specialist matching, and Google Gemini inspects submitted deliverables within bounded
-                verification prompts.
+                PayPal powers checkout, Jina AI and Elasticsearch match task needs with specialist skills, and Google
+                Gemini assists with security inspection before verified work returns.
               </p>
             </CardContent>
           </Card>
@@ -91,7 +81,7 @@ export default function PrivacyPage() {
             </Button>
             <Button asChild variant="outline">
               <Link to="/contact">
-                <Mail className="size-4" /> Support &amp; Security Ops
+                <Mail className="size-4" /> Support &amp; Security
               </Link>
             </Button>
           </div>

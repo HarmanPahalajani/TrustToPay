@@ -17,7 +17,6 @@ import { api, ApiError } from "@/lib/api";
 import type { SkillAssessmentAttemptResult, SkillAssessmentQuestion } from "@/lib/types";
 import { useAuth } from "@/context/AuthContext";
 import { PageHeader, SectionHeading, DataRow } from "@/components/common";
-import { PaymentModeBanner } from "@/components/payment-mode-banner";
 import { SkillLevelBadge } from "@/components/status-badges";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -164,12 +163,11 @@ export default function ProfilePage() {
   return (
     <div className="space-y-5">
       <PageHeader
-        eyebrow="Account"
-        title={reviewer ? "Reviewer profile and payout details" : "Your profile"}
+        title={reviewer ? "Specialist profile & payout details" : "Your profile"}
         description={
           reviewer
-            ? "Verified skills are earned sequentially (L1 Foundation → L2 Practitioner → L3 Advanced). A PayPal email and explicit consent are required before a verified reward can be paid."
-            : "Keep your account details up to date. Requesters and admins use them to identify who created or reviewed a task."
+            ? "Verified skills are earned step by step through short assessments. Add a PayPal email and confirm consent to receive payouts when rewards are released."
+            : "Manage your account details used across tasks and team reviews."
         }
         actions={
           reviewer ? (
@@ -181,8 +179,6 @@ export default function ProfilePage() {
           ) : null
         }
       />
-
-      <PaymentModeBanner compact />
 
       <div className="grid gap-5 lg:grid-cols-[1.4fr_1fr]">
         <form onSubmit={submit} className="space-y-5">
@@ -428,18 +424,18 @@ export default function ProfilePage() {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-sm">
-                  <Wallet className="size-4 text-primary" /> PayPal payout details
+                  <Wallet className="size-4 text-[#4263EB]" /> PayPal payout details
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <Alert tone="info">
-                  In demo mode, payouts are simulated and labelled. In genuine Sandbox mode, the server calls PayPal
-                  Payouts only after independent verification passes. No live-money endpoint is reachable.
+                  In practice mode, payouts are simulated and clearly labelled. In PayPal test mode, payouts run only
+                  after submitted work passes verification.
                 </Alert>
                 <Field
                   label="PayPal email"
                   htmlFor="profile-payout-email"
-                  hint="Use a verified PayPal account email. In Sandbox mode, use a Sandbox account email."
+                  hint="Enter the PayPal email where test payouts should be sent."
                 >
                   <Input
                     id="profile-payout-email"
@@ -450,16 +446,16 @@ export default function ProfilePage() {
                     maxLength={200}
                   />
                 </Field>
-                <label className="flex items-start gap-2.5 rounded-md border border-border bg-muted/30 p-3 text-xs leading-5">
+                <label className="flex items-start gap-2.5 rounded-xl bg-[#F5F7FC] p-3.5 text-xs leading-5 text-[#141B2D]">
                   <input
                     type="checkbox"
                     checked={consent}
                     onChange={(event) => setConsent(event.target.checked)}
-                    className="mt-0.5 size-4 accent-primary"
+                    className="mt-0.5 size-4 accent-[#4263EB]"
                   />
                   <span>
-                    I consent to receive reviewer rewards at this PayPal email after a submission passes independent
-                    verification. I understand that a failed or disputed task is not payable.
+                    I consent to receive specialist rewards at this PayPal email after submitted work passes checks.
+                    Failed or disputed tasks are not paid.
                   </span>
                 </label>
                 <div className="flex flex-wrap items-center justify-between gap-2">
@@ -467,7 +463,7 @@ export default function ProfilePage() {
                     {ready ? "Payout profile ready" : "Payout profile incomplete"}
                   </Badge>
                   {stats ? (
-                    <span className="text-[11px] text-muted-foreground">
+                    <span className="text-xs text-[#68738A] tabular-nums">
                       {stats.completedPayoutCount} completed payout{stats.completedPayoutCount === 1 ? "" : "s"}
                     </span>
                   ) : null}
@@ -477,9 +473,8 @@ export default function ProfilePage() {
           ) : null}
 
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="max-w-md text-[11px] leading-5 text-muted-foreground">
-              Consent is stored with the profile and checked again by the server before a payout. It is not inferred
-              from the presence of an email.
+            <p className="max-w-md text-xs leading-5 text-[#68738A]">
+              Consent is saved with your profile and verified before releasing any payout.
             </p>
             <Button type="submit" loading={save.isPending}>
               <Save className="size-4" /> Save profile
@@ -487,7 +482,7 @@ export default function ProfilePage() {
           </div>
         </form>
 
-        <aside className="space-y-4">
+        <aside className="min-w-0 space-y-4">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm">Account</CardTitle>
@@ -509,7 +504,7 @@ export default function ProfilePage() {
                   )}
                 </DataRow>
                 <DataRow label="Member since">{formatDate(user.createdAt)}</DataRow>
-                <DataRow label="Payout provider">{user.profile?.payoutProvider ?? "PAYPAL_SANDBOX"}</DataRow>
+                <DataRow label="Payout method">{user.profile?.payoutProvider ?? "PayPal"}</DataRow>
                 <DataRow label="Consent">{consent ? "Recorded" : "Not given"}</DataRow>
               </dl>
             </CardContent>
@@ -527,16 +522,15 @@ export default function ProfilePage() {
                   Payout readiness
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2 text-xs leading-5 text-muted-foreground">
+              <CardContent className="space-y-2.5 text-xs leading-5 text-[#68738A]">
                 {ready ? (
                   <p>
-                    The server can create a payout for a verified reward. Every payout is recorded in the ledger with
-                    a Simulated or Sandbox label.
+                    Your payout profile is complete. Eligible rewards appear clearly in your payment history.
                   </p>
                 ) : (
                   <p>
-                    Add a PayPal email and record consent. Until both are present, a verified reward stays authorized
-                    and is never silently marked paid.
+                    Add a PayPal email and confirm consent so verified rewards can be released when payouts are
+                    available.
                   </p>
                 )}
                 <Button asChild size="sm" variant="outline" className="w-full">
@@ -548,14 +542,14 @@ export default function ProfilePage() {
             </Card>
           ) : null}
 
-          <Card className="border-dashed">
-            <CardContent className="space-y-2 p-4 text-xs leading-5 text-muted-foreground">
-              <p className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
-                <ShieldCheck className="size-3.5 text-primary" /> Security note
+          <Card>
+            <CardContent className="space-y-2 p-4 text-xs leading-5 text-[#68738A]">
+              <p className="flex items-center gap-1.5 text-xs font-semibold text-[#141B2D]">
+                <ShieldCheck className="size-3.5 text-[#4263EB]" /> Security note
               </p>
               <p>
-                PayPal secrets never reach the browser. Only the Sandbox Client ID is exposed when genuine Sandbox
-                mode is active, because the PayPal JS SDK requires it.
+                Payment credentials are handled securely on the server, and payouts are only created after independent
+                verification passes.
               </p>
             </CardContent>
           </Card>

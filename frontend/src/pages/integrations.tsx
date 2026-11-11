@@ -1,98 +1,56 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
-  AlertTriangle,
-  ArrowUpRight,
   Bot,
-  Check,
   CheckCircle2,
-  Clipboard,
   CreditCard,
+  Database,
   ExternalLink,
-  FlaskConical,
-  KeyRound,
-  Link2,
-  Lock,
-  Plug,
   RefreshCw,
   ShieldAlert,
   ShieldCheck,
-  Terminal,
   Wallet,
-  Webhook,
 } from "lucide-react";
-import { api, ApiError } from "@/lib/api";
-import { useAuth } from "@/context/AuthContext";
-import { PageHeader, SectionHeading, DataRow } from "@/components/common";
+import { api } from "@/lib/api";
+import { PageHeader, DataRow } from "@/components/common";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ErrorState, LoadingBlock } from "@/components/ui/states";
-import { formatDate, humanize } from "@/lib/format";
-
-const ENV_SNIPPET = `# Local demo (default, no credentials, simulated payments)
-DEMO_MODE=true
-PAYPAL_ENV=sandbox
-PAYPAL_CURRENCY=USD
-
-# Genuine PayPal Sandbox (replace with YOUR Sandbox app credentials)
-# DEMO_MODE=false
-# PAYPAL_CLIENT_ID=your_sandbox_client_id
-# PAYPAL_CLIENT_SECRET=your_sandbox_client_secret
-# PAYPAL_WEBHOOK_ID=your_webhook_id
-# PAYPAL_PAYOUTS_ENABLED=false
-
-# Optional OpenAI-compatible provider (server-side only)
-# AI_PROVIDER=openai
-# AI_API_KEY=your_provider_key
-# AI_MODEL=gpt-4o-mini
-# AI_BASE_URL=https://api.openai.com/v1`;
+import { formatDate } from "@/lib/format";
 
 export default function IntegrationsPage() {
-  const { user } = useAuth();
-  const [copied, setCopied] = useState(false);
-  const [oauthResult, setOauthResult] = useState<string | null>(null);
-
   const query = useQuery({
     queryKey: ["integrations", "status"],
     queryFn: api.integrations.status,
     staleTime: 30_000,
   });
 
-  const testOAuth = useMutation({
-    mutationFn: api.integrations.testOAuth,
-    onSuccess: (data) => setOauthResult(data.message),
-    onError: (err) => setOauthResult(err instanceof ApiError ? err.message : "OAuth test failed."),
-  });
-
-  if (query.isLoading) return <LoadingBlock label="Loading integration status…" />;
+  if (query.isLoading) return <LoadingBlock label="Checking service status…" />;
   if (query.error || !query.data) {
-    return <ErrorState message={(query.error as Error)?.message ?? "Status unavailable."} onRetry={() => query.refetch()} />;
+    return (
+      <ErrorState
+        message={(query.error as Error)?.message ?? "Service status is unavailable."}
+        onRetry={() => query.refetch()}
+      />
+    );
   }
 
   const status = query.data;
   const { paypal, ai } = status;
 
-  async function copyEnv() {
-    await navigator.clipboard.writeText(ENV_SNIPPET);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 2000);
-  }
-
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <PageHeader
-        eyebrow="Integrations"
-        title="Configuration and live status"
-        description="The server decides which AI engine and payment mode are active. The browser only renders that decision; no PayPal secret ever reaches the client."
+        title="Platform service status"
+        description="Live health and readiness for AI analysis, task verification, and PayPal payment processing."
         actions={
           <>
             <Button asChild variant="outline">
-              <a href="/api-docs" target="_blank" rel="noreferrer">
-                API docs <ExternalLink className="size-3.5" />
-              </a>
+              <Link to="/app/docs">
+                API &amp; MCP Docs <ExternalLink className="size-3.5" />
+              </Link>
             </Button>
             <Button variant="outline" onClick={() => query.refetch()} loading={query.isFetching}>
               <RefreshCw className="size-4" /> Refresh
@@ -101,26 +59,34 @@ export default function IntegrationsPage() {
         }
       />
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-3">
         <StatusTile
           icon={<Bot className="size-4" />}
-          label="AI engine"
-          value={ai.engine === "demo" ? "Demo AI" : ai.provider}
-          detail={ai.engine === "demo" ? "Deterministic, no LLM or key required" : ai.model}
+          label="AI analysis"
+          value={ai.engine === "demo" ? "Practice mode" : "Active"}
+          detail={ai.engine === "demo" ? "Built-in analysis rules active" : `${ai.provider} · ${ai.model}`}
           tone={ai.engine === "demo" ? "info" : "success"}
         />
         <StatusTile
           icon={<CreditCard className="size-4" />}
-          label="Payments"
-          value={paypal.paymentsMode === "SIMULATED" ? "Simulated" : "PayPal Sandbox"}
-          detail={paypal.paymentsMode === "SIMULATED" ? "No PayPal money moves" : "Genuine Sandbox API calls"}
+          label="Task funding"
+          value={paypal.paymentsMode === "SIMULATED" ? "Practice mode" : "PayPal test mode"}
+          detail={
+            paypal.paymentsMode === "SIMULATED"
+              ? "Test payment — no real money will be charged"
+              : "PayPal test checkout ready"
+          }
           tone={paypal.paymentsMode === "SIMULATED" ? "warning" : "success"}
         />
         <StatusTile
           icon={<Wallet className="size-4" />}
-          label="Payouts"
-          value={paypal.payoutsEnabled ? "Enabled" : "Not enabled"}
-          detail={paypal.payoutsEnabled ? "Reviewer rewards can be released" : "Funding works; payouts need enablement"}
+          label="Specialist payouts"
+          value={paypal.payoutsEnabled ? "Available" : "Restricted"}
+          detail={
+            paypal.payoutsEnabled
+              ? "Verified specialist rewards can be released"
+              : "Task funding works; payouts disabled on merchant account"
+          }
           tone={paypal.payoutsEnabled ? "success" : "neutral"}
         />
       </div>
@@ -129,10 +95,10 @@ export default function IntegrationsPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-sm">
-              <AlertTriangle className="size-4 text-[#9A6100]" /> Configuration notices
+              <ShieldAlert className="size-4 text-[#9A6100]" /> Service notices
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="space-y-2.5">
             {status.issues.map((issue) => (
               <Alert
                 key={issue.code}
@@ -140,7 +106,6 @@ export default function IntegrationsPage() {
                 title={issue.message}
               >
                 {issue.hint ? <p>{issue.hint}</p> : null}
-                <p className="mt-1 font-mono text-[10px] opacity-70">{issue.code}</p>
               </Alert>
             ))}
           </CardContent>
@@ -149,261 +114,80 @@ export default function IntegrationsPage() {
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
-          <CardHeader className="border-b border-border pb-3">
+          <CardHeader className="border-b border-[#E4E9F2] pb-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <CardTitle className="flex items-center gap-2">
-                <CreditCard className="size-4 text-[#4263EB]" /> PayPal Checkout funding
+                <CreditCard className="size-4 text-[#4263EB]" /> Payment processing
               </CardTitle>
               <Badge tone={paypal.checkoutReady ? "success" : "danger"} dot>
-                {paypal.checkoutReady ? "Ready" : "Not ready"}
+                {paypal.checkoutReady ? "Ready" : "Unavailable"}
               </Badge>
             </div>
           </CardHeader>
           <CardContent className="space-y-3 pt-4">
             <dl>
-              <DataRow label="Environment">{paypal.environment}</DataRow>
-              <DataRow label="Server mode">{paypal.paymentsMode}</DataRow>
-              <DataRow label="Credentials present">{paypal.credentialsPresent ? "Yes" : "No"}</DataRow>
-              <DataRow label="Sandbox configured">{paypal.configured ? "Yes" : "No"}</DataRow>
-              <DataRow label="Client ID">{paypal.clientId ? `${paypal.clientId.slice(0, 8)}…` : "Not exposed"}</DataRow>
+              <DataRow label="Payment mode">
+                {paypal.paymentsMode === "SIMULATED" ? "Practice mode" : "PayPal test mode"}
+              </DataRow>
+              <DataRow label="Checkout status">{paypal.checkoutReady ? "Ready" : "Unavailable"}</DataRow>
+              <DataRow label="Payouts status">{paypal.payoutsEnabled ? "Enabled" : "Unavailable"}</DataRow>
               <DataRow label="Currency">{paypal.currency}</DataRow>
-              <DataRow label="Webhook signature check">{paypal.webhookConfigured ? "Configured" : "Not configured"}</DataRow>
+              <DataRow label="Reward range">
+                {status.rewardLimits.minDisplay} – {status.rewardLimits.maxDisplay}
+              </DataRow>
             </dl>
-            <div className="rounded-md border border-border bg-muted/30 p-2.5 text-[11px] leading-5 text-muted-foreground">
-              Checkout uses Orders v2 create + capture. The server validates the captured amount, currency and task
-              reference before marking a task funded. Duplicate create requests reuse the open local order.
-            </div>
-            {paypal.paymentsMode === "SANDBOX" && paypal.configured ? (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => testOAuth.mutate()}
-                loading={testOAuth.isPending}
-              >
-                <KeyRound className="size-3.5" /> Test Sandbox OAuth
-              </Button>
-            ) : (
-              <p className="text-[11px] leading-5 text-muted-foreground">
-                OAuth testing is available only in genuine Sandbox mode with credentials present.
-              </p>
-            )}
-            {oauthResult ? (
-              <Alert tone={testOAuth.isError ? "danger" : "success"}>{oauthResult}</Alert>
-            ) : null}
+            <p className="rounded-xl bg-[#F5F7FC] p-3.5 text-xs leading-5 text-[#4E596E]">
+              Task funding and specialist payouts are handled separately. Even if payouts are temporarily restricted on
+              a test merchant account, task escrow and verification continue to run reliably.
+            </p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="border-b border-border pb-3">
+          <CardHeader className="border-b border-[#E4E9F2] pb-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <CardTitle className="flex items-center gap-2">
-                <Wallet className="size-4 text-[#12A875]" /> PayPal Payouts
+                <ShieldCheck className="size-4 text-[#12A875]" /> AI &amp; verification services
               </CardTitle>
-              <Badge tone={paypal.payoutsEnabled ? "success" : "warning"} dot>
-                {paypal.payoutsEnabled ? "Enabled" : "Permission required"}
+              <Badge tone={ai.configured || ai.engine === "demo" ? "success" : "warning"} dot>
+                {ai.configured || ai.engine === "demo" ? "Operational" : "Check required"}
               </Badge>
             </div>
           </CardHeader>
           <CardContent className="space-y-3 pt-4">
             <dl>
-              <DataRow label="Requested by env">{paypal.payoutsRequested ? "PAYPAL_PAYOUTS_ENABLED=true" : "No"}</DataRow>
-              <DataRow label="Provider status">{paypal.payoutsEnabled ? "Ready" : "Unavailable"}</DataRow>
-              <DataRow label="Recipient consent">Required per reviewer</DataRow>
-              <DataRow label="Recipient email">Required per reviewer</DataRow>
-            </dl>
-            <Alert tone="info">
-              Payouts are separate from Checkout. A Sandbox app may be able to capture payments but still require
-              Payouts enablement. When unavailable, verified rewards stay authorized and the task remains{" "}
-              <code>PAYMENT_READY</code>; nothing is silently marked paid.
-            </Alert>
-            <p className="text-[11px] leading-5 text-muted-foreground">
-              Payout creation is followed by a provider batch lookup. A payout is never recorded as paid from the
-              local request alone. Unknown or timed-out outcomes block blind retries.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid gap-4 lg:grid-cols-[1.1fr_1fr]">
-        <Card>
-          <CardHeader className="border-b border-border pb-3">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <CardTitle className="flex items-center gap-2">
-                <Terminal className="size-4 text-primary" /> Environment setup
-              </CardTitle>
-              <Button variant="outline" size="sm" onClick={copyEnv}>
-                {copied ? <Check className="size-3.5" /> : <Clipboard className="size-3.5" />}
-                {copied ? "Copied" : "Copy template"}
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-4">
-            <pre className="overflow-x-auto rounded-md border border-[#1E293B] bg-[#10172A] p-3 text-[11px] leading-5 text-[#F5F7FC]">
-              <code>{ENV_SNIPPET}</code>
-            </pre>
-            <div className="mt-3 space-y-2 text-[11px] leading-5 text-muted-foreground">
-              <p className="flex gap-2">
-                <Lock className="mt-0.5 size-3.5 shrink-0 text-[#12A875]" />
-                Put secrets in <code>.env</code> locally or your platform&apos;s secret settings. Never send them in
-                chat or commit them.
-              </p>
-              <p className="flex gap-2">
-                <ShieldCheck className="mt-0.5 size-3.5 shrink-0 text-[#12A875]" />
-                The server refuses live PayPal. The adapter is hard-wired to the Sandbox API base URL.
-              </p>
-              <p className="flex gap-2">
-                <ShieldAlert className="mt-0.5 size-3.5 shrink-0 text-[#F5A623]" />
-                Restart the backend after changing <code>DEMO_MODE</code> or credentials so the server reloads config.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="border-b border-border pb-3">
-            <CardTitle className="flex items-center gap-2">
-              <KeyRound className="size-4 text-primary" /> Sandbox setup checklist
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 pt-4">
-            {[
-              {
-                title: "Create a PayPal Developer account and Sandbox app",
-                body: "developer.paypal.com → Apps & Credentials → Sandbox. Copy the Client ID and Secret for your app.",
-                link: status.docs.paypalSetup,
-              },
-              {
-                title: "Add a Sandbox buyer and recipient",
-                body: "Use Sandbox accounts from the developer dashboard. The reviewer's payout email must be a valid Sandbox recipient.",
-                link: status.docs.paypalSandbox,
-              },
-              {
-                title: "Set server environment values",
-                body: "DEMO_MODE=false, PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET, and optionally PAYPAL_WEBHOOK_ID. Restart the backend.",
-                link: null,
-              },
-              {
-                title: "Enable Payouts for the app",
-                body: "If Payouts is not enabled, Checkout funding still works. Set PAYPAL_PAYOUTS_ENABLED=true only after the app can create payouts.",
-                link: status.docs.paypalSetup,
-              },
-              {
-                title: "Register the webhook",
-                body: "Point PayPal to /api/v1/webhooks/paypal. The server verifies signatures with the configured webhook ID and deduplicates event IDs.",
-                link: status.docs.paypalWebhooks,
-              },
-            ].map((step, index) => (
-              <div key={step.title} className="flex gap-2.5">
-                <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-semibold text-primary">
-                  {index + 1}
-                </span>
-                <div>
-                  <p className="text-xs font-medium">{step.title}</p>
-                  <p className="text-[11px] leading-5 text-muted-foreground">{step.body}</p>
-                  {step.link ? (
-                    <a
-                      href={step.link}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-1 text-[10px] text-primary underline underline-offset-2"
-                    >
-                      PayPal documentation <ArrowUpRight className="size-2.5" />
-                    </a>
-                  ) : null}
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-sm">
-              <Bot className="size-4 text-primary" /> AI provider
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <dl>
-              <DataRow label="Engine">{ai.engine === "demo" ? "Deterministic demo" : "Provider"}</DataRow>
-              <DataRow label="Provider">{ai.provider}</DataRow>
+              <DataRow label="Analysis mode">{ai.engine === "demo" ? "Built-in rules" : "AI provider"}</DataRow>
               <DataRow label="Model">{ai.model}</DataRow>
-              <DataRow label="Configured">{ai.configured ? "Yes" : "No — demo engine used"}</DataRow>
-              <DataRow label="Escalation threshold">{Math.round(ai.threshold * 100)}%</DataRow>
+              <DataRow label="Escalation threshold" className="tabular-nums">
+                {Math.round(ai.threshold * 100)}%
+              </DataRow>
+              <DataRow label="Database">
+                <span className="inline-flex items-center gap-1.5">
+                  <Database className="size-3.5 text-[#12A875]" /> {status.database.label}
+                </span>
+              </DataRow>
             </dl>
-            <p className="text-[11px] leading-5 text-muted-foreground">
-              Server-side overrides are applied: a critical conflict, missing required fields or a schema-invalid
-              response forces escalation. The browser cannot override the decision.
+            <p className="rounded-xl bg-[#F5F7FC] p-3.5 text-xs leading-5 text-[#4E596E]">
+              Submitted specialist work is verified automatically against task requirements and security checks before
+              returning a signed result to the requesting agent.
             </p>
-            <Button asChild variant="outline" size="sm">
-              <Link to="/app/docs#ai">AI configuration details</Link>
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-sm">
-              <Webhook className="size-4 text-primary" /> Webhooks and reconciliation
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="space-y-2 text-[11px] leading-5 text-muted-foreground">
-              <p className="flex gap-2">
-                <Link2 className="mt-0.5 size-3.5 shrink-0" /> Endpoint: <code>POST /api/v1/webhooks/paypal</code>
-              </p>
-              <p className="flex gap-2">
-                <ShieldCheck className="mt-0.5 size-3.5 shrink-0" /> Signature verified through PayPal&apos;s{" "}
-                <code>verify-webhook-signature</code> API using <code>PAYPAL_WEBHOOK_ID</code>.
-              </p>
-              <p className="flex gap-2">
-                <FlaskConical className="mt-0.5 size-3.5 shrink-0" /> Events are stored and deduplicated by event ID
-                before any state change.
-              </p>
-              <p className="flex gap-2">
-                <RefreshCw className="mt-0.5 size-3.5 shrink-0" /> Capture and payout amounts are compared with the
-                server-stored minor units. Mismatches become failures, not silent successes.
-              </p>
-            </div>
-            <div className="rounded-md border border-[#F5A623]/30 bg-[#F5A623]/10 p-2.5 text-[11px] leading-5 text-[#9A6100]">
-              Without <code>PAYPAL_WEBHOOK_ID</code>, webhook requests are rejected. The payment ledger still has manual
-              reconcile controls for funding and payout state.
-            </div>
           </CardContent>
         </Card>
       </div>
 
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-sm">
-            <Plug className="size-4 text-primary" /> Current evaluation mode
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <MiniFact label="Database" value={status.database.label} />
-            <MiniFact label="Demo access" value={status.demoUsersEnabled ? "Enabled" : "Disabled"} />
-            <MiniFact label="Reward range" value={`${status.rewardLimits.minDisplay} – ${status.rewardLimits.maxDisplay}`} />
-            <MiniFact label="PayPal currency" value={status.paypal.currency} />
-          </div>
-          {status.paypal.paymentsMode === "SIMULATED" ? (
-            <Alert tone="warning" icon={<FlaskConical className="size-4" />} title="You are in local demo mode">
-              All seeded and newly captured payments are simulated and labelled in the ledger. To evaluate genuine
-              PayPal Checkout or Payouts, configure Sandbox credentials and set <code>DEMO_MODE=false</code>.
-            </Alert>
-          ) : status.paypal.configured ? (
-            <Alert tone="success" icon={<CheckCircle2 className="size-4" />} title="Genuine PayPal Sandbox mode">
-              The backend will make real HTTP calls to PayPal Sandbox. No live-money endpoint is reachable.
-            </Alert>
-          ) : (
-            <Alert tone="danger" icon={<ShieldAlert className="size-4" />} title="Sandbox requested but not configured">
-              Add credentials or return to demo mode. Payment actions will fail closed rather than pretend to work.
-            </Alert>
-          )}
-          <p className="text-[10px] text-muted-foreground">Status refreshed {formatDate(new Date().toISOString())}</p>
-        </CardContent>
-      </Card>
+      {status.paypal.paymentsMode === "SIMULATED" ? (
+        <Alert tone="info" title="Practice payment mode is active">
+          Test payment entries in this workspace never charge real money.
+        </Alert>
+      ) : status.paypal.configured ? (
+        <Alert tone="success" icon={<CheckCircle2 className="size-4" />} title="PayPal test mode is active">
+          Payments use PayPal&apos;s test environment. No real money is ever transferred.
+        </Alert>
+      ) : null}
+
+      <p className="text-xs text-[#68738A] tabular-nums">
+        Last checked {formatDate(new Date().toISOString())}
+      </p>
     </div>
   );
 }
@@ -422,27 +206,18 @@ function StatusTile({
   tone: "info" | "success" | "warning" | "neutral";
 }) {
   return (
-    <Card className="p-4">
+    <Card className="p-5">
       <div className="flex items-start justify-between gap-2">
-        <div>
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{label}</p>
-          <p className="mt-1 text-sm font-semibold">{value}</p>
-          <p className="mt-0.5 text-[11px] text-muted-foreground">{detail}</p>
+        <div className="min-w-0">
+          <p className="text-xs font-medium text-[#68738A]">{label}</p>
+          <p className="mt-1.5 font-heading text-lg font-bold text-[#141B2D]">{value}</p>
+          <p className="mt-1 text-xs leading-5 text-[#68738A]">{detail}</p>
         </div>
-        <div className="rounded-md bg-muted p-2 text-muted-foreground">{icon}</div>
+        <div className="rounded-lg bg-[#F5F7FC] p-2.5 text-[#4E596E]">{icon}</div>
       </div>
-      <Badge tone={tone} dot className="mt-2">
-        {tone === "success" ? "Ready" : tone === "warning" ? "Simulated" : humanize(value)}
+      <Badge tone={tone} dot className="mt-3">
+        {tone === "success" ? "Healthy" : tone === "warning" ? "Practice mode" : "Status"}
       </Badge>
     </Card>
-  );
-}
-
-function MiniFact({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-md border border-border bg-muted/30 p-2.5">
-      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</p>
-      <p className="mt-0.5 text-xs font-medium">{value}</p>
-    </div>
   );
 }
