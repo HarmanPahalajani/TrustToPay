@@ -1,67 +1,92 @@
-import type { TaskEvent } from "@/lib/types";
-import { formatDate, humanize } from "@/lib/format";
-import { cn } from "@/lib/utils";
 import {
-  BadgeCheck,
-  Ban,
   CheckCircle2,
+  CircleDot,
   CreditCard,
-  FileCheck2,
   Gavel,
-  MessageSquarePlus,
-  PlayCircle,
-  Send,
-  Sparkles,
+  RefreshCw,
+  ShieldAlert,
   UserCheck,
   Wallet,
 } from "lucide-react";
+import type { TaskEvent } from "@/lib/types";
+import { formatDate, humanize } from "@/lib/format";
+import { cn } from "@/lib/utils";
 
-function iconFor(type: string) {
-  if (type.includes("FUND")) return CreditCard;
-  if (type.includes("ACCEPT") || type.includes("ASSIGN")) return UserCheck;
-  if (type.includes("VERIF")) return FileCheck2;
-  if (type.includes("PAYOUT") || type.includes("PAYMENT")) return Wallet;
-  if (type.includes("SUBMIT")) return Send;
-  if (type.includes("COMPLET") || type.includes("PAID") || type.includes("RESOLV")) return CheckCircle2;
-  if (type.includes("DISPUT")) return Gavel;
-  if (type.includes("RESUME")) return PlayCircle;
-  if (type.includes("CANCEL") || type.includes("REJECT") || type.includes("FAIL")) return Ban;
-  if (type.includes("CREATED") || type.includes("ANALYSIS")) return Sparkles;
-  if (type.includes("ANSWER") || type.includes("REOPEN")) return MessageSquarePlus;
-  return BadgeCheck;
+function eventStyle(type: string): { icon: React.ReactNode; ring: string } {
+  if (type.includes("FAILED") || type.includes("REJECTED") || type.includes("CANCEL")) {
+    return {
+      icon: <ShieldAlert className="size-3.5 text-[#E5484D]" />,
+      ring: "border-[#E5484D]/35 bg-[#E5484D]/10",
+    };
+  }
+  if (type.includes("DISPUTE")) {
+    return {
+      icon: <Gavel className="size-3.5 text-[#9A6100]" />,
+      ring: "border-[#F5A623]/40 bg-[#F5A623]/12",
+    };
+  }
+  if (type.includes("PAYOUT")) {
+    return {
+      icon: <Wallet className="size-3.5 text-[#12A875]" />,
+      ring: "border-[#12A875]/35 bg-[#12A875]/10",
+    };
+  }
+  if (type.includes("FUNDING") || type.includes("ORDER")) {
+    return {
+      icon: <CreditCard className="size-3.5 text-[#4263EB]" />,
+      ring: "border-[#4263EB]/30 bg-[#4263EB]/10",
+    };
+  }
+  if (type.includes("VERIFICATION") || type.includes("RESUMED")) {
+    return {
+      icon: <CheckCircle2 className="size-3.5 text-[#12A875]" />,
+      ring: "border-[#12A875]/35 bg-[#12A875]/10",
+    };
+  }
+  if (type.includes("ASSIGN") || type.includes("CLAIM") || type.includes("OFFER")) {
+    return {
+      icon: <UserCheck className="size-3.5 text-[#7057F5]" />,
+      ring: "border-[#7057F5]/30 bg-[#7057F5]/10",
+    };
+  }
+  if (type.includes("RECONCILE")) {
+    return {
+      icon: <RefreshCw className="size-3.5 text-[#20BCE5]" />,
+      ring: "border-[#20BCE5]/35 bg-[#20BCE5]/10",
+    };
+  }
+  return {
+    icon: <CircleDot className="size-3.5 text-[#68738A]" />,
+    ring: "border-[#E4E9F2] bg-[#F5F7FC]",
+  };
 }
 
 export function TaskTimeline({ events, dense = false }: { events: TaskEvent[]; dense?: boolean }) {
-  if (events.length === 0) {
-    return <p className="text-sm text-muted-foreground">No timeline events recorded yet.</p>;
+  if (!events || events.length === 0) {
+    return <p className="text-xs text-[#68738A]">No workflow events recorded yet.</p>;
   }
 
   return (
-    <ol className={cn("relative space-y-0", dense ? "pl-0" : "pl-1")}>
-      {events.map((event, index) => {
-        const Icon = iconFor(event.type);
-        const isLast = index === events.length - 1;
+    <ol className="relative space-y-3 before:absolute before:bottom-3 before:left-[15px] before:top-3 before:w-px before:bg-[#E4E9F2]">
+      {events.map((event) => {
+        const style = eventStyle(event.type);
         return (
-          <li key={event.id} className="relative flex gap-3 pb-4 last:pb-0">
-            {!isLast ? (
-              <span
-                aria-hidden
-                className="absolute left-[13px] top-7 h-[calc(100%-1.25rem)] w-px bg-border"
-              />
-            ) : null}
-            <span className="relative z-10 mt-0.5 flex size-[27px] shrink-0 items-center justify-center rounded-full border border-border bg-card text-muted-foreground">
-              <Icon className="size-3.5" aria-hidden />
+          <li key={event.id} className={cn("relative pl-10", dense ? "text-xs" : "text-xs")}>
+            <span
+              className={cn(
+                "absolute left-0 top-0.5 flex size-8 items-center justify-center rounded-full border",
+                style.ring,
+              )}
+              aria-hidden="true"
+            >
+              {style.icon}
             </span>
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  {humanize(event.type)}
-                </p>
-                <time className="text-[11px] tabular-nums text-muted-foreground" dateTime={event.createdAt}>
-                  {formatDate(event.createdAt)}
-                </time>
+            <div className="min-w-0 rounded-lg border border-[#E4E9F2] bg-[#FFFFFF] px-3.5 py-2.5 shadow-surface">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="font-semibold text-[#141B2D]">{humanize(event.type)}</span>
+                <span className="font-mono text-[11px] text-[#68738A] tabular-nums">{formatDate(event.createdAt)}</span>
               </div>
-              <p className="mt-0.5 text-sm leading-6">{event.message}</p>
+              <p className="mt-1 leading-5 text-[#4E596E]">{event.message}</p>
             </div>
           </li>
         );

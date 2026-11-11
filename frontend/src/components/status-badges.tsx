@@ -13,11 +13,11 @@ export function StatusBadge({ status, dot = true }: { status: string; dot?: bool
 export const TaskStatusBadge = StatusBadge;
 
 export function UrgencyBadge({ urgency }: { urgency?: string }) {
-  if (!urgency) return null;
-  const tone = urgency === "CRITICAL" ? "danger" : urgency === "HIGH" ? "warning" : "neutral";
+  const value = urgency ?? "NORMAL";
+  const tone = value === "CRITICAL" ? "danger" : value === "HIGH" ? "warning" : "neutral";
   return (
-    <Badge tone={tone}>
-      {humanize(urgency)}
+    <Badge tone={tone} dot>
+      {humanize(value)}
     </Badge>
   );
 }
@@ -39,86 +39,82 @@ export function PaymentStatusBadge({ status }: { status: string }) {
 }
 
 export function ModeBadge({ mode }: { mode: "SIMULATED" | "SANDBOX" }) {
-  return mode === "SIMULATED" ? (
-    <Badge tone="warning" dot>
-      Simulated
-    </Badge>
-  ) : (
-    <Badge tone="info" dot>
-      PayPal Sandbox
+  return (
+    <Badge tone={mode === "SIMULATED" ? "warning" : "info"}>
+      {mode === "SIMULATED" ? "Simulated" : "PayPal Sandbox"}
     </Badge>
   );
 }
 
 export function PayoutAvailabilityBadge({
   availability,
+  className,
 }: {
-  availability: PayoutAvailability | undefined;
+  availability?: PayoutAvailability | string | null;
+  className?: string;
 }) {
-  if (availability === "DEMO_SIMULATED") {
-    return (
-      <Badge tone="warning" data-availability="DEMO_SIMULATED">
-        Simulated Payouts
-      </Badge>
-    );
-  }
-  if (availability === "PAYOUT_UNAVAILABLE") {
-    return (
-      <Badge tone="danger" data-availability="PAYOUT_UNAVAILABLE">
-        Payout Unavailable
-      </Badge>
-    );
-  }
+  const value = availability ?? "DEMO_SIMULATED";
+  const label =
+    value === "SANDBOX_ENABLED"
+      ? "Sandbox Payouts Ready"
+      : value === "PAYOUT_UNAVAILABLE"
+        ? "Payout Unavailable"
+        : "Simulated Payouts";
+  const tone =
+    value === "SANDBOX_ENABLED" ? "success" : value === "PAYOUT_UNAVAILABLE" ? "warning" : "info";
   return (
-    <Badge tone="info" data-availability="SANDBOX_ENABLED">
-      Sandbox Payouts
+    <Badge tone={tone} dot data-availability={value} className={className}>
+      {label}
     </Badge>
   );
 }
 
-export function SecurityVerdictBadge({ verdict }: { verdict: string }) {
-  const tone =
-    verdict === "PASS"
-      ? "success"
-      : verdict === "NEEDS_HUMAN_REVIEW"
-        ? "warning"
-        : "danger";
+export function SecurityVerdictBadge({
+  verdict,
+  className,
+}: {
+  verdict: string;
+  className?: string;
+}) {
+  const upper = verdict.toUpperCase();
   const label =
-    verdict === "PASS"
+    upper === "PASS" || upper === "PASSED"
       ? "Passed"
-      : verdict === "NEEDS_HUMAN_REVIEW"
-        ? "Needs Review"
-        : verdict === "BLOCK"
-          ? "Blocked"
-          : humanize(verdict);
+      : upper === "BLOCK" || upper === "BLOCKED"
+        ? "Blocked"
+        : humanize(verdict);
+  const tone =
+    upper === "PASS" || upper === "PASSED" || upper === "CLEAN"
+      ? "success"
+      : upper === "BLOCK" || upper === "BLOCKED"
+        ? "danger"
+        : upper === "REVIEW" || upper === "WARN" || upper === "WARNING" || upper === "NEEDS_HUMAN_REVIEW"
+          ? "warning"
+          : "neutral";
   return (
-    <Badge tone={tone} data-verdict={verdict}>
+    <Badge tone={tone} dot data-verdict={upper} className={className}>
       {label}
     </Badge>
   );
 }
 
 export function RiskBadge({ risk }: { risk: string }) {
-  return (
-    <Badge tone={risk === "HIGH" ? "danger" : "neutral"}>
-      {risk === "HIGH" ? "High risk" : "Standard risk"}
-    </Badge>
-  );
+  const tone =
+    risk === "HIGH" || risk === "CRITICAL" ? "danger" : risk === "MEDIUM" ? "warning" : "success";
+  return <Badge tone={tone}>{humanize(risk)} risk</Badge>;
 }
 
 export function skillLevelLabel(level: number): string {
-  if (level >= 3) return "L3 Expert";
-  if (level === 2) return "L2 Practitioner";
-  return "L1 Foundation";
+  if (level >= 3) return "Advanced";
+  if (level === 2) return "Practitioner";
+  return "Foundation";
 }
 
 export function SkillLevelBadge({ name, level }: { name?: string; level: number }) {
-  const normalizedLevel = level >= 3 ? 3 : level === 2 ? 2 : 1;
-  const tone = normalizedLevel === 3 ? "success" : normalizedLevel === 2 ? "info" : "accent";
-  const label = skillLevelLabel(normalizedLevel);
+  const tone = level >= 3 ? "indigo" : level === 2 ? "cobalt" : "success";
   return (
-    <Badge tone={tone}>
-      {name ? `${name} · ${label}` : label}
+    <Badge tone={tone} dot>
+      {name ? `${name} · L${level}` : `L${level} ${skillLevelLabel(level)}`}
     </Badge>
   );
 }

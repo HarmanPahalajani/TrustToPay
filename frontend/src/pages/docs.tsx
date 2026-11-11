@@ -142,7 +142,7 @@ export default function DocsPage() {
             </p>
             <Card className="not-prose my-4">
               <CardContent className="space-y-3 p-4">
-                <pre className="overflow-x-auto rounded-md bg-slate-950 p-3 text-[11px] leading-5 text-slate-200">
+                <pre className="overflow-x-auto rounded-md border border-[#1E293B] bg-[#10172A] p-3 text-[11px] leading-5 text-[#F5F7FC]">
                   <code>{`npm install
 npm run setup     # .env, Prisma migrate, demo seed
 npm run dev       # API :4000 and web :5173`}</code>
@@ -164,15 +164,11 @@ npm run dev       # API :4000 and web :5173`}</code>
             <ul>
               <li>
                 <strong>Requester / Agent Operator</strong> — creates agent sessions, runs confidence analysis, funds
-                PayPal escrow orders, and consumes signed handback payloads.
+                PayPal escrow orders, and consumes cryptographically signed handback payloads.
               </li>
               <li>
-                <strong>Specialist (Reviewer)</strong> — completes L1–L3 skill assessments, accepts top-5 parallel task
-                offers, submits verified patches/answers, and receives PayPal Payouts.
-              </li>
-              <li>
-                <strong>Administrator</strong> — manages specialist eligibility, monitors AG Grid operations &amp;
-                Elastic hybrid discovery, resolves disputes, and audits security verification runs.
+                <strong>Specialist (Reviewer)</strong> — completes L1–L3 proctored skill assessments, accepts top-5
+                parallel task offers, submits verified patches/answers, and receives PayPal Payouts.
               </li>
             </ul>
 
@@ -225,7 +221,7 @@ npm run dev       # API :4000 and web :5173`}</code>
               A React SPA talks to an Express API. Prisma owns persistence in SQLite. The API is the only component
               that holds secrets and the only component that can transition task state.
             </p>
-            <pre className="overflow-x-auto rounded-lg border border-border bg-slate-950 p-4 text-[11px] leading-5 text-slate-200">
+            <pre className="overflow-x-auto rounded-lg border border-[#1E293B] bg-[#10172A] p-4 text-[11px] leading-5 text-[#F5F7FC]">
               <code>{`Browser (React + Vite)
    |  httpOnly cookie, /api/v1 only
    v
@@ -306,7 +302,7 @@ Any pre-paid state -> CANCELLED`}</code>
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="flex items-center gap-2 text-sm">
-                    <CreditCard className="size-4 text-blue-400" /> Funding - Checkout
+                    <CreditCard className="size-4 text-[#4263EB]" /> Funding - Checkout
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2 text-[11px] leading-5 text-muted-foreground">
@@ -321,7 +317,7 @@ Any pre-paid state -> CANCELLED`}</code>
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="flex items-center gap-2 text-sm">
-                    <CreditCard className="size-4 text-emerald-400" /> Reward - Payouts
+                    <CreditCard className="size-4 text-[#12A875]" /> Reward - Payouts
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2 text-[11px] leading-5 text-muted-foreground">
@@ -531,7 +527,7 @@ Any pre-paid state -> CANCELLED`}</code>
 
           <div className="not-prose mt-8 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-dashed border-border bg-muted/30 p-4">
             <div className="flex items-start gap-2 text-xs leading-5 text-muted-foreground">
-              <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-emerald-400" />
+              <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#12A875]" />
               <span>
                 MIT licensed. Sandbox-only. Demo payments are simulated and labelled in every ledger view.
               </span>

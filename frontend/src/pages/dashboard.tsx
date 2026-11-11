@@ -1,86 +1,102 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
-import {
-  AlertTriangle,
   ArrowRight,
-  BadgeCheck,
-  Banknote,
+  Award,
   Bot,
-  CircleDollarSign,
-  Clock,
+  BriefcaseBusiness,
+  CheckCircle2,
   CreditCard,
-  FileCheck2,
-  Gauge,
+  Inbox,
   Plus,
   ShieldCheck,
-  Store,
-  Users,
+  Sparkles,
   Wallet,
-  XCircle,
 } from "lucide-react";
+import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
-import { PageHeader, StatCard, SectionHeading, DataRow } from "@/components/common";
+import { MetricTile, PageHeader, SectionHeading } from "@/components/common";
 import { PaymentModeBanner } from "@/components/payment-mode-banner";
-import { TaskCard } from "@/components/task-card";
-import { StatusBadge } from "@/components/status-badges";
+import { TaskRowCard } from "@/components/task-card";
+import {
+  ModeBadge,
+  PaymentStatusBadge,
+  StatusBadge,
+} from "@/components/status-badges";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState, ErrorState, LoadingBlock } from "@/components/ui/states";
-import { formatDate, formatMoney, humanize, timeAgo, truncate } from "@/lib/format";
+import { formatDate, formatMoney, humanize, timeAgo } from "@/lib/format";
 
-function ChartCard({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
+export default function DashboardPage() {
+  const { user } = useAuth();
+  if (!user) return <LoadingBlock label="Loading workspace…" />;
+  if (user.role === "REVIEWER") return <ReviewerDashboard />;
+  return <RequesterDashboard />;
+}
+
+const CHART_COLORS = ["#4263EB", "#12A875", "#7057F5", "#20BCE5", "#F5A623", "#E5484D"];
+
+function ChartCard({
+  title,
+  subtitle,
+  children,
+}: {
+  title: string;
+  subtitle?: string;
+  children: React.ReactNode;
+}) {
   return (
     <Card>
-      <CardHeader className="pb-1">
-        <CardTitle>{title}</CardTitle>
-        {subtitle ? <p className="text-xs text-muted-foreground">{subtitle}</p> : null}
+      <CardHeader className="pb-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <CardTitle className="text-sm">{title}</CardTitle>
+          {subtitle ? <span className="font-mono text-[11px] text-[#68738A]">{subtitle}</span> : null}
+        </div>
       </CardHeader>
-      <CardContent className="h-[190px] pt-2">{children}</CardContent>
+      <CardContent>{children}</CardContent>
     </Card>
   );
 }
-
-const CHART_COLORS = ["#3B82F6", "#10B981", "#F59E0B", "#38BDF8", "#EF4444", "#64748B"];
 
 function RequesterDashboard() {
   const { user } = useAuth();
   const query = useQuery({ queryKey: ["dashboard", "agent"], queryFn: api.dashboards.agent });
 
-  if (query.isLoading) return <LoadingBlock label="Loading your agent workspace…" />;
+  if (query.isLoading) return <LoadingBlock label="Loading agent operations dashboard…" />;
   if (query.error || !query.data) {
-    return <ErrorState message={(query.error as Error)?.message ?? "Dashboard unavailable."} onRetry={() => query.refetch()} />;
+    return (
+      <ErrorState
+        message={(query.error as Error)?.message ?? "Dashboard could not load."}
+        onRetry={() => query.refetch()}
+      />
+    );
   }
 
   const data = query.data;
+  const sessionData = data.sessions.byStatus.map((row) => ({
+    name: humanize(row.status),
+    count: row.count,
+  }));
 
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Requester workspace"
-        title={`Welcome back, ${user?.name.split(" ")[0] ?? "operator"}`}
-        description="Your agents escalate when evidence conflicts or specifications are missing. Fund a review, follow verification, and resume the original session with a verified answer."
+        eyebrow="Requester Workspace"
+        title={`Welcome back, ${user?.name ?? "Requester"}`}
+        description="Submit agent blockers, inspect specialist offers and hybrid retrieval progress, fund approved tasks, and collect signed verified results."
         actions={
           <>
             <Button asChild variant="outline">
-              <Link to="/app/workspace">
-                <Bot className="size-4" /> Agent workspace
+              <Link to="/app/requests">
+                <Inbox className="size-4" /> My tasks
               </Link>
             </Button>
             <Button asChild>
-              <Link to="/app/workspace?new=1">
+              <Link to="/app/workspace">
                 <Plus className="size-4" /> New question
               </Link>
             </Button>
@@ -88,183 +104,185 @@ function RequesterDashboard() {
         }
       />
 
-      <PaymentModeBanner />
+      <PaymentModeBanner compact />
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard
-          label="Active review tasks"
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <MetricTile
+          label="Active tasks"
           value={data.tasks.active}
-          hint={`${data.tasks.total} total task${data.tasks.total === 1 ? "" : "s"}`}
-          icon={<FileCheck2 className="size-4" />}
+          hint={`${data.tasks.total} total review tasks`}
+          icon={<Bot className="size-4" />}
+          tone="info"
+          to="/app/requests"
         />
-        <StatCard
+        <MetricTile
           label="Awaiting funding"
           value={data.tasks.awaitingFunding}
-          hint="Reviewers cannot accept until funded"
+          hint="PayPal Checkout opens claims"
           icon={<CreditCard className="size-4" />}
           tone={data.tasks.awaitingFunding > 0 ? "warning" : "neutral"}
+          to="/app/requests?status=AWAITING_FUNDING"
         />
-        <StatCard
-          label="Captured funding"
+        <MetricTile
+          label="Escrow funded"
           value={data.funding.display}
-          hint={`${data.fundingCount} completed transaction${data.fundingCount === 1 ? "" : "s"}`}
-          icon={<Banknote className="size-4" />}
-        />
-        <StatCard
-          label="Authorized rewards"
-          value={data.approvedRewards.display}
-          hint={`${data.approvedRewardCount} approved for payout`}
+          hint={`${data.fundingCount} captured order${data.fundingCount === 1 ? "" : "s"}`}
           icon={<Wallet className="size-4" />}
           tone="success"
+          to="/app/payments"
+        />
+        <MetricTile
+          label="Verified payouts"
+          value={data.approvedRewards.display}
+          hint={`${data.approvedRewardCount} settled task${data.approvedRewardCount === 1 ? "" : "s"}`}
+          icon={<CheckCircle2 className="size-4" />}
+          to="/app/payments?type=PAYOUT"
         />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
-        <div>
+      <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+        <div className="space-y-6">
           <SectionHeading
+            eyebrow="Escalations"
             title="Recent review tasks"
-            description="Funding, review, verification and payment status in one place."
-            actions={
-              <Button asChild variant="ghost" size="sm">
-                <Link to="/app/requests">
-                  View all <ArrowRight className="size-3.5" />
-                </Link>
-              </Button>
+            action={
+              <Link to="/app/requests" className="text-xs font-semibold text-[#4263EB] hover:underline">
+                View all requests →
+              </Link>
             }
           />
           {data.recentTasks.length === 0 ? (
             <EmptyState
+              icon={<Sparkles className="size-5" />}
               title="No review tasks yet"
-              description="Run an analysis in the agent workspace. If the AI is uncertain, you can turn it into a funded human review."
+              description="Submit a technical blocker in the Agent Workspace. When confidence drops below threshold or evidence conflicts, the engine creates a review task."
               action={
                 <Button asChild size="sm">
-                  <Link to="/app/workspace?new=1">Analyze a question</Link>
+                  <Link to="/app/workspace">Open Agent Workspace</Link>
                 </Button>
               }
             />
           ) : (
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-3">
               {data.recentTasks.map((task) => (
-                <TaskCard key={task.id} task={task} />
+                <TaskRowCard key={task.id} task={task} />
               ))}
             </div>
           )}
+
+          {sessionData.length > 0 ? (
+            <ChartCard title="Agent session status distribution" subtitle="Live PostgreSQL breakdown">
+              <div className="h-52">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={sessionData} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
+                    <XAxis
+                      dataKey="name"
+                      tick={{ fill: "#68738A", fontSize: 11 }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      allowDecimals={false}
+                      tick={{ fill: "#68738A", fontSize: 11 }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "#FFFFFF",
+                        border: "1px solid #E4E9F2",
+                        borderRadius: "8px",
+                        fontSize: "12px",
+                        color: "#141B2D",
+                      }}
+                    />
+                    <Bar dataKey="count" radius={[6, 6, 0, 0]} barSize={32}>
+                      {sessionData.map((_, index) => (
+                        <Cell key={index} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </ChartCard>
+          ) : null}
         </div>
 
         <div className="space-y-4">
-          <ChartCard title="Sessions by status" subtitle="Agent sessions across your workspace">
-            {data.sessions.byStatus.length === 0 ? (
-              <p className="flex h-full items-center justify-center text-xs text-muted-foreground">No sessions yet.</p>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={data.sessions.byStatus} margin={{ top: 8, right: 8, bottom: 0, left: -20 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E1D7" />
-                  <XAxis
-                    dataKey="status"
-                    tickFormatter={(value: string) => humanize(value).split(" ")[0]}
-                    tick={{ fontSize: 9, fill: "#69736D" }}
-                    axisLine={false}
-                    tickLine={false}
-                    interval={0}
-                  />
-                  <YAxis allowDecimals={false} tick={{ fontSize: 9, fill: "#69736D" }} axisLine={false} tickLine={false} />
-                  <Tooltip
-                    formatter={(value: number) => [`${value}`, "Sessions"]}
-                    labelFormatter={(label: string) => humanize(label)}
-                    contentStyle={{
-                      fontSize: 11,
-                      borderRadius: 8,
-                      borderColor: "#E5E1D7",
-                      backgroundColor: "#FFFEFA",
-                      color: "#202722",
-                      boxShadow: "0 1px 3px 0 rgba(32, 39, 34, 0.08)",
-                    }}
-                  />
-                  <Bar dataKey="count" radius={[4, 4, 0, 0]}>
-                    {data.sessions.byStatus.map((entry, index) => (
-                      <Cell key={entry.status} fill={CHART_COLORS[index % CHART_COLORS.length]} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </ChartCard>
+          <SectionHeading
+            eyebrow="Agent Activity"
+            title="Recent agent sessions"
+            action={
+              <Link to="/app/workspace" className="text-xs font-semibold text-[#4263EB] hover:underline">
+                Open workspace →
+              </Link>
+            }
+          />
+          {data.recentSessions.length === 0 ? (
+            <Card className="p-6 text-center text-xs text-[#68738A]">
+              No sessions recorded yet. Start in the Agent Workspace.
+            </Card>
+          ) : (
+            <Card className="divide-y divide-[#E4E9F2]">
+              {data.recentSessions.map((session) => (
+                <Link
+                  key={session.id}
+                  to={`/app/sessions/${session.id}`}
+                  className="block p-4 transition-colors hover:bg-[#F5F7FC]"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <StatusBadge status={session.status} />
+                    <span className="font-mono text-[11px] text-[#68738A]">
+                      {session.confidence != null
+                        ? `${Math.round(session.confidence * 100)}% conf`
+                        : "Unanalyzed"}{" "}
+                      · {timeAgo(session.createdAt)}
+                    </span>
+                  </div>
+                  <p className="mt-2 line-clamp-1 font-display text-sm font-bold text-[#141B2D]">{session.title}</p>
+                  <p className="mt-1 line-clamp-2 text-xs leading-5 text-[#68738A]">
+                    {session.action ? humanize(session.action) : "Ready for confidence triage"}
+                  </p>
+                </Link>
+              ))}
+            </Card>
+          )}
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle>Recent sessions</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {data.recentSessions.length === 0 ? (
-                <p className="text-xs text-muted-foreground">No sessions yet.</p>
-              ) : (
-                data.recentSessions.map((session) => (
-                  <Link
-                    key={session.id}
-                    to={`/app/sessions/${session.id}`}
-                    className="block rounded-md border border-border bg-background px-3 py-2 transition-colors hover:border-primary/30"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <p className="line-clamp-1 text-xs font-medium">{session.title}</p>
-                      <StatusBadge status={session.status} dot={false} />
-                    </div>
-                    <div className="mt-1 flex items-center justify-between gap-2 text-[10px] text-muted-foreground">
-                      <span>
-                        {session.confidence !== null
-                          ? `confidence ${session.confidence.toFixed(2)}`
-                          : "no analysis"}
-                        {session.action ? ` · ${humanize(session.action)}` : ""}
-                      </span>
-                      <span>{timeAgo(session.createdAt)}</span>
-                    </div>
-                  </Link>
-                ))
-              )}
-            </CardContent>
-          </Card>
+          <DemoScenarioGuide />
         </div>
       </div>
-
-      <DemoScenarioGuide />
     </div>
   );
 }
 
 function DemoScenarioGuide() {
   return (
-    <Card className="border-dashed">
+    <Card>
       <CardHeader className="pb-2">
-        <div className="flex items-center gap-2">
-          <ShieldCheck className="size-4 text-primary" />
-          <CardTitle>Suggested demo path</CardTitle>
-        </div>
-        <p className="text-xs text-muted-foreground">
-          Seeded scenario A is ready for funding. Follow it end to end in about two minutes; scenarios I and J are funded reviews in the crypto and conceptual domains.
-        </p>
+        <CardTitle className="flex items-center gap-2 text-sm">
+          <ShieldCheck className="size-4 text-[#4263EB]" /> Execution Checklist
+        </CardTitle>
       </CardHeader>
-      <CardContent>
-        <ol className="grid gap-2 text-xs sm:grid-cols-2 lg:grid-cols-4">
+      <CardContent className="space-y-3 text-xs text-[#4E596E]">
+        <ol className="space-y-2.5 leading-5">
           {[
-            "Open Agent workspace and select a seeded question (hardware, programming, crypto or conceptual).",
-            "Fund the $15.00 reward (simulated or PayPal Sandbox).",
-            "Sign in as the reviewer, accept the task, and submit the evidenced answer.",
-            "Watch verification pass, release the reward, and resume the AI session.",
-          ].map((step, index) => (
-            <li key={step} className="flex gap-2 rounded-md border border-border bg-background p-2.5">
-              <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-semibold text-primary">
-                {index + 1}
+            "Submit an ambiguous question with evidence in Agent Workspace.",
+            "Run AI analysis and inspect detected specification conflicts.",
+            "Create the review task, verify Jina + Elastic matching, and fund via PayPal.",
+            "Verify specialist deliverables pass scanners, Gemini, and isolated execution.",
+          ].map((step, idx) => (
+            <li key={step} className="flex items-start gap-2.5">
+              <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-[#EDF0F6] font-mono text-[10px] font-bold text-[#141B2D]">
+                {idx + 1}
               </span>
-              <span className="leading-5 text-muted-foreground">{step}</span>
+              <span>{step}</span>
             </li>
           ))}
         </ol>
-        <div className="mt-3 flex flex-wrap gap-2">
-          <Button asChild size="sm" variant="outline">
-            <Link to="/app/workspace">Open workspace</Link>
-          </Button>
-          <Button asChild size="sm" variant="ghost">
-            <Link to="/app/docs">Read the demo script</Link>
-          </Button>
+        <div className="border-t border-[#E4E9F2] pt-3">
+          <Link to="/app/docs#demo" className="inline-flex items-center gap-1 font-semibold text-[#4263EB] hover:underline">
+            Full documentation <ArrowRight className="size-3.5" />
+          </Link>
         </div>
       </CardContent>
     </Card>
@@ -275,80 +293,119 @@ function ReviewerDashboard() {
   const { user } = useAuth();
   const query = useQuery({ queryKey: ["dashboard", "reviewer"], queryFn: api.dashboards.reviewer });
 
-  if (query.isLoading) return <LoadingBlock label="Loading reviewer workspace…" />;
+  if (query.isLoading) return <LoadingBlock label="Loading specialist workbench…" />;
   if (query.error || !query.data) {
-    return <ErrorState message={(query.error as Error)?.message ?? "Dashboard unavailable."} onRetry={() => query.refetch()} />;
+    return (
+      <ErrorState
+        message={(query.error as Error)?.message ?? "Dashboard could not load."}
+        onRetry={() => query.refetch()}
+      />
+    );
   }
+
   const data = query.data;
+  const payoutReady = Boolean(data.payoutProfile?.consent && data.payoutProfile?.email);
 
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Reviewer workspace"
-        title={`Good to see you, ${user?.name.split(" ")[0] ?? "reviewer"}`}
-        description="Accept a narrowly scoped task, answer with evidence, and track independent verification and your PayPal reward."
+        eyebrow="Specialist Workbench"
+        title={`Ready for review, ${user?.name ?? "Specialist"}`}
+        description="Claim ranked offers matching your certified skill levels, submit verifiable artifacts, and track verified PayPal Sandbox payouts."
         actions={
-          <Button asChild>
-            <Link to="/app/marketplace">
-              <Store className="size-4" /> Browse marketplace
-            </Link>
-          </Button>
+          <>
+            <Button asChild variant="outline">
+              <Link to="/app/onboarding/skills">
+                <Award className="size-4" /> Skill Credentials
+              </Link>
+            </Button>
+            <Button asChild>
+              <Link to="/app/marketplace">
+                <BriefcaseBusiness className="size-4" /> Open marketplace
+              </Link>
+            </Button>
+          </>
         }
       />
 
-      <PaymentModeBanner />
+      <PaymentModeBanner compact />
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard
-          label="Available tasks"
+      {!payoutReady ? (
+        <Alert
+          tone="warning"
+          icon={<Wallet className="size-4 text-[#D48806]" />}
+          title="Add a PayPal payout email and consent to unlock rewards"
+          actions={
+            <Button asChild size="sm" variant="outline">
+              <Link to="/app/profile">Complete payout profile</Link>
+            </Button>
+          }
+        >
+          Verified rewards cannot create a payout until both your PayPal email and explicit recipient consent are saved.
+        </Alert>
+      ) : null}
+
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <MetricTile
+          label="Open marketplace"
           value={data.availableCount}
-          hint="Funded and unassigned"
-          icon={<Store className="size-4" />}
-          tone={data.availableCount > 0 ? "info" : "neutral"}
+          hint="Funded & eligible offers"
+          icon={<BriefcaseBusiness className="size-4" />}
+          tone="info"
+          to="/app/marketplace"
         />
-        <StatCard label="Active assignments" value={data.assignments.active} hint={`${data.assignments.total} total`} icon={<Bot className="size-4" />} />
-        <StatCard
-          label="Simulated / Sandbox earnings"
-          value={data.earnings.display}
-          hint={`${data.completedPayoutCount} completed payout${data.completedPayoutCount === 1 ? "" : "s"}`}
-          icon={<CircleDollarSign className="size-4" />}
-          tone="success"
+        <MetricTile
+          label="Active assignments"
+          value={data.assignments.active}
+          hint="Claimed & awaiting submission"
+          icon={<Inbox className="size-4" />}
+          tone={data.assignments.active > 0 ? "warning" : "neutral"}
+          to="/app/reviews"
         />
-        <StatCard
+        <MetricTile
           label="Pending rewards"
           value={data.pendingRewards.display}
-          hint={`${data.pendingRewardCount} authorized or processing`}
-          icon={<Clock className="size-4" />}
+          hint={`${data.pendingRewardCount} authorized reward${data.pendingRewardCount === 1 ? "" : "s"}`}
+          icon={<CreditCard className="size-4" />}
+          tone="warning"
+          to="/app/earnings"
+        />
+        <MetricTile
+          label="Completed earnings"
+          value={data.earnings.display}
+          hint={`${data.completedPayoutCount} completed payout${data.completedPayoutCount === 1 ? "" : "s"}`}
+          icon={<Wallet className="size-4" />}
+          tone="success"
+          to="/app/earnings"
         />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
-        <div>
+      <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+        <div className="space-y-4">
           <SectionHeading
-            title="Available now"
-            description="Funded tasks you can accept. First acceptance wins."
-            actions={
-              <Button asChild variant="ghost" size="sm">
-                <Link to="/app/marketplace">
-                  See all <ArrowRight className="size-3.5" />
-                </Link>
-              </Button>
+            eyebrow="Matched Offers"
+            title="Available in marketplace"
+            action={
+              <Link to="/app/marketplace" className="text-xs font-semibold text-[#4263EB] hover:underline">
+                Browse all →
+              </Link>
             }
           />
           {data.availableTasks.length === 0 ? (
             <EmptyState
-              title="No open tasks right now"
-              description="New funded reviews appear here. You can also check your assigned reviews."
+              icon={<BriefcaseBusiness className="size-5" />}
+              title="No matching tasks right now"
+              description="New tasks appear once requesters capture funding and your verified skill profile qualifies."
               action={
                 <Button asChild size="sm" variant="outline">
-                  <Link to="/app/reviews">My reviews</Link>
+                  <Link to="/app/onboarding/skills">Certify More Skills</Link>
                 </Button>
               }
             />
           ) : (
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-3">
               {data.availableTasks.map((task) => (
-                <TaskCard key={task.id} task={task} />
+                <TaskRowCard key={task.id} task={task} showRequester />
               ))}
             </div>
           )}
@@ -357,84 +414,81 @@ function ReviewerDashboard() {
         <div className="space-y-4">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle>Payout readiness</CardTitle>
+              <div className="flex items-center justify-between gap-2">
+                <CardTitle className="text-sm">Verified Credentials</CardTitle>
+                <Link to="/app/onboarding/skills" className="text-xs font-semibold text-[#4263EB] hover:underline">
+                  Manage
+                </Link>
+              </div>
             </CardHeader>
-            <CardContent className="space-y-3 text-xs">
-              {data.payoutProfile?.consent && data.payoutProfile.email ? (
-                <div className="flex items-start gap-2 rounded-md border border-emerald-500/30 bg-emerald-500/10 p-2.5 text-emerald-200">
-                  <BadgeCheck className="mt-0.5 size-4 shrink-0 text-emerald-400" />
-                  <div>
-                    <p className="font-medium text-emerald-100">PayPal payouts ready</p>
-                    <p className="mt-0.5 break-all text-emerald-200/90">{data.payoutProfile.email}</p>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <Alert tone="warning">Add a PayPal email and record consent before a reward can be paid.</Alert>
-                  <Button asChild size="sm" variant="outline" className="w-full">
-                    <Link to="/app/profile">Set up payout profile</Link>
-                  </Button>
-                </>
-              )}
-              {data.skills.length > 0 ? (
-                <div>
-                  <div className="flex items-center justify-between">
-                    <p className="font-medium">Verified Credentials</p>
-                    <Link to="/app/onboarding/skills" className="text-[11px] text-[#365FEA] hover:underline">
-                      View All
-                    </Link>
-                  </div>
-                  <div className="mt-1.5 flex flex-wrap gap-1">
-                    {data.skills.map((skill) => (
-                      <Badge key={skill} tone="accent">
-                        {skill}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <p className="text-muted-foreground">
-                    Certify your domains through proctored evaluations to qualify for high-reward escalation bounties.
+            <CardContent className="space-y-3">
+              {data.skills.length === 0 ? (
+                <div className="rounded-lg border border-dashed border-[#E4E9F2] bg-[#F5F7FC] p-4 text-center">
+                  <p className="text-xs font-medium text-[#68738A]">
+                    No verified skills yet. Complete L1–L3 assessments to unlock higher-match routing.
                   </p>
-                  <Button asChild size="sm" variant="outline" className="w-full text-xs">
-                    <Link to="/app/onboarding/skills">Earn Skill Certifications</Link>
+                  <Button asChild size="sm" variant="outline" className="mt-3">
+                    <Link to="/app/onboarding/skills">Start Onboarding</Link>
                   </Button>
                 </div>
+              ) : (
+                <div className="flex flex-wrap gap-1.5">
+                  {data.skills.map((skill) => (
+                    <Badge key={skill} tone="cobalt" dot>
+                      {skill}
+                    </Badge>
+                  ))}
+                </div>
               )}
+              <div className="border-t border-[#E4E9F2] pt-3 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-[#68738A]">Payout profile</span>
+                  <Badge tone={payoutReady ? "success" : "warning"} dot>
+                    {payoutReady ? "Ready" : "Incomplete"}
+                  </Badge>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle>Recent reward activity</CardTitle>
+              <CardTitle className="text-sm">Recent payouts</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               {data.recentPayouts.length === 0 ? (
-                <p className="text-xs text-muted-foreground">No rewards yet.</p>
+                <p className="text-xs text-[#68738A]">No payouts created yet.</p>
               ) : (
-                data.recentPayouts.map((row) => (
-                  <Link
-                    key={row.taskId}
-                    to={`/app/tasks/${row.taskId}`}
-                    className="block rounded-md border border-border bg-background px-3 py-2 hover:border-primary/30"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <p className="line-clamp-1 text-xs font-medium">{row.title}</p>
-                      <span className="shrink-0 text-xs font-semibold tabular-nums">
-                        {row.reward ? formatMoney(row.reward.amountMinor, row.reward.currency) : "—"}
+                data.recentPayouts.map((row) => {
+                  const latestPayout = row.payouts[0] ?? null;
+                  return (
+                    <Link
+                      key={row.taskId}
+                      to={`/app/tasks/${row.taskId}`}
+                      className="flex items-center justify-between gap-2 rounded-lg border border-[#E4E9F2] bg-[#F5F7FC] p-2.5 transition-colors hover:border-[#4263EB]/40"
+                    >
+                      <div className="min-w-0 space-y-1">
+                        <p className="truncate text-xs font-semibold text-[#141B2D]">{row.title}</p>
+                        <div className="flex flex-wrap items-center gap-1">
+                          <PaymentStatusBadge status={latestPayout?.status ?? row.status} />
+                          {latestPayout ? (
+                            <ModeBadge mode={latestPayout.mode === "SANDBOX" ? "SANDBOX" : "SIMULATED"} />
+                          ) : null}
+                        </div>
+                        {latestPayout ? (
+                          <p className="truncate font-mono text-[10px] text-[#68738A]">
+                            {formatDate(latestPayout.createdAt)}
+                          </p>
+                        ) : null}
+                      </div>
+                      <span className="shrink-0 font-display text-sm font-bold text-[#141B2D] tabular-nums">
+                        {row.reward
+                          ? formatMoney(row.reward.amountMinor, row.reward.currency)
+                          : latestPayout?.amountDisplay ?? "—"}
                       </span>
-                    </div>
-                    <div className="mt-1 flex items-center justify-between text-[10px] text-muted-foreground">
-                      <StatusBadge status={row.status} dot={false} />
-                      <span>
-                        {row.payouts[0]
-                          ? `${row.payouts[0].mode === "SIMULATED" ? "Simulated" : "Sandbox"} · ${humanize(row.payouts[0].status)}`
-                          : "No payout"}
-                      </span>
-                    </div>
-                  </Link>
-                ))
+                    </Link>
+                  );
+                })
               )}
             </CardContent>
           </Card>
@@ -442,10 +496,4 @@ function ReviewerDashboard() {
       </div>
     </div>
   );
-}
-
-export default function DashboardPage() {
-  const { user } = useAuth();
-  if (user?.role === "REVIEWER") return <ReviewerDashboard />;
-  return <RequesterDashboard />;
 }

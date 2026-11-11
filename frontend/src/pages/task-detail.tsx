@@ -4,62 +4,68 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertTriangle,
   ArrowLeft,
-  ArrowRight,
+  Award,
   BadgeCheck,
   Banknote,
-  Check,
   CheckCircle2,
   CircleDollarSign,
   ClipboardCheck,
-  Clock,
-  Code2,
+  Database,
   ExternalLink,
   FileCheck2,
   FileCode2,
-  FileText,
   Flag,
   Gavel,
   HandCoins,
+  KeyRound,
   Loader2,
-  Lock,
-  MessageSquarePlus,
   RefreshCw,
+  Search,
   Send,
   ShieldAlert,
   ShieldCheck,
   Sparkles,
   Terminal,
+  Upload,
   Wallet,
-  X,
-  XCircle,
 } from "lucide-react";
 import { api, ApiError } from "@/lib/api";
-import type { AgentHandbackPayload, Submission, TaskDetail, VerificationRun } from "@/lib/types";
+import type {
+  AgentHandbackPayload,
+  Submission,
+  TaskDetail,
+  VerificationRun,
+} from "@/lib/types";
 import { useAuth } from "@/context/AuthContext";
 import { PageHeader, SectionHeading, DataRow } from "@/components/common";
 import { PaymentModeBanner } from "@/components/payment-mode-banner";
+import { PayPalCheckout } from "@/components/paypal-checkout";
 import {
-  StatusBadge,
   ModeBadge,
-  VerificationBadge,
   PaymentStatusBadge,
   PayoutAvailabilityBadge,
-  SecurityVerdictBadge,
-  SkillLevelBadge,
   RiskBadge,
+  SecurityVerdictBadge,
+  StatusBadge,
+  VerificationBadge,
 } from "@/components/status-badges";
 import { TaskTimeline } from "@/components/task-timeline";
-import { PayPalCheckout } from "@/components/paypal-checkout";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Field, Input, Textarea } from "@/components/ui/input";
 import { ErrorState, LoadingBlock } from "@/components/ui/states";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { formatDate, formatMoney, humanize, parseMoneyToMinor, timeAgo } from "@/lib/format";
 import { categoryLabel, normalizeCategoryValue } from "@/lib/categories";
+import { formatDate, formatMoney, humanize, parseMoneyToMinor } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 export default function TaskDetailPage() {
@@ -67,6 +73,7 @@ export default function TaskDetailPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+
   const [error, setError] = useState<string | null>(null);
   const [disputeOpen, setDisputeOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
@@ -83,13 +90,12 @@ export default function TaskDetailPage() {
     enabled: Boolean(id),
   });
 
-  const invalidate = async () => {
+  async function invalidate() {
     await queryClient.invalidateQueries({ queryKey: ["task", id] });
     await queryClient.invalidateQueries({ queryKey: ["tasks"] });
     await queryClient.invalidateQueries({ queryKey: ["payments"] });
     await queryClient.invalidateQueries({ queryKey: ["dashboard"] });
-    await queryClient.invalidateQueries({ queryKey: ["sessions"] });
-  };
+  }
 
   const accept = useMutation({
     mutationFn: () => api.tasks.accept(id),
@@ -97,7 +103,7 @@ export default function TaskDetailPage() {
       await invalidate();
       setError(null);
     },
-    onError: (err) => setError(err instanceof ApiError ? err.message : "Could not accept the task."),
+    onError: (err) => setError(err instanceof ApiError ? err.message : "Could not accept task."),
   });
 
   const declineOffer = useMutation({
@@ -106,7 +112,7 @@ export default function TaskDetailPage() {
       await invalidate();
       setError(null);
     },
-    onError: (err) => setError(err instanceof ApiError ? err.message : "Could not decline the task offer."),
+    onError: (err) => setError(err instanceof ApiError ? err.message : "Could not decline offer."),
   });
 
   const dispatchOffers = useMutation({
@@ -125,7 +131,8 @@ export default function TaskDetailPage() {
       await invalidate();
       setError(null);
     },
-    onError: (err) => setError(err instanceof ApiError ? err.message : "Could not retrieve verified agent handback."),
+    onError: (err) =>
+      setError(err instanceof ApiError ? err.message : "Could not retrieve verified agent handback."),
   });
 
   const submit = useMutation({
@@ -134,7 +141,7 @@ export default function TaskDetailPage() {
       await invalidate();
       setError(null);
     },
-    onError: (err) => setError(err instanceof ApiError ? err.message : "Could not submit the answer."),
+    onError: (err) => setError(err instanceof ApiError ? err.message : "Submission failed."),
   });
 
   const verify = useMutation({
@@ -176,27 +183,25 @@ export default function TaskDetailPage() {
   const cancel = useMutation({
     mutationFn: () => api.tasks.cancel(id),
     onSuccess: async () => {
-      await invalidate();
       setCancelOpen(false);
+      await invalidate();
       setError(null);
     },
-    onError: (err) => setError(err instanceof ApiError ? err.message : "Cancel failed."),
+    onError: (err) => setError(err instanceof ApiError ? err.message : "Could not cancel task."),
   });
 
   const updateReward = useMutation({
     mutationFn: (rewardMinor: number) => api.tasks.updateReward(id, rewardMinor),
     onSuccess: async () => {
-      await invalidate();
       setRewardOpen(false);
+      await invalidate();
       setError(null);
     },
-    onError: (err) => setError(err instanceof ApiError ? err.message : "Could not update the reward."),
+    onError: (err) => setError(err instanceof ApiError ? err.message : "Could not update reward."),
   });
 
-  const task = query.data?.task;
-
   if (query.isLoading) return <LoadingBlock label="Loading review task…" />;
-  if (query.error || !task) {
+  if (query.error || !query.data) {
     return (
       <ErrorState
         message={(query.error as Error)?.message ?? "Task not found."}
@@ -205,6 +210,7 @@ export default function TaskDetailPage() {
     );
   }
 
+  const task = query.data.task;
   const isRequester = task.requester?.id === user?.id;
   const isReviewer = user?.role === "REVIEWER";
   const isAdmin = false;
@@ -212,54 +218,37 @@ export default function TaskDetailPage() {
   const isOpenMarket = ["FUNDED", "OFFERED"].includes(task.status) && !task.assignment && isReviewer;
   const latestSubmission = task.submissions?.[0] ?? null;
   const latestVerification = task.verificationRuns?.[0] ?? null;
-  const failedPayout = task.payments?.find((payment) => payment.type === "PAYOUT" && payment.status === "FAILED");
-  const processingPayout = task.payments?.find(
-    (payment) => payment.type === "PAYOUT" && ["PROCESSING", "PENDING"].includes(payment.status),
-  );
+
   const canSubmit =
     isAssignedReviewer &&
-    ["REVIEWER_ASSIGNED", "ASSIGNED", "IN_PROGRESS", "VERIFICATION_REJECTED", "NEEDS_REVISION"].includes(task.status);
-  const canDispute =
-    (isRequester || isAssignedReviewer || isAdmin) &&
-    !["COMPLETED", "CANCELLED", "DISPUTED", "PAYMENT_PAID", "EXPIRED"].includes(task.status);
-  const canCancel =
-    (isRequester || isAdmin) &&
-    !["PAYMENT_PROCESSING", "PAYMENT_PAID", "COMPLETED", "CANCELLED", "DISPUTED", "EXPIRED", "PAYOUT_FAILED"].includes(
+    ["REVIEWER_ASSIGNED", "ASSIGNED", "IN_PROGRESS", "VERIFICATION_REJECTED", "NEEDS_REVISION"].includes(
       task.status,
     );
-  const canEditReward = (isRequester || isAdmin) && ["AWAITING_FUNDING", "FUNDING_FAILED"].includes(task.status);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <PageHeader
-        eyebrow="Review task"
+        eyebrow="Escalated Task Detail"
         breadcrumbs={[
-          isAdmin ? { label: "All review tasks", to: "/app/tasks" } : isReviewer ? { label: "Marketplace", to: "/app/marketplace" } : { label: "My requests", to: "/app/requests" },
+          {
+            label: user?.role === "REVIEWER" ? "Marketplace" : "Escalated Tasks",
+            to: user?.role === "REVIEWER" ? "/app/marketplace" : "/app/requests",
+          },
           { label: task.title },
         ]}
         title={task.title}
-        description={
-          <div className="flex flex-wrap items-center gap-1.5">
-            <StatusBadge status={task.status} />
-            <RiskBadge risk={task.riskLevel} />
-            <PayoutAvailabilityBadge availability={task.payoutAvailability} />
-            {task.minimumSkillLevel ? <SkillLevelBadge level={task.minimumSkillLevel} /> : null}
-            {task.isSeed ? <Badge tone="neutral">Seeded demo task</Badge> : null}
-            {task.hasOpenDispute ? <Badge tone="danger">Open dispute</Badge> : null}
-            <span className="text-xs">· {formatMoney(task.rewardMinor, task.currency)} reward</span>
-          </div>
-        }
+        description={task.question}
         actions={
           <>
             <Button asChild variant="outline">
-              <Link to={`/app/tasks/${task.id}/verification`}>
-                <FileCheck2 className="size-4" /> Verification
+              <Link to={task.session ? `/app/sessions/${task.session.id}` : "/app"}>
+                <ArrowLeft className="size-4" /> {task.session ? "Agent session" : "Back"}
               </Link>
             </Button>
-            {task.session ? (
+            {latestVerification ? (
               <Button asChild variant="outline">
-                <Link to={`/app/sessions/${task.session.id}`}>
-                  <Sparkles className="size-4" /> AI session
+                <Link to={`/app/tasks/${task.id}/verification`}>
+                  <FileCheck2 className="size-4 text-[#4263EB]" /> Verification record
                 </Link>
               </Button>
             ) : null}
@@ -268,105 +257,89 @@ export default function TaskDetailPage() {
       />
 
       <PaymentModeBanner compact />
-
       {error ? <Alert tone="danger">{error}</Alert> : null}
-      {task.hasOpenDispute ? (
-        <Alert tone="warning" icon={<Gavel className="size-4" />} title="This task is disputed">
-          Payment and verification changes are paused until an administrator resolves the dispute.
-        </Alert>
-      ) : null}
-      {(task.status === "VERIFICATION_REJECTED" || task.status === "NEEDS_REVISION") && isAssignedReviewer ? (
-        <Alert tone="danger" icon={<XCircle className="size-4" />} title="Your submission was rejected">
-          Read the failed checks below, correct the gap and resubmit. No reward was authorized.
-        </Alert>
-      ) : null}
-      {task.status === "PAYOUT_FAILED" ? (
-        <Alert tone="danger" icon={<Wallet className="size-4" />} title="Payout failed — the verified answer is preserved">
-          {isAdmin
-            ? "Reconcile the failed payout. Automatic retry is blocked unless reconciliation proves the payout did not succeed."
-            : "An administrator must reconcile the payout. The verified answer can still be delivered to the agent session once the task allows resume."}
-        </Alert>
-      ) : null}
 
-      <div className="grid gap-5 lg:grid-cols-[1.5fr_1fr]">
-        <div className="space-y-5">
+      <div className="flex flex-wrap items-center gap-2">
+        <StatusBadge status={task.status} />
+        <RiskBadge risk={task.riskLevel} />
+        <Badge tone="neutral">{categoryLabel(task.category)}</Badge>
+        {task.fundedAt ? (
+          <Badge tone="success" dot>
+            Escrow Funded
+          </Badge>
+        ) : null}
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-[1.45fr_1fr]">
+        <div className="space-y-6">
+          {/* Task Requirements & Supplied Evidence */}
           <Card>
-            <CardHeader className="border-b border-border pb-3">
-              <CardTitle className="flex items-center gap-2">
-                <MessageSquarePlus className="size-4 text-primary" /> Request and scope
+            <CardHeader className="border-b border-[#E4E9F2] pb-3.5">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <ClipboardCheck className="size-4 text-[#4263EB]" /> Escalation specification &amp; criteria
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 pt-4">
-              {task.session ? (
+              {task.question ? (
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Original question</p>
-                  <p className="mt-1 text-sm leading-6">{task.session.question}</p>
+                  <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#68738A]">
+                    Original agent blocker
+                  </p>
+                  <p className="mt-1 whitespace-pre-line text-sm leading-6 text-[#141B2D]">{task.question}</p>
                 </div>
-              ) : (
-                <p className="text-sm leading-6">{task.question}</p>
-              )}
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div className="rounded-md border border-border bg-muted/30 p-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Acceptance criteria</p>
-                  <ul className="mt-1.5 space-y-1 text-xs leading-5">
-                    {task.acceptanceCriteria
-                      .split(/\n|;/)
-                      .filter(Boolean)
-                      .map((line, index) => (
-                        <li key={`${line}-${index}`} className="flex gap-1.5">
-                          <Check className="mt-0.5 size-3 shrink-0 text-primary" />
-                          <span>{line.replace(/^[\s\-*\d.]+/, "")}</span>
-                        </li>
-                      ))}
-                  </ul>
-                </div>
-                <div className="rounded-md border border-border bg-muted/30 p-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Required skills</p>
-                  <div className="mt-1.5 flex flex-wrap gap-1">
-                    {task.requiredSkills.length === 0 ? (
-                      <span className="text-xs text-muted-foreground">None specified</span>
-                    ) : (
-                      task.requiredSkills.map((skill) => (
-                        <Badge key={skill} tone="accent">
-                          {skill}
-                        </Badge>
-                      ))
-                    )}
-                    {task.minimumSkillLevel ? (
-                      <SkillLevelBadge level={task.minimumSkillLevel} />
-                    ) : null}
-                  </div>
-                  <p className="mt-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Requester</p>
-                  <p className="text-xs">{task.requester?.name ?? "Unknown"}</p>
-                  <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Assigned reviewer</p>
-                  <p className="text-xs">{task.assignment?.reviewer.name ?? "Not assigned yet"}</p>
+              ) : null}
+
+              <div>
+                <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#68738A]">
+                  Acceptance criteria
+                </p>
+                <div className="mt-1.5 rounded-xl border border-[#E4E9F2] bg-[#F5F7FC] p-3.5 whitespace-pre-line text-xs leading-6 text-[#141B2D]">
+                  {task.acceptanceCriteria}
                 </div>
               </div>
 
-              {task.evidence.length > 0 ? (
+              {task.requiredSkills && task.requiredSkills.length > 0 ? (
                 <div>
-                  <SectionHeading title="Supplied evidence" description="The reviewer's claim is checked against these documents." />
-                  <div className="space-y-1.5">
+                  <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#68738A]">
+                    Required specialist skills
+                  </p>
+                  <div className="mt-1.5 flex flex-wrap gap-1.5">
+                    {task.requiredSkills.map((skill) => (
+                      <Badge key={skill} tone="indigo">
+                        {skill}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
+              {task.evidence && task.evidence.length > 0 ? (
+                <div className="space-y-2 border-t border-[#E4E9F2] pt-4">
+                  <SectionHeading
+                    title="Supplied evidence"
+                    description="Specialists and automated verifiers inspect deliverables against these sources."
+                  />
+                  <div className="space-y-2">
                     {task.evidence.map((item) => (
-                      <details key={item.id} className="rounded-md border border-border bg-background p-2.5">
-                        <summary className="flex cursor-pointer flex-wrap items-center justify-between gap-2 text-xs font-medium">
-                          <span className="flex items-center gap-1.5">
-                            <FileText className="size-3.5 text-muted-foreground" /> {item.title}
-                            {item.isSeed ? <Badge tone="neutral">Seeded</Badge> : null}
-                          </span>
-                          <span className="text-[10px] font-normal text-muted-foreground">
-                            {humanize(item.sourceType)}
-                          </span>
+                      <details
+                        key={item.id}
+                        className="rounded-xl border border-[#E4E9F2] bg-[#F5F7FC] p-3"
+                      >
+                        <summary className="flex cursor-pointer flex-wrap items-center justify-between gap-2 text-xs font-bold text-[#141B2D]">
+                          <span>{item.title}</span>
+                          <Badge tone="neutral">{humanize(item.sourceType)}</Badge>
                         </summary>
-                        <p className="mt-2 whitespace-pre-line text-[11px] leading-5 text-muted-foreground">{item.content}</p>
+                        <p className="mt-2 whitespace-pre-line text-xs leading-5 text-[#4E596E]">
+                          {item.content}
+                        </p>
                         {item.url ? (
                           <a
                             href={item.url}
                             target="_blank"
                             rel="noreferrer"
-                            className="mt-1 inline-flex items-center gap-1 text-[10px] text-primary underline underline-offset-2"
+                            className="mt-1.5 inline-flex items-center gap-1 text-[11px] font-medium text-[#4263EB] underline underline-offset-2"
                           >
-                            {item.url} <ExternalLink className="size-2.5" />
+                            {item.url} <ExternalLink className="size-3" />
                           </a>
                         ) : null}
                       </details>
@@ -377,6 +350,16 @@ export default function TaskDetailPage() {
             </CardContent>
           </Card>
 
+          {/* Hybrid Matching & Top-5 Specialist Offers */}
+          {(isRequester && (Boolean(task.fundedAt) || (task.offers && task.offers.length > 0))) ? (
+            <MatchingProgressCard
+              task={task}
+              onDispatchOffers={() => dispatchOffers.mutate()}
+              dispatching={dispatchOffers.isPending}
+            />
+          ) : null}
+
+          {/* Submission or Form */}
           {latestSubmission ? (
             <SubmissionCard
               submission={latestSubmission}
@@ -397,21 +380,22 @@ export default function TaskDetailPage() {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-sm">
-                  <ClipboardCheck className="size-4 text-primary" /> Verification
+                  <ClipboardCheck className="size-4 text-[#4263EB]" /> Deliverable status
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-xs leading-5 text-muted-foreground">
+                <p className="text-xs leading-5 text-[#68738A]">
                   {isAssignedReviewer
-                    ? "Your submission will appear here with an independent checklist once submitted."
+                    ? "Your deliverable and independent verification record will appear here once submitted."
                     : isOpenMarket
-                      ? "Accept this task to submit an answer. Verification is independent of payment approval."
-                      : "No submission has been recorded yet. The reviewer must accept and submit an answer."}
+                      ? "Accept this task in the action panel to claim ownership and submit an artifact."
+                      : "No submission has been recorded yet. An eligible specialist must claim and submit an artifact."}
                 </p>
               </CardContent>
             </Card>
           )}
 
+          {/* Verification Certificate & Checks */}
           {latestVerification ? (
             <VerificationCard
               verification={latestVerification}
@@ -422,39 +406,53 @@ export default function TaskDetailPage() {
             />
           ) : null}
 
+          {/* Signed Agent Handback Certificate */}
           {handbackPreview ? (
-            <Card className="border-emerald-500/30">
-              <CardHeader className="border-b border-border pb-3">
+            <Card className="border-[#12A875]/40">
+              <CardHeader className="border-b border-[#E4E9F2] bg-[#12A875]/[0.05] pb-3.5">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <CardTitle className="flex items-center gap-2 text-sm">
-                    <ShieldCheck className="size-4 text-emerald-400" /> Verified Agent Handback Payload
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <KeyRound className="size-4 text-[#12A875]" /> Verified Results Certificate &amp; Signed Handback
                   </CardTitle>
                   <div className="flex items-center gap-1.5">
                     <Badge tone="success" dot>
                       {handbackPreview.signature.algorithm}
                     </Badge>
-                    {handbackPreview.idempotentReplay ? <Badge tone="neutral">Idempotent Replay</Badge> : null}
+                    {handbackPreview.idempotentReplay ? (
+                      <Badge tone="neutral">Idempotent Replay</Badge>
+                    ) : null}
                   </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-3 pt-4 text-xs">
-                <div className="grid gap-2 rounded-md border border-border bg-muted/30 p-2.5">
+                <div className="grid gap-2.5 rounded-xl border border-[#E4E9F2] bg-[#F5F7FC] p-3.5">
                   <div>
-                    <span className="font-semibold text-muted-foreground">Artifact v{handbackPreview.handback.artifact.version} SHA-256: </span>
-                    <span className="break-all font-mono text-[11px]">{handbackPreview.handback.artifact.sha256Digest}</span>
+                    <span className="font-semibold text-[#68738A]">
+                      Artifact v{handbackPreview.handback.artifact.version} SHA-256:{" "}
+                    </span>
+                    <span className="break-all font-mono text-[11px] text-[#141B2D]">
+                      {handbackPreview.handback.artifact.sha256Digest}
+                    </span>
                   </div>
                   <div>
-                    <span className="font-semibold text-muted-foreground">X-TrustToPay-Signature: </span>
-                    <span className="break-all font-mono text-[11px]">{handbackPreview.signature.header}</span>
+                    <span className="font-semibold text-[#68738A]">X-TrustToPay-Signature: </span>
+                    <span className="break-all font-mono text-[11px] text-[#141B2D]">
+                      {handbackPreview.signature.header}
+                    </span>
                   </div>
                   <div>
-                    <span className="font-semibold text-muted-foreground">Handoff Idempotency Key: </span>
-                    <span className="break-all font-mono text-[11px]">{handbackPreview.handback.handoffIdempotencyKey}</span>
+                    <span className="font-semibold text-[#68738A]">Handoff Idempotency Key: </span>
+                    <span className="break-all font-mono text-[11px] text-[#141B2D]">
+                      {handbackPreview.handback.handoffIdempotencyKey}
+                    </span>
                   </div>
                 </div>
-                <details className="rounded-md border border-border bg-background p-2.5">
-                  <summary className="cursor-pointer font-semibold">Inspect Signed Handback JSON</summary>
-                  <pre className="mt-2 max-h-60 overflow-auto rounded bg-muted/40 p-2.5 font-mono text-[10px]">
+
+                <details className="rounded-xl border border-[#1E293B] bg-[#10172A] p-3.5 text-[#E2E8F0]">
+                  <summary className="cursor-pointer font-mono text-[11px] font-semibold text-[#20BCE5]">
+                    Inspect JSON Handback Payload
+                  </summary>
+                  <pre className="mt-2 max-h-64 overflow-auto font-mono text-[11px] leading-5">
                     {JSON.stringify(handbackPreview.handback, null, 2)}
                   </pre>
                 </details>
@@ -462,29 +460,27 @@ export default function TaskDetailPage() {
             </Card>
           ) : null}
 
+          {/* Workflow Timeline */}
           <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-sm">
-                <Clock className="size-4 text-primary" /> Task timeline
-              </CardTitle>
+            <CardHeader className="border-b border-[#E4E9F2] pb-3">
+              <CardTitle className="text-sm">Workflow audit timeline</CardTitle>
             </CardHeader>
-            <CardContent>
-              <TaskTimeline events={task.events} />
+            <CardContent className="pt-4">
+              <TaskTimeline events={task.events ?? []} />
             </CardContent>
           </Card>
         </div>
 
-        <aside className="space-y-4">
+        {/* Right Sticky Action & Ledger Column */}
+        <aside className="space-y-5">
           <ActionCard
             task={task}
             userRole={user?.role}
-            isRequester={isRequester}
-            isReviewer={isReviewer}
             isAdmin={isAdmin}
+            isRequester={isRequester}
             isAssignedReviewer={isAssignedReviewer}
             isOpenMarket={isOpenMarket}
-            processingPayout={processingPayout}
-            failedPayout={failedPayout}
+            onFunded={invalidate}
             onAccept={() => accept.mutate()}
             accepting={accept.isPending}
             onDeclineOffer={() => declineOffer.mutate()}
@@ -499,10 +495,9 @@ export default function TaskDetailPage() {
             reconciling={reconcile.isPending}
             onRetry={(paymentId) => retry.mutate(paymentId)}
             retrying={retry.isPending}
-            onDispute={() => setDisputeOpen(true)}
-            onCancel={() => setCancelOpen(true)}
+            onOpenDispute={() => setDisputeOpen(true)}
+            onOpenCancel={() => setCancelOpen(true)}
             onEditReward={() => setRewardOpen(true)}
-            onFunded={invalidate}
             onResume={async () => {
               if (!task.session) return;
               try {
@@ -527,7 +522,7 @@ export default function TaskDetailPage() {
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm">Task facts</CardTitle>
+              <CardTitle className="text-sm">Task metadata</CardTitle>
             </CardHeader>
             <CardContent>
               <dl>
@@ -555,22 +550,26 @@ export default function TaskDetailPage() {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-sm">
-                  <HandCoins className="size-4 text-primary" /> Reviewer payout profile
+                  <HandCoins className="size-4 text-[#4263EB]" /> Specialist payout profile
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2 text-xs">
                 {task.reviewerPayout.consent && task.reviewerPayout.email ? (
-                  <div className="flex items-start gap-2 rounded-md border border-emerald-500/30 bg-emerald-500/10 p-2.5 text-emerald-200">
-                    <BadgeCheck className="mt-0.5 size-4 shrink-0 text-emerald-400" />
-                    <div>
-                      <p className="font-medium text-emerald-100">Payout consent recorded</p>
-                      <p className="mt-0.5 break-all">{task.reviewerPayout.email}</p>
+                  <div className="flex items-start gap-2 rounded-lg border border-[#12A875]/30 bg-[#12A875]/[0.07] p-3 text-[#141B2D]">
+                    <BadgeCheck className="mt-0.5 size-4 shrink-0 text-[#12A875]" />
+                    <div className="min-w-0">
+                      <p className="font-semibold text-[#0B7D56]">Payout consent recorded</p>
+                      <p className="mt-0.5 truncate font-mono text-[11px] text-[#141B2D]">
+                        {task.reviewerPayout.email}
+                      </p>
                     </div>
                   </div>
                 ) : (
-                  <Alert tone="warning">Payout details are incomplete. The reviewer must add a PayPal email and consent.</Alert>
+                  <Alert tone="warning">
+                    Payout details incomplete. The specialist must configure a PayPal email and record consent.
+                  </Alert>
                 )}
-                <p className="text-[11px] text-muted-foreground">Provider: {task.reviewerPayout.provider}</p>
+                <p className="font-mono text-[11px] text-[#68738A]">Provider: {task.reviewerPayout.provider}</p>
               </CardContent>
             </Card>
           ) : null}
@@ -615,23 +614,117 @@ export default function TaskDetailPage() {
         open={rewardOpen}
         onOpenChange={setRewardOpen}
         currentMinor={task.rewardMinor}
-        onSubmit={(amount) => updateReward.mutate(amount)}
+        onSubmit={(rewardMinor) => updateReward.mutate(rewardMinor)}
         loading={updateReward.isPending}
       />
     </div>
   );
 }
 
+function MatchingProgressCard({
+  task,
+  onDispatchOffers,
+  dispatching,
+}: {
+  task: TaskDetail;
+  onDispatchOffers: () => void;
+  dispatching: boolean;
+}) {
+  const offers = task.offers ?? [];
+  const funded = Boolean(task.fundedAt);
+  const matched = offers.length > 0;
+  const assigned = Boolean(task.assignment);
+
+  const steps = [
+    { label: "Jina Embeddings", done: funded },
+    { label: "Elastic Hybrid Search", done: funded },
+    { label: "PostgreSQL Eligibility", done: matched || assigned },
+    { label: "Top-5 Offer Dispatch", done: matched || assigned },
+  ];
+
+  return (
+    <Card>
+      <CardHeader className="border-b border-[#E4E9F2] pb-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <CardTitle className="flex items-center gap-2 text-sm">
+            <Search className="size-4 text-[#4263EB]" /> Hybrid Specialist Routing &amp; Top-5 Offers
+          </CardTitle>
+          {["FUNDED", "OFFERED"].includes(task.status) && !assigned ? (
+            <Button size="sm" variant="outline" onClick={onDispatchOffers} loading={dispatching}>
+              <Sparkles className="size-3.5 text-[#4263EB]" /> Re-dispatch Offers
+            </Button>
+          ) : null}
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4 pt-4">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {steps.map((step) => (
+            <div
+              key={step.label}
+              className={cn(
+                "rounded-lg border p-2.5 text-xs",
+                step.done
+                  ? "border-[#12A875]/35 bg-[#12A875]/[0.06] text-[#141B2D]"
+                  : "border-[#E4E9F2] bg-[#F5F7FC] text-[#68738A]",
+              )}
+            >
+              <div className="flex items-center gap-1.5 font-semibold">
+                <CheckCircle2 className={cn("size-3.5 shrink-0", step.done ? "text-[#12A875]" : "text-[#94A3B8]")} />
+                <span className="truncate">{step.label}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {offers.length === 0 ? (
+          <p className="text-xs text-[#68738A]">
+            No specialist offers dispatched yet. Dispatch offers once funding is captured to notify the top 5 matches.
+          </p>
+        ) : (
+          <div className="space-y-2">
+            {offers.map((offer) => (
+              <div
+                key={offer.id}
+                className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[#E4E9F2] bg-[#F5F7FC] px-3 py-2 text-xs"
+              >
+                <div className="flex min-w-0 items-center gap-2">
+                  <Badge tone="neutral">Rank #{offer.rank}</Badge>
+                  <span className="truncate font-semibold text-[#141B2D]">
+                    {offer.specialist?.name ?? `Specialist ${offer.specialistId.slice(0, 8)}`}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-[11px] text-[#4E596E]">{offer.score} pts</span>
+                  <Badge
+                    tone={
+                      offer.status === "ACCEPTED"
+                        ? "success"
+                        : offer.status === "PENDING"
+                          ? "cobalt"
+                          : "neutral"
+                    }
+                    dot
+                  >
+                    {humanize(offer.status)}
+                  </Badge>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 function ActionCard({
   task,
   userRole,
-  isRequester,
-  isReviewer,
   isAdmin,
+  isRequester,
   isAssignedReviewer,
   isOpenMarket,
-  processingPayout,
-  failedPayout,
+  onFunded,
   onAccept,
   accepting,
   onDeclineOffer,
@@ -646,21 +739,18 @@ function ActionCard({
   reconciling,
   onRetry,
   retrying,
-  onDispute,
-  onCancel,
+  onOpenDispute,
+  onOpenCancel,
   onEditReward,
-  onFunded,
   onResume,
 }: {
   task: TaskDetail;
-  userRole?: string;
-  isRequester: boolean;
-  isReviewer: boolean;
+  userRole: string | undefined;
   isAdmin: boolean;
+  isRequester: boolean;
   isAssignedReviewer: boolean;
   isOpenMarket: boolean;
-  processingPayout?: TaskDetail["payments"][number];
-  failedPayout?: TaskDetail["payments"][number];
+  onFunded: () => Promise<void>;
   onAccept: () => void;
   accepting: boolean;
   onDeclineOffer: () => void;
@@ -675,21 +765,21 @@ function ActionCard({
   reconciling: boolean;
   onRetry: (paymentId: string) => void;
   retrying: boolean;
-  onDispute: () => void;
-  onCancel: () => void;
+  onOpenDispute: () => void;
+  onOpenCancel: () => void;
   onEditReward: () => void;
-  onFunded: () => Promise<void>;
-  onResume: () => Promise<void>;
+  onResume: () => void;
 }) {
-  const payable = (isRequester || isAdmin) && task.payoutEligible;
-  const resumeAllowed = [
-    "VERIFIED",
-    "PAYMENT_READY",
-    "PAYMENT_PAID",
-    "PAYOUT_FAILED",
-    "HANDED_OFF",
-    "ORIGINAL_TASK_RESUMED",
-  ].includes(task.status);
+  const payable =
+    (isRequester || isAdmin) &&
+    ["VERIFIED", "PAYMENT_READY", "PAYOUT_FAILED"].includes(task.status);
+  const processingPayout = task.payments?.find(
+    (p) => p.type === "PAYOUT" && p.status === "PROCESSING",
+  );
+  const failedFunding = task.payments?.find((p) => p.type === "FUNDING" && p.status === "FAILED");
+  const resumeAllowed =
+    (isRequester || isAdmin) &&
+    ["VERIFIED", "PAYMENT_READY", "PAYMENT_PAID", "PAYOUT_FAILED", "HANDED_OFF"].includes(task.status);
   const handbackAllowed =
     (isRequester || isAdmin) &&
     [
@@ -708,22 +798,21 @@ function ActionCard({
   const pendingMyOffer = task.myOffer?.status === "PENDING" ? task.myOffer : null;
 
   return (
-    <Card className="border-primary/20">
+    <Card className="border-[#4263EB]/25">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-sm">
-          <Flag className="size-4 text-primary" /> Next action
+          <Flag className="size-4 text-[#4263EB]" /> Next action
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         {["AWAITING_FUNDING", "FUNDING_FAILED"].includes(task.status) && (isRequester || isAdmin) ? (
           <>
-            <p className="text-xs leading-5 text-muted-foreground">
-              Fund the reward to make this task available. In demo mode the payment is clearly simulated; in Sandbox
-              mode the server calls PayPal Orders v2.
+            <p className="text-xs leading-5 text-[#68738A]">
+              Fund the escrow reward to make this task available to specialists.
             </p>
             {task.status === "FUNDING_FAILED" ? (
               <Alert tone="warning">
-                The previous funding attempt failed. Create a new order after reconciling the old transaction below.
+                Previous funding attempt failed. Reconcile or capture a new funding order below.
               </Alert>
             ) : null}
             <PayPalCheckout
@@ -740,12 +829,12 @@ function ActionCard({
         ) : null}
 
         {["FUNDED", "OFFERED"].includes(task.status) && (isRequester || isAdmin) && !task.assignment ? (
-          <div className="space-y-2 rounded-md border border-border bg-muted/20 p-2.5 text-xs">
-            <p className="font-semibold">Specialist Offer Broadcast</p>
-            <p className="text-muted-foreground">
+          <div className="space-y-2 rounded-xl border border-[#E4E9F2] bg-[#F5F7FC] p-3 text-xs">
+            <p className="font-semibold text-[#141B2D]">Specialist Offer Broadcast</p>
+            <p className="text-[#68738A]">
               {task.offers && task.offers.length > 0
-                ? `${task.offers.filter((o) => o.status === "PENDING").length} pending expiring offer(s) active.`
-                : "Rank qualified specialists (L1–L3) and dispatch up to 5 parallel expiring offers."}
+                ? `${task.offers.filter((o) => o.status === "PENDING").length} pending offer(s) active.`
+                : "Rank qualified specialists (L1–L3) and dispatch up to 5 offers."}
             </p>
             <Button
               variant="outline"
@@ -754,7 +843,7 @@ function ActionCard({
               onClick={onDispatchOffers}
               loading={dispatchingOffers}
             >
-              <Sparkles className="size-3.5" /> Dispatch top-5 specialist offers
+              <Sparkles className="size-3.5 text-[#4263EB]" /> Dispatch top-5 specialist offers
             </Button>
           </div>
         ) : null}
@@ -762,21 +851,20 @@ function ActionCard({
         {isOpenMarket ? (
           <>
             {pendingMyOffer ? (
-              <div className="space-y-1.5 rounded-md border border-primary/40 bg-primary/5 p-2.5 text-xs">
+              <div className="space-y-1.5 rounded-xl border border-[#4263EB]/35 bg-[#4263EB]/[0.06] p-3 text-xs">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-semibold text-primary">
+                  <span className="font-bold text-[#2E4CCB]">
                     Top-5 Offer #{pendingMyOffer.rank} ({pendingMyOffer.score} pts)
                   </span>
-                  <Badge tone="accent">Batch #{pendingMyOffer.batchNumber}</Badge>
+                  <Badge tone="indigo">Batch #{pendingMyOffer.batchNumber}</Badge>
                 </div>
-                <p className="text-[11px] text-muted-foreground">
-                  Expires {formatDate(pendingMyOffer.expiresAt)}. First specialist to accept wins atomically.
+                <p className="text-[11px] text-[#4E596E]">
+                  Expires {formatDate(pendingMyOffer.expiresAt)}. Claim atomically to start review.
                 </p>
               </div>
             ) : (
-              <p className="text-xs leading-5 text-muted-foreground">
-                This funded task is available. Acceptance is exclusive and transaction-safe: only the first reviewer
-                can claim it.
+              <p className="text-xs leading-5 text-[#68738A]">
+                This funded task is available in the marketplace. First eligible specialist to claim owns the task.
               </p>
             )}
             <div className="flex gap-2">
@@ -784,12 +872,7 @@ function ActionCard({
                 <ClipboardCheck className="size-3.5" /> Accept review task
               </Button>
               {pendingMyOffer ? (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={onDeclineOffer}
-                  loading={decliningOffer}
-                >
+                <Button size="sm" variant="outline" onClick={onDeclineOffer} loading={decliningOffer}>
                   Decline
                 </Button>
               ) : null}
@@ -797,35 +880,36 @@ function ActionCard({
           </>
         ) : null}
 
-        {["FUNDED", "OFFERED"].includes(task.status) && isAssignedReviewer ? (
-          <p className="text-xs leading-5 text-muted-foreground">
-            You accepted this task. Submit your answer and evidence below.
+        {isAssignedReviewer && ["REVIEWER_ASSIGNED", "ASSIGNED", "IN_PROGRESS"].includes(task.status) ? (
+          <p className="text-xs leading-5 text-[#68738A]">
+            You claimed this task. Submit your resolution and artifact files in the workbench on the left.
           </p>
         ) : null}
 
         {task.status === "VERIFICATION_PENDING" ? (
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Loader2 className="size-3.5 animate-spin text-primary" /> Independent verification is running…
+          <div className="flex items-center gap-2 rounded-lg border border-[#E4E9F2] bg-[#F5F7FC] p-3 text-xs font-medium text-[#141B2D]">
+            <Loader2 className="size-4 animate-spin text-[#4263EB]" /> Independent verification running…
           </div>
         ) : null}
 
         {payable ? (
           <>
-            <div className="rounded-md border border-emerald-500/30 bg-emerald-500/10 p-2.5 text-xs leading-5 text-emerald-100">
+            <div className="rounded-xl border border-[#12A875]/35 bg-[#12A875]/[0.07] p-3 text-xs leading-5 text-[#141B2D]">
               <div className="flex flex-wrap items-center justify-between gap-1.5">
-                <p className="font-semibold text-emerald-300">Verified and authorized</p>
+                <p className="font-bold text-[#0B7D56]">Verified and authorized</p>
                 <PayoutAvailabilityBadge availability={task.payoutAvailability} />
               </div>
-              <p className="mt-1">
-                Release {formatMoney(task.rewardMinor, task.currency)} to {task.assignment?.reviewer.name ?? "the reviewer"}.
-                {" "}
+              <p className="mt-1 text-[#4E596E]">
+                Release {formatMoney(task.rewardMinor, task.currency)} to{" "}
+                {task.assignment?.reviewer.name ?? "the specialist"}.{" "}
                 {task.payoutAvailability === "DEMO_SIMULATED"
-                  ? "In demo mode this is a labelled simulated payout."
+                  ? "Recorded as a labelled simulated payout in demo mode."
                   : task.payoutAvailability === "PAYOUT_UNAVAILABLE"
-                    ? "PayPal Payouts is disabled for Indian Sandbox merchant accounts unless PAYPAL_PAYOUTS_ENABLED=true or DEMO_MODE=true."
+                    ? "PayPal Payouts is disabled for Indian Sandbox merchant accounts unless configured."
                     : "Calls PayPal Sandbox Payouts v1."}
               </p>
             </div>
+
             <Button
               size="sm"
               className="w-full"
@@ -833,47 +917,36 @@ function ActionCard({
               loading={paying}
               disabled={task.payoutAvailability === "PAYOUT_UNAVAILABLE"}
             >
-              <Wallet className="size-3.5" />{" "}
+              <Wallet className="size-3.5" />
               {task.payoutAvailability === "PAYOUT_UNAVAILABLE"
                 ? "Payout Unavailable (Sandbox Restriction)"
                 : task.payoutAvailability === "DEMO_SIMULATED"
                   ? "Release Simulated Payout"
-                  : "Release Reviewer Payout"}
+                  : "Release Specialist Payout"}
             </Button>
-            {task.payoutAvailability === "PAYOUT_UNAVAILABLE" ? (
-              <Alert tone="warning">
-                PayPal Sandbox Checkout works with Indian merchant accounts, but Payouts requires separate regional approval (`PAYPAL_PAYOUTS_ENABLED=false`). The verified deliverable and Agent Handback remain available below.
-              </Alert>
-            ) : null}
+
             {!task.reviewerPayout?.consent || !task.reviewerPayout.email ? (
-              <Alert tone="warning">The reviewer has not completed payout consent and a PayPal email.</Alert>
+              <Alert tone="warning">The specialist has not saved payout consent and a PayPal email.</Alert>
             ) : null}
           </>
         ) : null}
 
-        {task.status === "PAYMENT_PROCESSING" ? (
-          <>
-            <p className="text-xs leading-5 text-muted-foreground">
-              PayPal is processing the payout. Reconcile before retrying or resuming the session.
-            </p>
-            {processingPayout ? (
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full"
-                onClick={() => onReconcile(processingPayout.id)}
-                loading={reconciling}
-              >
-                <RefreshCw className="size-3.5" /> Reconcile payout
-              </Button>
-            ) : null}
-          </>
+        {task.status === "PAYMENT_PROCESSING" && processingPayout ? (
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full"
+            onClick={() => onReconcile(processingPayout.id)}
+            loading={reconciling}
+          >
+            <RefreshCw className="size-3.5" /> Reconcile payout
+          </Button>
         ) : null}
 
         {task.status === "PAYMENT_PAID" ? (
-          <div className="rounded-md border border-emerald-500/30 bg-emerald-500/10 p-2.5 text-xs text-emerald-100">
-            <p className="font-semibold text-emerald-300">Reviewer paid</p>
-            <p className="mt-0.5">The verified answer can now be delivered to the AI session.</p>
+          <div className="rounded-xl border border-[#12A875]/35 bg-[#12A875]/[0.07] p-3 text-xs">
+            <p className="font-bold text-[#0B7D56]">Specialist paid</p>
+            <p className="mt-0.5 text-[#4E596E]">The verified deliverable is unlocked for the AI agent.</p>
           </div>
         ) : null}
 
@@ -885,7 +958,7 @@ function ActionCard({
             onClick={onFetchHandback}
             loading={fetchingHandback}
           >
-            <ShieldCheck className="size-3.5" /> Retrieve signed Agent Handback
+            <ShieldCheck className="size-3.5 text-[#12A875]" /> Retrieve signed Agent Handback
           </Button>
         ) : null}
 
@@ -895,94 +968,30 @@ function ActionCard({
           </Button>
         ) : null}
 
-        {task.status === "PAYOUT_FAILED" ? (
-          <>
-            <div className="rounded-md border border-border bg-muted/30 p-2.5 text-xs leading-5 text-muted-foreground">
-              The answer is verified. The payout is unresolved; automatic retry requires reconciliation.
-            </div>
-            {failedPayout ? (
-              <div className="grid gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onReconcile(failedPayout.id)}
-                  loading={reconciling}
-                >
-                  <RefreshCw className="size-3.5" /> Reconcile failed payout
-                </Button>
-                {isAdmin ? (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onRetry(failedPayout.id)}
-                    loading={retrying}
-                  >
-                    <Wallet className="size-3.5" /> Retry payout (admin)
-                  </Button>
-                ) : null}
-              </div>
-            ) : null}
-          </>
+        {task.status === "PAYOUT_FAILED" && failedFunding ? (
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full"
+            onClick={() => onRetry(failedFunding.id)}
+            loading={retrying}
+          >
+            Retry
+          </Button>
         ) : null}
 
-        {["NEEDS_MANUAL_REVIEW", "VERIFICATION_REJECTED", "NEEDS_REVISION"].includes(task.status) ? (
-          <div className="rounded-md border border-border bg-muted/30 p-2.5 text-xs leading-5 text-muted-foreground">
-            {task.status === "NEEDS_MANUAL_REVIEW"
-              ? "An administrator must decide whether to pass or reject the submission."
-              : "Reviewer can correct and resubmit. Verification failed, so no reward is authorized."}
-          </div>
+        {userRole === "REQUESTER" &&
+        ["AWAITING_FUNDING", "FUNDING_FAILED", "FUNDED", "OFFERED"].includes(task.status) ? (
+          <Button variant="ghost" size="sm" className="w-full text-[#E5484D] hover:bg-[#E5484D]/10" onClick={onOpenCancel}>
+            Cancel review task
+          </Button>
         ) : null}
 
-        {task.status === "COMPLETED" ? (
-          <div className="rounded-md border border-emerald-500/30 bg-emerald-500/10 p-2.5 text-xs leading-5 text-emerald-100">
-            <p className="font-semibold text-emerald-300">Task completed</p>
-            <p>The verified answer was delivered to the AI session.</p>
-          </div>
+        {canDispute ? (
+          <Button variant="ghost" size="sm" className="w-full" onClick={onOpenDispute}>
+            <Gavel className="size-3.5" /> Open dispute
+          </Button>
         ) : null}
-
-        {task.status === "CANCELLED" ? (
-          <div className="rounded-md border border-border bg-muted/30 p-2.5 text-xs leading-5 text-muted-foreground">
-            This task was cancelled. It cannot be accepted or paid.
-          </div>
-        ) : null}
-
-        <div className="border-t border-border pt-3">
-          <div className="flex flex-wrap gap-2">
-            {task.payoutEligible || task.status === "PAYMENT_READY" ? (
-              <Button asChild variant="ghost" size="sm">
-                <Link to={`/app/tasks/${task.id}/verification`}>
-                  <FileCheck2 className="size-3.5" /> Evidence checks
-                </Link>
-              </Button>
-            ) : null}
-            {task.session?.finalAnswer ? (
-              <Button asChild variant="ghost" size="sm">
-                <Link to={`/app/sessions/${task.session.id}`}>
-                  <Sparkles className="size-3.5" /> Final answer
-                </Link>
-              </Button>
-            ) : null}
-            {isAssignedReviewer ? (
-              <Button asChild variant="ghost" size="sm">
-                <Link to="/app/profile">
-                  <ShieldCheck className="size-3.5" /> Payout profile
-                </Link>
-              </Button>
-            ) : null}
-          </div>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {canDispute ? (
-              <Button variant="outline" size="sm" onClick={onDispute}>
-                <Gavel className="size-3.5" /> Open dispute
-              </Button>
-            ) : null}
-            {userRole === "ADMIN" || isRequester ? (
-              <Button variant="ghost" size="sm" className="text-destructive" onClick={onCancel}>
-                Cancel task
-              </Button>
-            ) : null}
-          </div>
-        </div>
       </CardContent>
     </Card>
   );
@@ -1010,61 +1019,49 @@ function PaymentsCard({
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-sm">
-          <Banknote className="size-4 text-primary" /> Payment ledger
+          <Banknote className="size-4 text-[#4263EB]" /> Payment ledger
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-2">
+      <CardContent className="space-y-2.5">
         {visible.length === 0 ? (
-          <p className="text-xs text-muted-foreground">No payment transactions yet.</p>
+          <p className="text-xs text-[#68738A]">No payment transactions yet.</p>
         ) : (
           visible.map((payment) => (
-            <div key={payment.id} className="rounded-md border border-border bg-background p-2.5">
+            <div key={payment.id} className="rounded-xl border border-[#E4E9F2] bg-[#F5F7FC] p-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="text-xs font-semibold">{humanize(payment.type)}</span>
+                  <span className="text-xs font-bold text-[#141B2D]">{humanize(payment.type)}</span>
                   <PaymentStatusBadge status={payment.status} />
                   <ModeBadge mode={payment.mode} />
-                  {payment.type === "PAYOUT" ? (
-                    <PayoutAvailabilityBadge
-                      availability={
-                        payment.payoutAvailability ?? (payment.mode === "SIMULATED" ? "DEMO_SIMULATED" : undefined)
-                      }
-                    />
-                  ) : null}
                 </div>
-                <span className="text-xs font-semibold tabular-nums">{payment.amountDisplay}</span>
+                <span className="font-display text-xs font-bold text-[#141B2D] tabular-nums">
+                  {payment.amountDisplay}
+                </span>
               </div>
-              <p className="mt-1 text-[10px] text-muted-foreground">
+              <p className="mt-1 text-[11px] text-[#68738A]">
                 {payment.provider} · {formatDate(payment.createdAt)}
               </p>
               {payment.orderId ? (
-                <p className="truncate font-mono text-[10px] text-muted-foreground">Order {payment.orderId}</p>
+                <p className="truncate font-mono text-[10px] text-[#68738A]">Order: {payment.orderId}</p>
               ) : null}
               {payment.payoutBatchId ? (
-                <p className="truncate font-mono text-[10px] text-muted-foreground">Batch {payment.payoutBatchId}</p>
+                <p className="truncate font-mono text-[10px] text-[#68738A]">Batch: {payment.payoutBatchId}</p>
               ) : null}
               {payment.failureMessage ? (
-                <p className="mt-1 text-[10px] leading-4 text-red-400">{payment.failureMessage}</p>
+                <p className="mt-1 text-[11px] font-medium text-[#E5484D]">{payment.failureMessage}</p>
               ) : null}
               {(isAdmin || isRequester) && ["FAILED", "PROCESSING", "PENDING"].includes(payment.status) ? (
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-7 text-[11px]"
                     onClick={() => onReconcile(payment.id)}
                     loading={reconciling}
                   >
                     <RefreshCw className="size-3" /> Reconcile
                   </Button>
                   {isAdmin && payment.status === "FAILED" ? (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 text-[11px]"
-                      onClick={() => onRetry(payment.id)}
-                      loading={retrying}
-                    >
+                    <Button variant="ghost" size="sm" onClick={() => onRetry(payment.id)} loading={retrying}>
                       Retry
                     </Button>
                   ) : null}
@@ -1095,11 +1092,11 @@ function VerificationCard({
   const [decision, setDecision] = useState<"PASS" | "REJECT">("PASS");
 
   return (
-    <Card>
-      <CardHeader className="border-b border-border pb-3">
+    <Card className={verification.status === "PASSED" ? "border-[#12A875]/35" : undefined}>
+      <CardHeader className="border-b border-[#E4E9F2] pb-3.5">
         <div className="flex flex-wrap items-start justify-between gap-2">
-          <CardTitle className="flex items-center gap-2">
-            <FileCheck2 className="size-4 text-primary" /> Independent verification
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Award className="size-4 text-[#12A875]" /> Independent verification certificate
           </CardTitle>
           <div className="flex flex-wrap items-center gap-1.5">
             <VerificationBadge status={verification.status} />
@@ -1113,27 +1110,27 @@ function VerificationCard({
         </div>
       </CardHeader>
       <CardContent className="space-y-4 pt-4">
-        <p className="text-sm leading-6">{verification.decisionReason}</p>
+        <p className="text-sm leading-6 text-[#141B2D]">{verification.decisionReason}</p>
 
         {verification.artifactSha256 ? (
-          <div className="rounded-md border border-border bg-muted/30 p-2 text-xs">
-            <span className="font-semibold text-muted-foreground">Artifact SHA-256: </span>
-            <span className="break-all font-mono text-[11px]">{verification.artifactSha256}</span>
+          <div className="rounded-xl border border-[#E4E9F2] bg-[#F5F7FC] p-3 text-xs">
+            <span className="font-semibold text-[#68738A]">Immutable Artifact SHA-256: </span>
+            <span className="break-all font-mono text-[11px] text-[#141B2D]">{verification.artifactSha256}</span>
           </div>
         ) : null}
 
         {verification.securityReview ? (
-          <div className="rounded-md border border-border bg-muted/20 p-3 text-xs space-y-2">
+          <div className="space-y-2 rounded-xl border border-[#E4E9F2] bg-[#F5F7FC] p-3.5 text-xs">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="font-semibold flex items-center gap-1.5">
-                <ShieldCheck className="size-3.5 text-primary" /> Layered Security Gate
+              <p className="flex items-center gap-1.5 font-bold text-[#141B2D]">
+                <ShieldCheck className="size-4 text-[#4263EB]" /> Layered Security Gate
               </p>
               <SecurityVerdictBadge verdict={verification.securityReview.verdict} />
             </div>
-            <p className="text-muted-foreground">{verification.securityReview.summary}</p>
+            <p className="leading-5 text-[#4E596E]">{verification.securityReview.summary}</p>
             {verification.securityReview.gemini ? (
-              <p className="text-[11px] text-muted-foreground">
-                Gemini model: <span className="font-mono">{verification.securityReview.gemini.model}</span> · Confidence:{" "}
+              <p className="font-mono text-[11px] text-[#68738A]">
+                Gemini ({verification.securityReview.gemini.model}) · Confidence:{" "}
                 {Math.round(verification.securityReview.gemini.confidence * 100)}%
               </p>
             ) : null}
@@ -1141,10 +1138,10 @@ function VerificationCard({
         ) : null}
 
         {verification.executionSummary ? (
-          <div className="rounded-md border border-border bg-muted/20 p-3 text-xs space-y-2">
+          <div className="space-y-2 rounded-xl border border-[#E4E9F2] bg-[#F5F7FC] p-3.5 text-xs">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="font-semibold flex items-center gap-1.5">
-                <Terminal className="size-3.5 text-primary" /> Isolated Execution Runner
+              <p className="flex items-center gap-1.5 font-bold text-[#141B2D]">
+                <Terminal className="size-4 text-[#4263EB]" /> Isolated Execution Runner
               </p>
               <div className="flex items-center gap-1.5">
                 <Badge tone={verification.executionSummary.passed ? "success" : "danger"} dot>
@@ -1153,64 +1150,65 @@ function VerificationCard({
                 <Badge tone="neutral">{verification.executionSummary.mode}</Badge>
               </div>
             </div>
-            <p className="text-muted-foreground">{verification.executionSummary.summary}</p>
+            <p className="leading-5 text-[#4E596E]">{verification.executionSummary.summary}</p>
             {verification.executionSummary.stdout ? (
-              <pre className="max-h-32 overflow-auto rounded border border-border bg-background p-2 font-mono text-[10px]">
+              <pre className="max-h-36 overflow-auto rounded-lg border border-[#1E293B] bg-[#10172A] p-3 font-mono text-[11px] text-[#E2E8F0]">
                 {verification.executionSummary.stdout}
               </pre>
             ) : null}
           </div>
         ) : null}
 
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+            <p className="mb-2 font-mono text-[10px] font-semibold uppercase tracking-wider text-[#68738A]">
               Passed checks ({verification.checksPassed.length})
             </p>
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               {verification.checksPassed.map((check) => (
-                <div key={check.id} className="flex gap-1.5 rounded border border-emerald-500/30 bg-emerald-500/10 p-2">
-                  <CheckCircle2 className="mt-0.5 size-3.5 shrink-0 text-emerald-400" />
+                <div
+                  key={check.id}
+                  className="flex gap-2 rounded-lg border border-[#12A875]/30 bg-[#12A875]/[0.06] p-2.5"
+                >
+                  <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#12A875]" />
                   <div>
-                    <p className="text-[11px] font-medium text-emerald-100">{check.label}</p>
-                    <p className="text-[10px] leading-4 text-emerald-200/80">{check.detail}</p>
+                    <p className="text-xs font-bold text-[#141B2D]">{check.label}</p>
+                    <p className="mt-0.5 text-[11px] leading-4 text-[#4E596E]">{check.detail}</p>
                   </div>
                 </div>
               ))}
             </div>
           </div>
+
           <div>
-            <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+            <p className="mb-2 font-mono text-[10px] font-semibold uppercase tracking-wider text-[#68738A]">
               Failed checks ({verification.checksFailed.length})
             </p>
             {verification.checksFailed.length === 0 ? (
-              <p className="rounded border border-border bg-muted/30 p-2 text-[11px] text-muted-foreground">
+              <p className="rounded-lg border border-[#E4E9F2] bg-[#F5F7FC] p-3 text-xs text-[#68738A]">
                 No failed checks.
               </p>
             ) : (
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 {verification.checksFailed.map((check) => (
                   <div
                     key={check.id}
                     className={cn(
-                      "flex gap-1.5 rounded border p-2",
+                      "flex gap-2 rounded-lg border p-2.5",
                       check.severity === "HARD"
-                        ? "border-red-500/30 bg-red-500/10"
-                        : "border-amber-500/30 bg-amber-500/10",
+                        ? "border-[#E5484D]/35 bg-[#E5484D]/[0.06]"
+                        : "border-[#F5A623]/40 bg-[#F5A623]/[0.08]",
                     )}
                   >
                     <ShieldAlert
                       className={cn(
-                        "mt-0.5 size-3.5 shrink-0",
-                        check.severity === "HARD" ? "text-red-400" : "text-amber-400",
+                        "mt-0.5 size-4 shrink-0",
+                        check.severity === "HARD" ? "text-[#E5484D]" : "text-[#D48806]",
                       )}
                     />
                     <div>
-                      <p className="text-[11px] font-medium text-foreground">{check.label}</p>
-                      <p className="text-[10px] leading-4 text-muted-foreground">{check.detail}</p>
-                      <Badge tone={check.severity === "HARD" ? "danger" : "warning"} className="mt-1">
-                        {check.severity === "HARD" ? "Required" : "Risk review"}
-                      </Badge>
+                      <p className="text-xs font-bold text-[#141B2D]">{check.label}</p>
+                      <p className="mt-0.5 text-[11px] leading-4 text-[#4E596E]">{check.detail}</p>
                     </div>
                   </div>
                 ))}
@@ -1221,22 +1219,26 @@ function VerificationCard({
 
         {verification.evidenceReferences.length > 0 ? (
           <div>
-            <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Evidence references</p>
-            <div className="space-y-1">
+            <p className="mb-2 font-mono text-[10px] font-semibold uppercase tracking-wider text-[#68738A]">
+              Evidence references
+            </p>
+            <div className="space-y-1.5">
               {verification.evidenceReferences.map((reference, index) => (
-                <div key={`${reference.label}-${index}`} className="rounded border border-border bg-background p-2 text-[11px]">
-                  <p className="font-medium">{reference.label}</p>
+                <div key={`${reference.label}-${index}`} className="rounded-lg border border-[#E4E9F2] bg-[#FFFFFF] p-3 text-xs">
+                  <p className="font-semibold text-[#141B2D]">{reference.label}</p>
                   {reference.url ? (
                     <a
                       href={reference.url}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-1 text-[10px] text-primary underline underline-offset-2"
+                      className="mt-0.5 inline-flex items-center gap-1 text-[11px] font-medium text-[#4263EB] underline underline-offset-2"
                     >
-                      {reference.url} <ExternalLink className="size-2.5" />
+                      {reference.url} <ExternalLink className="size-3" />
                     </a>
                   ) : null}
-                  {reference.quote ? <p className="mt-0.5 text-muted-foreground">“{reference.quote}”</p> : null}
+                  {reference.quote ? (
+                    <p className="mt-1 text-[11px] italic text-[#4E596E]">“{reference.quote}”</p>
+                  ) : null}
                 </div>
               ))}
             </div>
@@ -1244,21 +1246,15 @@ function VerificationCard({
         ) : null}
 
         {isAdmin && taskStatus === "NEEDS_MANUAL_REVIEW" ? (
-          <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3">
-            <p className="flex items-center gap-1.5 text-xs font-semibold text-amber-200">
-              <ShieldAlert className="size-3.5 text-amber-400" /> Administrator decision required
-            </p>
-            <p className="mt-1 text-[11px] leading-5 text-amber-100/90">
-              The automated checks passed, but a risk check requires a human decision. A note is mandatory.
-            </p>
-            <div className="mt-3 space-y-2">
+          <div className="rounded-xl border border-[#F5A623]/40 bg-[#F5A623]/[0.08] p-4">
+            <p className="text-xs font-bold text-[#9A6100]">Manual verification decision</p>
+            <div className="mt-2 space-y-2">
               <Field label="Decision note" htmlFor="admin-verification-note">
                 <Textarea
                   id="admin-verification-note"
                   value={note}
                   onChange={(event) => setNote(event.target.value)}
                   rows={2}
-                  placeholder="Explain what you reviewed and why this decision is appropriate."
                 />
               </Field>
               <div className="flex flex-wrap gap-2">
@@ -1268,13 +1264,12 @@ function VerificationCard({
                   loading={verifying}
                   disabled={note.trim().length < 10}
                 >
-                  <CheckCircle2 className="size-3.5" /> {decision === "PASS" ? "Approve submission" : "Reject submission"}
+                  {decision === "PASS" ? "Approve submission" : "Reject submission"}
                 </Button>
                 <select
                   value={decision}
                   onChange={(event) => setDecision(event.target.value as "PASS" | "REJECT")}
-                  className="flex h-8 rounded-md border border-input bg-card px-2 text-xs"
-                  aria-label="Admin verification decision"
+                  className="h-8 rounded-md border border-[#E4E9F2] bg-[#FFFFFF] px-2 text-xs text-[#141B2D]"
                 >
                   <option value="PASS">PASS</option>
                   <option value="REJECT">REJECT</option>
@@ -1283,17 +1278,6 @@ function VerificationCard({
             </div>
           </div>
         ) : null}
-
-        {isAdmin && ["VERIFICATION_PENDING", "NEEDS_MANUAL_REVIEW"].includes(taskStatus) ? (
-          <Button variant="outline" size="sm" onClick={() => onVerify({})} loading={verifying}>
-            <RefreshCw className="size-3.5" /> Re-run automated verification
-          </Button>
-        ) : null}
-
-        <p className="text-[10px] leading-4 text-muted-foreground">
-          Engine: {verification.engine === "MANUAL" ? "Administrator manual decision" : "Automated independent check"} ·
-          Created {formatDate(verification.createdAt)}
-        </p>
       </CardContent>
     </Card>
   );
@@ -1317,56 +1301,56 @@ function SubmissionCard({
   const artifact = submission.artifact ?? task.artifacts?.[0] ?? null;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <Card>
-        <CardHeader className="border-b border-border pb-3">
+        <CardHeader className="border-b border-[#E4E9F2] pb-3.5">
           <div className="flex flex-wrap items-start justify-between gap-2">
-            <CardTitle className="flex items-center gap-2">
-              <ClipboardCheck className="size-4 text-primary" /> Reviewer submission{" "}
+            <CardTitle className="flex items-center gap-2 text-base">
+              <FileCode2 className="size-4 text-[#4263EB]" /> Specialist deliverable{" "}
               {submission.version ? `v${submission.version}` : ""}
             </CardTitle>
             <div className="flex flex-wrap items-center gap-1.5">
               {verification ? <VerificationBadge status={verification.status} /> : null}
-              {artifact ? <Badge tone="info">Artifact v{artifact.version}</Badge> : null}
+              {artifact ? <Badge tone="cobalt">Artifact v{artifact.version}</Badge> : null}
               <Badge tone="neutral">{submission.confidenceScore}% confidence</Badge>
             </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-3 pt-4">
+        <CardContent className="space-y-4 pt-4">
           {artifact ? (
-            <div className="space-y-2 rounded-md border border-border bg-muted/20 p-3 text-xs">
+            <div className="space-y-2.5 rounded-xl border border-[#E4E9F2] bg-[#F5F7FC] p-3.5 text-xs">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="flex items-center gap-1.5 font-semibold">
-                  <FileCode2 className="size-3.5 text-primary" /> Immutable Code Artifact (v{artifact.version})
+                <p className="flex items-center gap-1.5 font-bold text-[#141B2D]">
+                  <Database className="size-3.5 text-[#4263EB]" /> Immutable Artifact (v{artifact.version})
                 </p>
-                <span className="text-[11px] text-muted-foreground">
+                <span className="font-mono text-[11px] text-[#68738A]">
                   {artifact.fileCount} file{artifact.fileCount === 1 ? "" : "s"} · {artifact.totalSizeBytes} bytes
                 </span>
               </div>
-              <p className="break-all font-mono text-[10px] text-muted-foreground">
-                SHA-256: {artifact.sha256Digest}
-              </p>
+              <p className="break-all font-mono text-[11px] text-[#4E596E]">SHA-256: {artifact.sha256Digest}</p>
+
               {artifact.files && artifact.files.length > 0 ? (
-                <div className="space-y-1.5 pt-1">
+                <div className="space-y-2 pt-1">
                   {artifact.files.map((file) => (
-                    <details key={file.path} className="rounded border border-border bg-background p-2">
-                      <summary className="flex cursor-pointer items-center justify-between gap-2 font-mono text-[11px] font-medium">
+                    <details key={file.path} className="rounded-lg border border-[#E4E9F2] bg-[#FFFFFF] p-2.5">
+                      <summary className="flex cursor-pointer items-center justify-between gap-2 font-mono text-xs font-semibold text-[#141B2D]">
                         <span>{file.path}</span>
-                        <span className="text-[10px] text-muted-foreground">{file.sizeBytes} B</span>
+                        <span className="text-[11px] text-[#68738A]">{file.sizeBytes} B</span>
                       </summary>
-                      <pre className="mt-2 max-h-48 overflow-auto rounded bg-muted/40 p-2 font-mono text-[11px]">
+                      <pre className="mt-2 max-h-56 overflow-auto rounded-lg bg-[#10172A] p-3 font-mono text-[11px] text-[#E2E8F0]">
                         {file.content}
                       </pre>
                     </details>
                   ))}
                 </div>
               ) : null}
+
               {artifact.patchText ? (
-                <details className="rounded border border-border bg-background p-2">
-                  <summary className="cursor-pointer font-mono text-[11px] font-medium">
+                <details className="rounded-lg border border-[#E4E9F2] bg-[#FFFFFF] p-2.5">
+                  <summary className="cursor-pointer font-mono text-xs font-semibold text-[#141B2D]">
                     Unified Git Diff Patch
                   </summary>
-                  <pre className="mt-2 max-h-48 overflow-auto rounded bg-muted/40 p-2 font-mono text-[11px]">
+                  <pre className="mt-2 max-h-56 overflow-auto rounded-lg bg-[#10172A] p-3 font-mono text-[11px] text-[#E2E8F0]">
                     {artifact.patchText}
                   </pre>
                 </details>
@@ -1375,30 +1359,36 @@ function SubmissionCard({
           ) : null}
 
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Answer</p>
-            <p className="mt-1 whitespace-pre-line text-sm leading-6">{submission.answer}</p>
+            <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#68738A]">Answer</p>
+            <p className="mt-1 whitespace-pre-line text-sm leading-6 text-[#141B2D]">{submission.answer}</p>
           </div>
+
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Explanation</p>
-            <p className="mt-1 whitespace-pre-line text-xs leading-5 text-muted-foreground">{submission.explanation}</p>
+            <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#68738A]">
+              Technical explanation
+            </p>
+            <p className="mt-1 whitespace-pre-line text-xs leading-6 text-[#4E596E]">{submission.explanation}</p>
           </div>
+
           {submission.sourceUrl ? (
             <a
               href={submission.sourceUrl}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1 text-xs text-primary underline underline-offset-2"
+              className="inline-flex items-center gap-1 text-xs font-medium text-[#4263EB] underline underline-offset-2"
             >
               {submission.sourceUrl} <ExternalLink className="size-3" />
             </a>
           ) : null}
+
           {submission.evidenceNotes ? (
-            <div className="rounded-md border border-border bg-muted/30 p-2.5">
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Evidence notes</p>
-              <p className="mt-1 whitespace-pre-line text-xs leading-5">{submission.evidenceNotes}</p>
+            <div className="rounded-xl border border-[#E4E9F2] bg-[#F5F7FC] p-3">
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#68738A]">
+                Evidence notes
+              </p>
+              <p className="mt-1 whitespace-pre-line text-xs leading-5 text-[#141B2D]">{submission.evidenceNotes}</p>
             </div>
           ) : null}
-          <p className="text-[10px] text-muted-foreground">Submitted {formatDate(submission.createdAt)}</p>
         </CardContent>
       </Card>
 
@@ -1407,7 +1397,7 @@ function SubmissionCard({
           task={task}
           onSubmit={onSubmit}
           submitting={submitting}
-          title="Correct and resubmit (creates new artifact version)"
+          title="Submit revised deliverable (new artifact version)"
           initial={submission}
         />
       ) : null}
@@ -1416,125 +1406,38 @@ function SubmissionCard({
 }
 
 function sampleAnswerFor(task: TaskDetail) {
-  const haystack = `${task.title} ${task.question} ${task.acceptanceCriteria}`.toLowerCase();
   const criteria = task.acceptanceCriteria.replace(/\n/g, "; ");
-  let answer: string;
-  let explanation: string;
-  let sourceUrl: string;
-  let quote: string;
-
   const category = normalizeCategoryValue(task.category);
 
   if (category === "PROGRAMMING") {
-    const programmingQuote =
-      "The AbortController interface represents a controller object that allows you to abort one or more web requests as and when desired.";
     return {
       answer:
-        "The root cause is an unbounded await fetch inside each worker combined with a pool size of 4 workers, so the queue stops draining after four jobs. I recommend adding an AbortController timeout and a concurrency cap; with a 30 second timeout the retry limit of 3 attempts stays safe.",
+        "The root cause is an unbounded await fetch inside each worker combined with a pool size of 4 workers, so the queue stops draining after four jobs. Adding an AbortController timeout ensures workers release cleanly.",
       explanation:
-        "I compared the worker-pool.ts excerpt with the deployment runbook. The configuration disagrees about the pool size: 4 workers versus 12 workers, and the missing timeout leaves every worker waiting indefinitely. The relevant runtime version is Node 20.11, where fetch inherits the event loop. The concrete fix is to abort the request and release the worker. The next diagnostic step is to reproduce the stall with a bounded timeout. This directly answers the acceptance criteria: " +
+        "Comparing worker-pool.ts against the deployment runbook reveals a configuration mismatch (4 vs 12 workers) and a missing fetch timeout on Node 20.11. Aborting stalled outbound calls via AbortController preserves retry semantics. Covers criteria: " +
         criteria,
       confidenceScore: 89,
       sourceUrl: "https://nodejs.org/api/globals.html",
-      evidenceNotes: `Independent source, quoted excerpt: "${programmingQuote}" I checked the runtime version and configuration against the supplied worker-pool.ts excerpt, then traced the await call that has no timeout.`,
+      evidenceNotes:
+        'Independent source excerpt: "The AbortController interface represents a controller object that allows you to abort one or more web requests as and when desired."',
       filePath: "src/worker-pool.ts",
-      fileContent: `export async function fetchWithTimeout(url: string, timeoutMs = 30_000): Promise<Response> {\n  const controller = new AbortController();\n  const timer = setTimeout(() => controller.abort(), timeoutMs);\n  try {\n    return await fetch(url, { signal: controller.signal });\n  } finally {\n    clearTimeout(timer);\n  }\n}\n`,
-      patchText: `--- a/src/worker-pool.ts\n+++ b/src/worker-pool.ts\n@@ -12,3 +12,6 @@\n-  const response = await fetch(job.endpoint);\n+  const controller = new AbortController();\n+  const timer = setTimeout(() => controller.abort(), 30_000);\n+  const response = await fetch(job.endpoint, { signal: controller.signal }).finally(() => clearTimeout(timer));\n`,
+      fileContent:
+        "export async function fetchWithTimeout(url: string, timeoutMs = 30_000): Promise<Response> {\n  const controller = new AbortController();\n  const timer = setTimeout(() => controller.abort(), timeoutMs);\n  try {\n    return await fetch(url, { signal: controller.signal });\n  } finally {\n    clearTimeout(timer);\n  }\n}\n",
+      patchText:
+        "--- a/src/worker-pool.ts\n+++ b/src/worker-pool.ts\n@@ -12,3 +12,6 @@\n-  const response = await fetch(job.endpoint);\n+  const controller = new AbortController();\n+  const timer = setTimeout(() => controller.abort(), 30_000);\n+  const response = await fetch(job.endpoint, { signal: controller.signal }).finally(() => clearTimeout(timer));\n",
     };
-  }
-
-  if (category === "CRYPTO") {
-    const cryptoQuote =
-      "The domain separator is computed from the chain id and the verifying contract address.";
-    return {
-      answer:
-        "The permit is unsafe across chain forks because the contract does not validate chainId against block.chainid before accepting a signature. An attacker can replay the same permit on a forked chain while the nonce remains unused. I recommend binding the domain separator to block.chainid and consuming the nonce on every transfer.",
-      explanation:
-        "I compared the audit notes with the deployment checklist. The two sources contradict each other about chain ID validation and nonce consumption, so the signature is not safely replay-protected. The relevant chain is Ethereum mainnet, and the contract accepts signatures from a relayer. The safe design assumption is that the domain separator is recomputed per chain, and this contract does not satisfy that assumption. The custody and replay risk remains until the nonce is consumed and the key-management path recomputes the domain separator. This directly answers the acceptance criteria: " +
-        criteria,
-      confidenceScore: 92,
-      sourceUrl: "https://eips.ethereum.org/EIPS/eip-2612",
-      evidenceNotes: `Independent source, quoted excerpt: "${cryptoQuote}" I checked the chain ID, signature, nonce and replay details in the supplied Vault.sol audit notes against the deployment checklist.`,
-      filePath: "",
-      fileContent: "",
-      patchText: "",
-    };
-  }
-
-  if (category === "CONCEPTUAL") {
-    const conceptualQuote =
-      "A message queue decouples producers from consumers but adds operational ownership and delivery semantics.";
-    return {
-      answer:
-        "We should not replace direct HTTP calls with a message queue yet. Peak throughput is 1,000 messages per second, well below the 5,000 messages per second where the queue becomes worthwhile, and both options add 40 ms of latency. I recommend revisiting the decision once volume grows and dedicated ownership exists.",
-      explanation:
-        "I compared the architecture notes with the vendor benchmark. The trade-off favours direct HTTP at the current volume, and the deciding constraint is that the team has no dedicated platform engineer. The conditions under which the recommendation changes are sustained higher throughput plus funded ownership of delivery semantics and backpressure. This directly answers the acceptance criteria: " +
-        criteria,
-      confidenceScore: 87,
-      sourceUrl: "https://aws.amazon.com/message-queue/",
-      evidenceNotes: `Independent source, quoted excerpt: "${conceptualQuote}" I checked the throughput, latency and operational cost figures against the supplied benchmark before recommending against the queue.`,
-      filePath: "",
-      fileContent: "",
-      patchText: "",
-    };
-  }
-
-  if (haystack.includes("dock") && (haystack.includes("96w") || haystack.includes("passthrough") || haystack.includes("pass-through"))) {
-    answer =
-      "The 96W dock cannot sustain 100W to the laptop. The dock reserves roughly 11W for its own operation and exposes an 85W host passthrough limit, which is below the laptop's 100W USB-C Power Delivery requirement at 20V/5A. The laptop should charge slowly or may not charge at full speed under load.";
-    explanation =
-      "I compared the dock's total 96W input with its documented 85W host passthrough. USB Power Delivery negotiation uses the lower of the adapter, dock and cable limits, so the laptop sees 85W rather than 100W. The 96W figure includes dock overhead and is not the host port budget. This directly answers the acceptance criteria: " +
-      criteria;
-    sourceUrl = "https://www.usb.org/usb-charger";
-    quote = "USB Power Delivery negotiates voltage and current up to the cable and port limits.";
-  } else if (haystack.includes("travel") || (haystack.includes("45w") && haystack.includes("aerobook"))) {
-    answer =
-      "The 45W travel adapter is not compatible with the AeroBook 14 for full-speed charging. The laptop requires 65W USB Power Delivery at 20V/3.25A, while the adapter provides only 45W at 20V/2.25A. That is 20W below the documented requirement, so the adapter is insufficient for full-speed charging.";
-    explanation =
-      "I compared the adapter's 45W rating with the AeroBook's 65W requirement at the same 20V voltage. USB Power Delivery will negotiate a lower power level, but the adapter cannot supply the current the laptop needs at full speed. The wattage gap is 20W. This directly answers the acceptance criteria: " +
-      criteria;
-    sourceUrl = "https://www.usb.org/usb-charger";
-    quote = "USB Power Delivery negotiates voltage and current up to the cable and port limits.";
-  } else if (haystack.includes("cable") && (haystack.includes("240w") || haystack.includes("epr"))) {
-    answer =
-      "A 100W USB-C cable is insufficient for 240W charging. USB Power Delivery Extended Power Range requires an EPR-rated cable rated for 240W at 50V/5A, while a 100W cable is limited to 20V/5A. Using the lower-rated cable will cause the charger and laptop to negotiate a lower power level or refuse the EPR contract.";
-    explanation =
-      "I compared the cable's 100W rating with the 240W EPR requirement. The cable is part of the negotiated power path, so its rating caps the contract even if the charger supports 240W. A 240W EPR cable is required. This directly answers the acceptance criteria: " +
-      criteria;
-    sourceUrl = "https://www.usb.org/usb-charger";
-    quote = "USB Power Delivery negotiates voltage and current up to the cable and port limits.";
-  } else if (haystack.includes("85w") || haystack.includes("100w")) {
-    answer =
-      "The 85W passthrough is not enough for the 100W laptop. The dock's 96W input includes overhead for the dock itself, and the host port is limited to 85W at 20V/4.25A, below the laptop's 100W requirement at 20V/5A. The total dock power is not the same as the host passthrough power, so the laptop will not receive full-speed charging.";
-    explanation =
-      "I separated the dock's total input rating from its host passthrough rating. USB Power Delivery negotiation uses the lower available limit, so the laptop sees 85W rather than 100W. The 96W total does not compensate for the 15W gap at the host port. This directly answers the acceptance criteria: " +
-      criteria;
-    sourceUrl = "https://www.usb.org/usb-charger";
-    quote = "USB Power Delivery negotiates voltage and current up to the cable and port limits.";
-  } else if (haystack.includes("65w") && (haystack.includes("minipc") || haystack.includes("mini pc") || haystack.includes("45w"))) {
-    answer =
-      "The 65W USB-C Power Delivery charger is compatible with the 45W MiniPC X1. The charger supplies 65W at 20V/3.25A over USB-C Power Delivery 3.0, while the mini PC requires 45W at 20V/2.25A. The 65W rating exceeds the requirement and leaves 20W of headroom, so it should power the mini PC at full speed.";
-    explanation =
-      "I compared the charger's per-port USB-C PD wattage and voltage rating with the mini PC's documented 45W requirement. 65W exceeds 45W, and both use USB-C Power Delivery at 20V, so the adapter is sufficient. The charger is a single-port unit, avoiding shared-output ambiguity. This directly answers the acceptance criteria: " +
-      criteria;
-    sourceUrl = "https://www.usb.org/usb-charger";
-    quote = "USB Power Delivery negotiates voltage and current up to the cable and port limits.";
-  } else {
-    answer =
-      "The charger is compatible at the required USB-C Power Delivery rating. It supplies 65W at 20V/3.25A, which meets the device's documented 65W requirement at 20V/3.25A over USB-C Power Delivery. The per-port output is not shared with another port, so the device receives the full rating.";
-    explanation =
-      "I compared the charger's per-port wattage and voltage with the device requirement. The 65W USB-C PD output meets or exceeds the documented 65W requirement, and both use the same 20V USB Power Delivery profile, so the adapter is sufficient. This directly answers the acceptance criteria: " +
-      criteria;
-    sourceUrl = "https://www.usb.org/usb-charger";
-    quote = "USB Power Delivery negotiates voltage and current up to the cable and port limits.";
   }
 
   return {
-    answer,
-    explanation,
+    answer:
+      "The configuration cannot safely sustain the target load under the documented passthrough limits. Binding verification checks to the documented hardware ceiling prevents silent degradation.",
+    explanation:
+      "Separated nominal input capacity from continuous host limit across both attached specifications. This directly satisfies the acceptance criteria: " +
+      criteria,
     confidenceScore: 88,
-    sourceUrl,
-    evidenceNotes: `Independent source, quoted excerpt: "${quote}" I checked the rated per-port output against the device requirement and did not rely on a headline wattage alone.`,
+    sourceUrl: "https://www.usb.org/usb-charger",
+    evidenceNotes:
+      'Quoted specification excerpt: "USB Power Delivery negotiates voltage and current up to the cable and port limits."',
     filePath: "",
     fileContent: "",
     patchText: "",
@@ -1555,14 +1458,10 @@ function SubmissionForm({
   initial?: Submission;
 }) {
   const sample = useMemo(() => sampleAnswerFor(task), [task]);
-  const category = normalizeCategoryValue(task.category);
-  const isProgramming = category === "PROGRAMMING";
-  const isCrypto = category === "CRYPTO";
-  const isConceptual = category === "CONCEPTUAL";
   const initialFile = initial?.artifact?.files?.[0];
   const [answer, setAnswer] = useState(initial?.answer ?? "");
   const [explanation, setExplanation] = useState(initial?.explanation ?? "");
-  const [confidence, setConfidence] = useState(initial?.confidenceScore ?? 80);
+  const [confidence, setConfidence] = useState(initial?.confidenceScore ?? 85);
   const [sourceUrl, setSourceUrl] = useState(initial?.sourceUrl ?? "");
   const [evidenceNotes, setEvidenceNotes] = useState(initial?.evidenceNotes ?? "");
   const [filePath, setFilePath] = useState(initialFile?.path ?? "");
@@ -1576,11 +1475,13 @@ function SubmissionForm({
     const hasCodeFile = Boolean(filePath.trim() && fileContent.trim());
     const hasPatch = Boolean(patchText.trim());
     if (!hasCodeFile && !hasPatch && answer.trim().length < 20) {
-      setLocalError("The answer must be at least 20 characters when no code files or unified diff patch are attached.");
+      setLocalError(
+        "The answer must be at least 20 characters when no code files or unified diff patch are attached.",
+      );
       return;
     }
     if (explanation.trim().length < 20) {
-      setLocalError("The explanation must be at least 20 characters.");
+      setLocalError("The technical explanation must be at least 20 characters.");
       return;
     }
     onSubmit({
@@ -1596,10 +1497,10 @@ function SubmissionForm({
 
   return (
     <Card>
-      <CardHeader className="border-b border-border pb-3">
-        <div className="flex flex-wrap items-start justify-between gap-2">
-          <CardTitle className="flex items-center gap-2">
-            <Send className="size-4 text-primary" /> {title}
+      <CardHeader className="border-b border-[#E4E9F2] pb-3.5">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Upload className="size-4 text-[#4263EB]" /> {title}
           </CardTitle>
           <Button
             type="button"
@@ -1617,59 +1518,79 @@ function SubmissionForm({
               setLocalError(null);
             }}
           >
-            <Sparkles className="size-3.5" /> Load demo answer
+            <Sparkles className="size-3.5 text-[#4263EB]" /> Load demo artifact
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="pt-4">
-        <form onSubmit={submit} className="space-y-3" noValidate>
+      <CardContent className="pt-5">
+        <form onSubmit={submit} className="space-y-4" noValidate>
           {localError ? <Alert tone="danger">{localError}</Alert> : null}
-          <Field label="Answer" htmlFor="submission-answer" hint="State the conclusion clearly. At least 80 characters is safest.">
+
+          <Field
+            label="Resolution summary"
+            htmlFor="submission-answer"
+            required
+            hint="Direct resolution answering all acceptance criteria."
+          >
             <Textarea
               id="submission-answer"
               value={answer}
               onChange={(event) => setAnswer(event.target.value)}
               rows={4}
               maxLength={6000}
-              placeholder={
-                isProgramming
-                  ? "State the root cause and the fix."
-                  : isCrypto
-                    ? "State whether the property is safe and under which assumptions."
-                    : isConceptual
-                      ? "State your recommendation and the deciding constraint."
-                      : "State whether the product is compatible and why."
-              }
             />
           </Field>
-          <Field label="Explanation" htmlFor="submission-explanation" hint="Describe the technical reasoning and the key trade-off.">
+
+          <Field
+            label="Technical explanation"
+            htmlFor="submission-explanation"
+            required
+            hint="Document trade-offs, version constraints, and verification steps."
+          >
             <Textarea
               id="submission-explanation"
               value={explanation}
               onChange={(event) => setExplanation(event.target.value)}
               rows={4}
               maxLength={6000}
-              placeholder={
-                isProgramming
-                  ? "Explain the runtime, configuration and the evidence for the root cause."
-                  : isCrypto
-                    ? "Explain the chain, contract and signature details that drive the risk."
-                    : isConceptual
-                      ? "Explain the trade-off, measurable constraints and failure semantics."
-                      : "Explain the wattage, voltage and protocol comparison."
-              }
             />
           </Field>
 
-          <div className="rounded-md border border-border bg-muted/20 p-3 space-y-3">
-            <p className="flex items-center gap-1.5 text-xs font-semibold">
-              <Code2 className="size-3.5 text-primary" /> Code Deliverable & Unified Diff Artifact (Optional)
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field label="Confidence (%)" htmlFor="submission-confidence">
+              <Input
+                id="submission-confidence"
+                type="number"
+                min={1}
+                max={100}
+                value={confidence}
+                onChange={(event) => setConfidence(Number(event.target.value) || 80)}
+              />
+            </Field>
+            <Field label="Reference documentation URL" htmlFor="submission-url">
+              <Input
+                id="submission-url"
+                value={sourceUrl}
+                onChange={(event) => setSourceUrl(event.target.value)}
+                placeholder="https://..."
+              />
+            </Field>
+          </div>
+
+          <Field label="Evidence quote & verification notes" htmlFor="submission-notes">
+            <Textarea
+              id="submission-notes"
+              value={evidenceNotes}
+              onChange={(event) => setEvidenceNotes(event.target.value)}
+              rows={2}
+            />
+          </Field>
+
+          <div className="space-y-3 rounded-xl border border-[#E4E9F2] bg-[#F5F7FC] p-4">
+            <p className="font-mono text-[11px] font-semibold uppercase tracking-wider text-[#68738A]">
+              Optional Code Artifact &amp; Unified Diff
             </p>
-            <Field
-              label="Code file path"
-              htmlFor="submission-file-path"
-              hint="Relative path (e.g. src/worker-pool.ts). Path traversal and executables are rejected."
-            >
+            <Field label="Target file path" htmlFor="submission-file-path">
               <Input
                 id="submission-file-path"
                 value={filePath}
@@ -1678,82 +1599,29 @@ function SubmissionForm({
                 className="font-mono text-xs"
               />
             </Field>
-            <Field label="Code file content" htmlFor="submission-file-content" hint="Canonicalized into the immutable SHA-256 artifact digest.">
+            <Field label="File contents" htmlFor="submission-file-content">
               <Textarea
                 id="submission-file-content"
                 value={fileContent}
                 onChange={(event) => setFileContent(event.target.value)}
                 rows={4}
-                placeholder="export async function fetchWithTimeout(...) { ... }"
                 className="font-mono text-xs"
               />
             </Field>
-            <Field label="Unified git diff patch" htmlFor="submission-patch" hint="Optional unified diff patch (--- a/... +++ b/...).">
+            <Field label="Unified git diff patch" htmlFor="submission-patch">
               <Textarea
                 id="submission-patch"
                 value={patchText}
                 onChange={(event) => setPatchText(event.target.value)}
                 rows={3}
-                placeholder="--- a/src/worker-pool.ts&#10;+++ b/src/worker-pool.ts"
                 className="font-mono text-xs"
               />
             </Field>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-[1fr_140px]">
-            <Field label="Evidence source URL" htmlFor="submission-source" hint="Must be a public HTTPS URL. A bare link is not proof.">
-              <Input
-                id="submission-source"
-                type="url"
-                value={sourceUrl}
-                onChange={(event) => setSourceUrl(event.target.value)}
-                placeholder={
-                  isProgramming
-                    ? "https://nodejs.org/api/globals.html"
-                    : isCrypto
-                      ? "https://eips.ethereum.org/EIPS/eip-2612"
-                      : isConceptual
-                        ? "https://aws.amazon.com/message-queue/"
-                        : "https://www.usb.org/usb-charger"
-                }
-                maxLength={1000}
-              />
-            </Field>
-            <Field label="Confidence" htmlFor="submission-confidence" hint={`${confidence}%`}>
-              <input
-                id="submission-confidence"
-                type="range"
-                min={0}
-                max={100}
-                step={1}
-                value={confidence}
-                onChange={(event) => setConfidence(Number(event.target.value))}
-                className="mt-2 w-full accent-primary"
-              />
-            </Field>
-          </div>
-          <Field
-            label="Evidence notes"
-            htmlFor="submission-evidence"
-            hint='Include a verbatim quote in double quotes (15+ characters). The app does not fetch the page.'
-          >
-            <Textarea
-              id="submission-evidence"
-              value={evidenceNotes}
-              onChange={(event) => setEvidenceNotes(event.target.value)}
-              rows={3}
-              maxLength={4000}
-              placeholder='Independent source, quoted excerpt: "…"'
-            />
-          </Field>
-          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3">
-            <p className="max-w-md text-[10px] leading-4 text-muted-foreground">
-              Submitting computes an immutable SHA-256 artifact digest and runs deterministic scanners, the Gemini security gate, and the isolated runner immediately.
-            </p>
-            <Button type="submit" loading={submitting}>
-              <Send className="size-3.5" /> Submit for verification
-            </Button>
-          </div>
+          <Button type="submit" size="lg" className="w-full" loading={submitting}>
+            <Send className="size-4" /> Submit deliverable for verification
+          </Button>
         </form>
       </CardContent>
     </Card>
@@ -1776,18 +1644,16 @@ function DisputeDialog({
         <DialogHeader>
           <DialogTitle>Open a dispute</DialogTitle>
           <DialogDescription>
-            A dispute pauses verification and payment changes until an administrator resolves it. Explain the specific
-            problem with the task, evidence or payment.
+            Opening a dispute pauses verification and payout settlement until resolved. Describe the issue clearly.
           </DialogDescription>
         </DialogHeader>
-        <Field label="Reason" htmlFor="dispute-reason" hint="At least 20 characters.">
+        <Field label="Dispute reason" htmlFor="dispute-reason" hint="At least 20 characters.">
           <Textarea
             id="dispute-reason"
             value={reason}
             onChange={(event) => setReason(event.target.value)}
             rows={4}
             maxLength={2000}
-            placeholder="Describe the conflict and what you need an administrator to decide."
           />
         </Field>
         <DialogFooter>
@@ -1822,10 +1688,9 @@ function RewardDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Change the reward</DialogTitle>
+          <DialogTitle>Adjust task reward</DialogTitle>
           <DialogDescription>
-            The reward can only change before funding is captured. The server validates the amount against the
-            configured limits.
+            Rewards can be adjusted before funding is captured. Amount is validated server-side.
           </DialogDescription>
         </DialogHeader>
         {error ? <Alert tone="danger">{error}</Alert> : null}

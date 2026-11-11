@@ -58,7 +58,7 @@ export default function SkillAssessmentPage() {
     passingScore: number;
   }>({
     skillName: "TypeScript",
-    levelName: "Level 1 — Foundation",
+    levelName: "Level 1 â€” Foundation",
     passingScore: 80,
   });
   const [questions, setQuestions] = useState<SkillAssessmentQuestion[]>([]);
@@ -352,26 +352,26 @@ export default function SkillAssessmentPage() {
         <div className="mb-6 flex items-center justify-between">
           <Link
             to="/app/onboarding/skills"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#69736D] hover:text-[#202722]"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#68738A] hover:text-[#141B2D]"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Skill Catalogue
           </Link>
-          <span className="font-mono text-xs text-[#69736D] uppercase">
+          <span className="font-mono text-xs text-[#68738A] uppercase">
             Proctoring Pre-Flight Gate
           </span>
         </div>
 
-        <div className="rounded-2xl border border-[#E5E1D7] bg-[#FFFEFA] p-6 shadow-sm sm:p-8">
-          <div className="border-b border-[#E5E1D7] pb-5">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#365FEA]/30 bg-[#365FEA]/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#365FEA]">
+        <div className="rounded-2xl border border-[#E4E9F2] bg-[#FFFFFF] p-6 shadow-sm sm:p-8">
+          <div className="border-b border-[#E4E9F2] pb-5">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#4263EB]/30 bg-[#4263EB]/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#4263EB]">
               <ShieldCheck className="h-4 w-4" />
               Proctored Credential Verification
             </div>
-            <h1 className="font-heading mt-3 text-2xl font-bold tracking-tight text-[#202722] sm:text-3xl">
+            <h1 className="font-heading mt-3 text-2xl font-bold tracking-tight text-[#141B2D] sm:text-3xl">
               Pre-Flight Proctoring Setup: {skillSlug.toUpperCase()} (Level {levelNum})
             </h1>
-            <p className="mt-2 text-sm leading-relaxed text-[#69736D]">
+            <p className="mt-2 text-sm leading-relaxed text-[#68738A]">
               TrustToPay certifications require compulsory webcam and screen sharing verification.
               Your evaluation will be analyzed in real time to guarantee integrity and unlock high-reward AI escalation assignments.
             </p>
@@ -387,28 +387,28 @@ export default function SkillAssessmentPage() {
           {/* Verification Steps Grid */}
           <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
             {/* 1. Camera Verification Card */}
-            <div className="flex flex-col justify-between rounded-xl border border-[#E5E1D7] bg-[#F7F5EF] p-5">
+            <div className="flex flex-col justify-between rounded-xl border border-[#E4E9F2] bg-[#F5F7FC] p-5">
               <div>
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-[#202722]">
-                    <Camera className="h-4 w-4 text-[#365FEA]" />
+                  <div className="flex items-center gap-2 text-sm font-semibold text-[#141B2D]">
+                    <Camera className="h-4 w-4 text-[#4263EB]" />
                     <span>1. Webcam Video Feed</span>
                   </div>
                   {cameraActive ? (
-                    <span className="inline-flex items-center gap-1 text-xs font-medium text-[#438866]">
+                    <span className="inline-flex items-center gap-1 text-xs font-medium text-[#0B7D56]">
                       <CheckCircle2 className="h-4 w-4" /> Active
                     </span>
                   ) : (
-                    <span className="text-xs text-[#69736D]">Required</span>
+                    <span className="text-xs text-[#68738A]">Required</span>
                   )}
                 </div>
 
-                <p className="mt-2 text-xs text-[#69736D]">
+                <p className="mt-2 text-xs text-[#68738A]">
                   Position your camera so your face and environment are clearly visible throughout the entire assessment.
                 </p>
 
                 {/* Camera Viewport */}
-                <div className="relative mt-4 aspect-video w-full overflow-hidden rounded-lg border border-[#E5E1D7] bg-black/5 flex items-center justify-center">
+                <div className="relative mt-4 aspect-video w-full overflow-hidden rounded-lg border border-[#E4E9F2] bg-black/5 flex items-center justify-center">
                   <video
                     ref={cameraVideoRef}
                     autoPlay
@@ -418,8 +418,8 @@ export default function SkillAssessmentPage() {
                   />
                   {!cameraActive && (
                     <div className="flex flex-col items-center gap-2 text-center p-4">
-                      <Video className="h-8 w-8 text-[#69736D]/60" />
-                      <span className="text-xs text-[#69736D]">Webcam feed not connected</span>
+                      <Video className="h-8 w-8 text-[#68738A]/60" />
+                      <span className="text-xs text-[#68738A]">Webcam feed not connected</span>
                     </div>
                   )}
                 </div>
@@ -431,8 +431,8 @@ export default function SkillAssessmentPage() {
                   size="sm"
                   className={`w-full text-xs font-semibold ${
                     cameraActive
-                      ? "border-[#438866] text-[#438866] bg-white hover:bg-[#438866]/10"
-                      : "bg-[#365FEA] text-white hover:bg-[#365FEA]/90"
+                      ? "border-[#12A875] text-[#0B7D56] bg-white hover:bg-[#12A875]/10"
+                      : "bg-[#4263EB] text-white hover:bg-[#4263EB]/90"
                   }`}
                   onClick={requestCamera}
                 >
@@ -442,28 +442,28 @@ export default function SkillAssessmentPage() {
             </div>
 
             {/* 2. Screen Share Verification Card */}
-            <div className="flex flex-col justify-between rounded-xl border border-[#E5E1D7] bg-[#F7F5EF] p-5">
+            <div className="flex flex-col justify-between rounded-xl border border-[#E4E9F2] bg-[#F5F7FC] p-5">
               <div>
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-[#202722]">
-                    <ScreenShare className="h-4 w-4 text-[#438866]" />
+                  <div className="flex items-center gap-2 text-sm font-semibold text-[#141B2D]">
+                    <ScreenShare className="h-4 w-4 text-[#0B7D56]" />
                     <span>2. Full Screen Sharing</span>
                   </div>
                   {screenActive ? (
-                    <span className="inline-flex items-center gap-1 text-xs font-medium text-[#438866]">
+                    <span className="inline-flex items-center gap-1 text-xs font-medium text-[#0B7D56]">
                       <CheckCircle2 className="h-4 w-4" /> Sharing
                     </span>
                   ) : (
-                    <span className="text-xs text-[#69736D]">Required</span>
+                    <span className="text-xs text-[#68738A]">Required</span>
                   )}
                 </div>
 
-                <p className="mt-2 text-xs text-[#69736D]">
+                <p className="mt-2 text-xs text-[#68738A]">
                   Share your entire screen. Navigating away, opening third-party AI interfaces, or switching tabs will be flagged.
                 </p>
 
                 {/* Screen Preview Viewport */}
-                <div className="relative mt-4 aspect-video w-full overflow-hidden rounded-lg border border-[#E5E1D7] bg-black/5 flex items-center justify-center">
+                <div className="relative mt-4 aspect-video w-full overflow-hidden rounded-lg border border-[#E4E9F2] bg-black/5 flex items-center justify-center">
                   <video
                     ref={screenVideoRef}
                     autoPlay
@@ -473,8 +473,8 @@ export default function SkillAssessmentPage() {
                   />
                   {!screenActive && (
                     <div className="flex flex-col items-center gap-2 text-center p-4">
-                      <ScreenShare className="h-8 w-8 text-[#69736D]/60" />
-                      <span className="text-xs text-[#69736D]">Screen stream not detected</span>
+                      <ScreenShare className="h-8 w-8 text-[#68738A]/60" />
+                      <span className="text-xs text-[#68738A]">Screen stream not detected</span>
                     </div>
                   )}
                 </div>
@@ -486,8 +486,8 @@ export default function SkillAssessmentPage() {
                   size="sm"
                   className={`w-full text-xs font-semibold ${
                     screenActive
-                      ? "border-[#438866] text-[#438866] bg-white hover:bg-[#438866]/10"
-                      : "bg-[#438866] text-white hover:bg-[#438866]/90"
+                      ? "border-[#12A875] text-[#0B7D56] bg-white hover:bg-[#12A875]/10"
+                      : "bg-[#12A875] text-white hover:bg-[#12A875]/90"
                   }`}
                   onClick={requestScreenShare}
                 >
@@ -499,13 +499,13 @@ export default function SkillAssessmentPage() {
 
           {/* Dev/Testing Mode fallback */}
           {!allChecksPassed && (
-            <div className="mt-4 flex items-center justify-between rounded-lg border border-dashed border-[#E5E1D7] p-3 text-xs text-[#69736D]">
+            <div className="mt-4 flex items-center justify-between rounded-lg border border-dashed border-[#E4E9F2] p-3 text-xs text-[#68738A]">
               <span>Testing without physical hardware?</span>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={enableSimulatedProctoring}
-                className="text-xs text-[#365FEA] hover:underline"
+                className="text-xs text-[#4263EB] hover:underline"
               >
                 Enable Proctored Simulator Mode
               </Button>
@@ -513,15 +513,15 @@ export default function SkillAssessmentPage() {
           )}
 
           {/* Policy Agreement Checkbox */}
-          <div className="mt-6 rounded-xl border border-[#E5E1D7] bg-[#FFFEFA] p-4">
+          <div className="mt-6 rounded-xl border border-[#E4E9F2] bg-[#FFFFFF] p-4">
             <label className="flex items-start gap-3 cursor-pointer">
               <input
                 type="checkbox"
                 checked={proctoringAgreement}
                 onChange={(e) => setProctoringAgreement(e.target.checked)}
-                className="mt-0.5 h-4 w-4 rounded border-[#E5E1D7] text-[#365FEA] focus:ring-[#365FEA]"
+                className="mt-0.5 h-4 w-4 rounded border-[#E4E9F2] text-[#4263EB] focus:ring-[#4263EB]"
               />
-              <span className="text-xs leading-relaxed text-[#202722]">
+              <span className="text-xs leading-relaxed text-[#141B2D]">
                 <strong>Proctored Evaluation Agreement:</strong> I confirm that I will complete this assessment
                 independently without unauthorized external assistance. I acknowledge that webcam and screen sharing feeds
                 are continuously monitored. Losing stream connectivity or excessive window unfocusing will automatically
@@ -531,8 +531,8 @@ export default function SkillAssessmentPage() {
           </div>
 
           {/* Launch Assessment Action */}
-          <div className="mt-6 flex flex-col items-center justify-between gap-4 border-t border-[#E5E1D7] pt-5 sm:flex-row">
-            <div className="text-xs text-[#69736D]">
+          <div className="mt-6 flex flex-col items-center justify-between gap-4 border-t border-[#E4E9F2] pt-5 sm:flex-row">
+            <div className="text-xs text-[#68738A]">
               Estimated duration: <strong>30 minutes</strong> | Passing threshold: <strong>80%</strong>
             </div>
 
@@ -541,7 +541,7 @@ export default function SkillAssessmentPage() {
               size="lg"
               disabled={!allChecksPassed || !proctoringAgreement}
               onClick={handleStartAssessment}
-              className="w-full sm:w-auto bg-[#365FEA] text-white hover:bg-[#365FEA]/90 disabled:opacity-50 text-sm font-semibold px-8"
+              className="w-full sm:w-auto bg-[#4263EB] text-white hover:bg-[#4263EB]/90 disabled:opacity-50 text-sm font-semibold px-8"
             >
               Enter Proctored Assessment
               <ArrowRight className="ml-2 h-4 w-4" />
@@ -559,20 +559,20 @@ export default function SkillAssessmentPage() {
     return (
       <div className="mx-auto max-w-xl px-4 py-16 text-center">
         <XCircle className="mx-auto mb-4 h-12 w-12 text-red-500" />
-        <h2 className="font-heading text-xl font-bold text-[#202722]">Assessment Session Error</h2>
-        <p className="mt-2 text-sm text-[#69736D]">{errorMessage ?? "Unable to initialize this assessment."}</p>
+        <h2 className="font-heading text-xl font-bold text-[#141B2D]">Assessment Session Error</h2>
+        <p className="mt-2 text-sm text-[#68738A]">{errorMessage ?? "Unable to initialize this assessment."}</p>
         <div className="mt-6 flex justify-center gap-3">
           <Button
             variant="outline"
             onClick={() => setStageState("PREFLIGHT")}
-            className="border-[#E5E1D7]"
+            className="border-[#E4E9F2]"
           >
             Retry Pre-Flight
           </Button>
           <Button
             variant="default"
             onClick={() => navigate("/app/onboarding/skills")}
-            className="bg-[#365FEA] text-white"
+            className="bg-[#4263EB] text-white"
           >
             Return to Catalogue
           </Button>
@@ -589,55 +589,55 @@ export default function SkillAssessmentPage() {
 
     return (
       <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-        <div className="overflow-hidden rounded-2xl border border-[#E5E1D7] bg-[#FFFEFA] p-8 shadow-sm text-center">
+        <div className="overflow-hidden rounded-2xl border border-[#E4E9F2] bg-[#FFFFFF] p-8 shadow-sm text-center">
           {/* Status Icon */}
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#F7F5EF]">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#F5F7FC]">
             {isPassed ? (
-              <CheckCircle2 className="h-10 w-10 text-[#438866]" />
+              <CheckCircle2 className="h-10 w-10 text-[#0B7D56]" />
             ) : (
-              <XCircle className="h-10 w-10 text-[#69736D]" />
+              <XCircle className="h-10 w-10 text-[#68738A]" />
             )}
           </div>
 
           <span
             className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wider ${
               isPassed
-                ? "border border-[#438866]/30 bg-[#438866]/10 text-[#438866]"
+                ? "border border-[#12A875]/30 bg-[#12A875]/10 text-[#0B7D56]"
                 : "border border-amber-300 bg-amber-50 text-amber-800"
             }`}
           >
-            {isPassed ? "Assessment Certified" : "Assessment Completed — Needs Retake"}
+            {isPassed ? "Assessment Certified" : "Assessment Completed â€” Needs Retake"}
           </span>
 
-          <h1 className="font-heading mt-4 text-3xl font-extrabold text-[#202722]">
+          <h1 className="font-heading mt-4 text-3xl font-extrabold text-[#141B2D]">
             {isPassed
               ? `Congratulations! You Certified in ${attemptResult.skillName}`
               : `${attemptResult.skillName} Assessment Result`}
           </h1>
 
-          <p className="mx-auto mt-2 max-w-md text-sm text-[#69736D]">
+          <p className="mx-auto mt-2 max-w-md text-sm text-[#68738A]">
             {isPassed
               ? `You achieved a score of ${attemptResult.score}%, exceeding the ${attemptResult.passingScore}% threshold for ${attemptResult.levelName}. Your credentials are live.`
               : `Your score of ${attemptResult.score}% did not meet the ${attemptResult.passingScore}% threshold. You may review the feedback below and retry after the cooldown period.`}
           </p>
 
           {/* Score Badge Details */}
-          <div className="my-8 grid grid-cols-3 gap-4 rounded-xl border border-[#E5E1D7] bg-[#F7F5EF] p-4 text-left">
+          <div className="my-8 grid grid-cols-3 gap-4 rounded-xl border border-[#E4E9F2] bg-[#F5F7FC] p-4 text-left">
             <div>
-              <div className="text-xs text-[#69736D]">Overall Score</div>
-              <div className="font-heading mt-1 text-2xl font-bold text-[#202722]">
+              <div className="text-xs text-[#68738A]">Overall Score</div>
+              <div className="font-heading mt-1 text-2xl font-bold text-[#141B2D]">
                 {attemptResult.score}%
               </div>
             </div>
             <div>
-              <div className="text-xs text-[#69736D]">Passing Threshold</div>
-              <div className="font-heading mt-1 text-2xl font-bold text-[#69736D]">
+              <div className="text-xs text-[#68738A]">Passing Threshold</div>
+              <div className="font-heading mt-1 text-2xl font-bold text-[#68738A]">
                 {attemptResult.passingScore}%
               </div>
             </div>
             <div>
-              <div className="text-xs text-[#69736D]">Verified Credential</div>
-              <div className="font-heading mt-1 text-lg font-bold text-[#438866]">
+              <div className="text-xs text-[#68738A]">Verified Credential</div>
+              <div className="font-heading mt-1 text-lg font-bold text-[#0B7D56]">
                 {attemptResult.verifiedLevelName ?? `Level ${attemptResult.verifiedLevel}`}
               </div>
             </div>
@@ -646,26 +646,26 @@ export default function SkillAssessmentPage() {
           {/* Evaluations Breakdown */}
           {attemptResult.evaluations && attemptResult.evaluations.length > 0 && (
             <div className="mt-6 text-left">
-              <h3 className="font-heading text-sm font-bold text-[#202722] mb-3">
+              <h3 className="font-heading text-sm font-bold text-[#141B2D] mb-3">
                 Question Grading Feedback
               </h3>
               <div className="space-y-3">
                 {attemptResult.evaluations.map((evalItem, idx) => (
                   <div
                     key={evalItem.questionId}
-                    className="rounded-lg border border-[#E5E1D7] bg-white p-3 text-xs"
+                    className="rounded-lg border border-[#E4E9F2] bg-white p-3 text-xs"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-semibold text-[#202722]">Question {idx + 1}</span>
+                      <span className="font-semibold text-[#141B2D]">Question {idx + 1}</span>
                       <span
                         className={`font-semibold ${
-                          evalItem.passed ? "text-[#438866]" : "text-amber-700"
+                          evalItem.passed ? "text-[#0B7D56]" : "text-amber-700"
                         }`}
                       >
                         {evalItem.earnedWeight} / {evalItem.maxWeight} pts
                       </span>
                     </div>
-                    <p className="mt-1 text-[#69736D]">{evalItem.feedback}</p>
+                    <p className="mt-1 text-[#68738A]">{evalItem.feedback}</p>
                   </div>
                 ))}
               </div>
@@ -673,12 +673,12 @@ export default function SkillAssessmentPage() {
           )}
 
           {/* Actions */}
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3 border-t border-[#E5E1D7] pt-6">
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3 border-t border-[#E4E9F2] pt-6">
             <Button
               variant="outline"
               size="sm"
               onClick={() => navigate("/app/onboarding/skills")}
-              className="border-[#E5E1D7]"
+              className="border-[#E4E9F2]"
             >
               Back to Skill Catalogue
             </Button>
@@ -694,7 +694,7 @@ export default function SkillAssessmentPage() {
                     }`,
                   )
                 }
-                className="bg-[#438866] text-white hover:bg-[#438866]/90 font-semibold"
+                className="bg-[#12A875] text-white hover:bg-[#12A875]/90 font-semibold"
               >
                 Proceed to Level {attemptResult.level + 1}
                 <ArrowRight className="ml-1.5 h-4 w-4" />
@@ -705,7 +705,7 @@ export default function SkillAssessmentPage() {
               variant="default"
               size="sm"
               onClick={() => navigate("/app/marketplace")}
-              className="bg-[#365FEA] text-white hover:bg-[#365FEA]/90 font-semibold"
+              className="bg-[#4263EB] text-white hover:bg-[#4263EB]/90 font-semibold"
             >
               Browse Qualified Tasks
             </Button>
@@ -723,12 +723,12 @@ export default function SkillAssessmentPage() {
       {/* Stream Interruption Full Modal Overlay */}
       {isInterrupted && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="max-w-md w-full rounded-2xl border border-red-300 bg-[#FFFEFA] p-6 text-center shadow-2xl">
+          <div className="max-w-md w-full rounded-2xl border border-red-300 bg-[#FFFFFF] p-6 text-center shadow-2xl">
             <AlertTriangle className="mx-auto mb-3 h-10 w-10 text-red-600 animate-bounce" />
-            <h3 className="font-heading text-lg font-bold text-[#202722]">
+            <h3 className="font-heading text-lg font-bold text-[#141B2D]">
               Proctoring Stream Interrupted
             </h3>
-            <p className="mt-2 text-xs leading-relaxed text-[#69736D]">
+            <p className="mt-2 text-xs leading-relaxed text-[#68738A]">
               Your webcam or screen sharing stream was lost or disconnected. Assessment input and the exam timer
               have been paused to preserve test integrity.
             </p>
@@ -738,7 +738,7 @@ export default function SkillAssessmentPage() {
               <span className="font-mono text-base text-red-700">{interruptionGraceSeconds}s</span>
             </div>
 
-            <p className="text-[11px] text-[#69736D]">
+            <p className="text-[11px] text-[#68738A]">
               Restore camera and screen access before the grace period expires to resume your assessment.
             </p>
 
@@ -748,7 +748,7 @@ export default function SkillAssessmentPage() {
                   size="sm"
                   variant="default"
                   onClick={requestCamera}
-                  className="bg-[#365FEA] text-white text-xs font-semibold"
+                  className="bg-[#4263EB] text-white text-xs font-semibold"
                 >
                   <Camera className="mr-1.5 h-3.5 w-3.5" />
                   Re-enable Camera
@@ -759,7 +759,7 @@ export default function SkillAssessmentPage() {
                   size="sm"
                   variant="default"
                   onClick={requestScreenShare}
-                  className="bg-[#438866] text-white text-xs font-semibold"
+                  className="bg-[#12A875] text-white text-xs font-semibold"
                 >
                   <ScreenShare className="mr-1.5 h-3.5 w-3.5" />
                   Re-share Entire Screen
@@ -769,7 +769,7 @@ export default function SkillAssessmentPage() {
                 size="sm"
                 variant="ghost"
                 onClick={enableSimulatedProctoring}
-                className="text-xs text-[#69736D] hover:text-[#202722]"
+                className="text-xs text-[#68738A] hover:text-[#141B2D]"
               >
                 Resume in Proctor Simulator Mode
               </Button>
@@ -793,15 +793,15 @@ export default function SkillAssessmentPage() {
       )}
 
       {/* Sticky Assessment Header Bar */}
-      <div className="sticky top-0 z-30 mb-6 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-[#E5E1D7] bg-[#FFFEFA]/95 p-4 shadow-sm backdrop-blur">
+      <div className="sticky top-0 z-30 mb-6 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-[#E4E9F2] bg-[#FFFFFF]/95 p-4 shadow-sm backdrop-blur">
         <div className="flex items-center gap-3">
-          <span className="rounded-md border border-[#E5E1D7] bg-[#F7F5EF] px-2.5 py-1 text-xs font-semibold text-[#202722]">
+          <span className="rounded-md border border-[#E4E9F2] bg-[#F5F7FC] px-2.5 py-1 text-xs font-semibold text-[#141B2D]">
             {skillInfo.skillName}
           </span>
-          <span className="text-xs text-[#69736D]">{skillInfo.levelName}</span>
-          <span className="text-[#E5E1D7]">|</span>
-          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-[#438866]">
-            <span className="h-2 w-2 rounded-full bg-[#438866] animate-ping" />
+          <span className="text-xs text-[#68738A]">{skillInfo.levelName}</span>
+          <span className="text-[#E4E9F2]">|</span>
+          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-[#0B7D56]">
+            <span className="h-2 w-2 rounded-full bg-[#12A875] animate-ping" />
             Proctored Active
           </span>
           {tabSwitchWarnings > 0 && (
@@ -813,13 +813,13 @@ export default function SkillAssessmentPage() {
 
         <div className="flex items-center gap-4">
           {/* Timer Display */}
-          <div className="flex items-center gap-1.5 rounded-lg border border-[#E5E1D7] bg-[#F7F5EF] px-3 py-1 font-mono text-sm font-semibold text-[#202722]">
-            <Clock className="h-4 w-4 text-[#365FEA]" />
+          <div className="flex items-center gap-1.5 rounded-lg border border-[#E4E9F2] bg-[#F5F7FC] px-3 py-1 font-mono text-sm font-semibold text-[#141B2D]">
+            <Clock className="h-4 w-4 text-[#4263EB]" />
             <span>{formatTimer(timeRemainingSeconds)}</span>
           </div>
 
           {/* Mini PIP Camera Feed */}
-          <div className="relative h-9 w-14 overflow-hidden rounded border border-[#E5E1D7] bg-black/10">
+          <div className="relative h-9 w-14 overflow-hidden rounded border border-[#E4E9F2] bg-black/10">
             <video
               ref={pipVideoRef}
               autoPlay
@@ -827,7 +827,7 @@ export default function SkillAssessmentPage() {
               playsInline
               className="h-full w-full object-cover"
             />
-            <span className="absolute bottom-0 right-0 bg-[#202722]/80 px-1 text-[9px] font-mono text-white">
+            <span className="absolute bottom-0 right-0 bg-[#141B2D]/80 px-1 text-[9px] font-mono text-white">
               REC
             </span>
           </div>
@@ -837,7 +837,7 @@ export default function SkillAssessmentPage() {
             size="sm"
             onClick={handleFinalSubmit}
             disabled={isSubmitting}
-            className="bg-[#438866] text-white hover:bg-[#438866]/90 text-xs font-semibold"
+            className="bg-[#12A875] text-white hover:bg-[#12A875]/90 text-xs font-semibold"
           >
             {isSubmitting ? "Submitting..." : "Submit Assessment"}
           </Button>
@@ -845,7 +845,7 @@ export default function SkillAssessmentPage() {
       </div>
 
       {/* Question Progress Navigation Bar */}
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#E5E1D7] bg-[#FFFEFA] p-3 shadow-sm">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#E4E9F2] bg-[#FFFFFF] p-3 shadow-sm">
         <div className="flex items-center gap-1.5 overflow-x-auto">
           {questions.map((q, idx) => {
             const isCurrent = idx === currentQuestionIndex;
@@ -859,10 +859,10 @@ export default function SkillAssessmentPage() {
                 onClick={() => setCurrentQuestionIndex(idx)}
                 className={`relative flex h-8 w-8 items-center justify-center rounded-lg text-xs font-semibold transition-all ${
                   isCurrent
-                    ? "bg-[#202722] text-[#FFFEFA] shadow"
+                    ? "bg-[#141B2D] text-[#FFFFFF] shadow"
                     : hasAnswer
-                    ? "border border-[#438866]/50 bg-[#438866]/10 text-[#438866]"
-                    : "border border-[#E5E1D7] bg-[#F7F5EF] text-[#69736D] hover:bg-[#F0EEE7]"
+                    ? "border border-[#12A875]/50 bg-[#12A875]/10 text-[#0B7D56]"
+                    : "border border-[#E4E9F2] bg-[#F5F7FC] text-[#68738A] hover:bg-[#EDF0F6]"
                 }`}
               >
                 {idx + 1}
@@ -874,9 +874,9 @@ export default function SkillAssessmentPage() {
           })}
         </div>
 
-        <div className="flex items-center gap-3 text-xs text-[#69736D]">
+        <div className="flex items-center gap-3 text-xs text-[#68738A]">
           <span className="flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full bg-[#438866]" /> Answered:{" "}
+            <span className="h-2 w-2 rounded-full bg-[#12A875]" /> Answered:{" "}
             {Object.keys(answers).filter((k) => answers[k]?.trim()).length} / {questions.length}
           </span>
           <button
@@ -885,7 +885,7 @@ export default function SkillAssessmentPage() {
             className={`inline-flex items-center gap-1 text-xs font-medium ${
               flaggedQuestions.has(currentQuestionIndex)
                 ? "text-amber-600 font-semibold"
-                : "text-[#69736D] hover:text-[#202722]"
+                : "text-[#68738A] hover:text-[#141B2D]"
             }`}
           >
             <Flag className="h-3.5 w-3.5" />
@@ -896,25 +896,25 @@ export default function SkillAssessmentPage() {
 
       {/* Main Question Display & Answer Box */}
       {currentQuestion ? (
-        <div className="rounded-2xl border border-[#E5E1D7] bg-[#FFFEFA] p-6 shadow-sm sm:p-8">
+        <div className="rounded-2xl border border-[#E4E9F2] bg-[#FFFFFF] p-6 shadow-sm sm:p-8">
           {/* Question Title & Points Header */}
-          <div className="flex items-start justify-between gap-4 border-b border-[#E5E1D7] pb-4">
+          <div className="flex items-start justify-between gap-4 border-b border-[#E4E9F2] pb-4">
             <div>
-              <span className="text-xs font-semibold uppercase tracking-wider text-[#365FEA]">
+              <span className="text-xs font-semibold uppercase tracking-wider text-[#4263EB]">
                 Question {currentQuestionIndex + 1} of {questions.length}
               </span>
-              <h2 className="font-heading mt-1 text-lg font-bold text-[#202722]">
+              <h2 className="font-heading mt-1 text-lg font-bold text-[#141B2D]">
                 {currentQuestion.type === "CODE_TASK" ? "Coding Task" : "Multiple Choice Question"}
               </h2>
             </div>
 
-            <div className="rounded-md border border-[#E5E1D7] bg-[#F7F5EF] px-2.5 py-1 text-xs font-medium text-[#69736D]">
+            <div className="rounded-md border border-[#E4E9F2] bg-[#F5F7FC] px-2.5 py-1 text-xs font-medium text-[#68738A]">
               Weight: <strong>{currentQuestion.weight} pts</strong>
             </div>
           </div>
 
           {/* Question Prompt */}
-          <div className="mt-5 text-sm leading-relaxed text-[#202722]">
+          <div className="mt-5 text-sm leading-relaxed text-[#141B2D]">
             <p className="whitespace-pre-wrap">{currentQuestion.prompt}</p>
           </div>
 
@@ -929,8 +929,8 @@ export default function SkillAssessmentPage() {
                       key={opt.id}
                       className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition-all ${
                         isChecked
-                          ? "border-[#365FEA] bg-[#365FEA]/5 ring-1 ring-[#365FEA]"
-                          : "border-[#E5E1D7] bg-[#FFFEFA] hover:bg-[#F7F5EF]"
+                          ? "border-[#4263EB] bg-[#4263EB]/5 ring-1 ring-[#4263EB]"
+                          : "border-[#E4E9F2] bg-[#FFFFFF] hover:bg-[#F5F7FC]"
                       }`}
                     >
                       <input
@@ -939,9 +939,9 @@ export default function SkillAssessmentPage() {
                         value={opt.id}
                         checked={isChecked}
                         onChange={() => handleUpdateAnswer(currentQuestion.id, opt.id)}
-                        className="mt-0.5 h-4 w-4 border-[#E5E1D7] text-[#365FEA] focus:ring-[#365FEA]"
+                        className="mt-0.5 h-4 w-4 border-[#E4E9F2] text-[#4263EB] focus:ring-[#4263EB]"
                       />
-                      <span className="text-xs font-medium text-[#202722]">{opt.text}</span>
+                      <span className="text-xs font-medium text-[#141B2D]">{opt.text}</span>
                     </label>
                   );
                 })}
@@ -949,7 +949,7 @@ export default function SkillAssessmentPage() {
             ) : (
               /* CODE_TASK Editor */
               <div className="space-y-2">
-                <div className="flex items-center justify-between text-xs text-[#69736D]">
+                <div className="flex items-center justify-between text-xs text-[#68738A]">
                   <span className="font-mono text-[11px]">Type-safe solution:</span>
                   {currentQuestion.starterCode && (
                     <button
@@ -957,7 +957,7 @@ export default function SkillAssessmentPage() {
                       onClick={() =>
                         handleUpdateAnswer(currentQuestion.id, currentQuestion.starterCode ?? "")
                       }
-                      className="inline-flex items-center gap-1 text-[11px] text-[#365FEA] hover:underline"
+                      className="inline-flex items-center gap-1 text-[11px] text-[#4263EB] hover:underline"
                     >
                       <RotateCcw className="h-3 w-3" />
                       Reset to Starter Code
@@ -965,12 +965,12 @@ export default function SkillAssessmentPage() {
                   )}
                 </div>
 
-                <div className="overflow-hidden rounded-xl border border-[#E5E1D7] bg-[#F7F5EF]">
+                <div className="overflow-hidden rounded-xl border border-[#E4E9F2] bg-[#F5F7FC]">
                   <textarea
                     value={answers[currentQuestion.id] ?? ""}
                     onChange={(e) => handleUpdateAnswer(currentQuestion.id, e.target.value)}
                     rows={12}
-                    className="w-full bg-[#1e2320] p-4 font-mono text-xs text-[#eef1ed] focus:outline-none focus:ring-1 focus:ring-[#365FEA]"
+                    className="w-full bg-[#10172A] p-4 font-mono text-xs text-[#F5F7FC] focus:outline-none focus:ring-1 focus:ring-[#4263EB]"
                     placeholder="// Write your solution here..."
                     spellCheck={false}
                   />
@@ -980,13 +980,13 @@ export default function SkillAssessmentPage() {
           </div>
 
           {/* Navigation Controls */}
-          <div className="mt-8 flex items-center justify-between border-t border-[#E5E1D7] pt-5">
+          <div className="mt-8 flex items-center justify-between border-t border-[#E4E9F2] pt-5">
             <Button
               variant="outline"
               size="sm"
               disabled={!canProceedToPrev}
               onClick={() => setCurrentQuestionIndex((prev) => Math.max(0, prev - 1))}
-              className="border-[#E5E1D7] text-xs"
+              className="border-[#E4E9F2] text-xs"
             >
               <ArrowLeft className="mr-1.5 h-4 w-4" />
               Previous Question
@@ -999,7 +999,7 @@ export default function SkillAssessmentPage() {
                 onClick={() =>
                   setCurrentQuestionIndex((prev) => Math.min(questions.length - 1, prev + 1))
                 }
-                className="bg-[#202722] text-[#FFFEFA] hover:bg-[#202722]/90 text-xs font-semibold"
+                className="bg-[#141B2D] text-[#FFFFFF] hover:bg-[#141B2D]/90 text-xs font-semibold"
               >
                 Next Question
                 <ArrowRight className="ml-1.5 h-4 w-4" />
@@ -1010,7 +1010,7 @@ export default function SkillAssessmentPage() {
                 size="sm"
                 onClick={handleFinalSubmit}
                 disabled={isSubmitting}
-                className="bg-[#438866] text-white hover:bg-[#438866]/90 text-xs font-semibold"
+                className="bg-[#12A875] text-white hover:bg-[#12A875]/90 text-xs font-semibold"
               >
                 {isSubmitting ? "Submitting..." : "Submit Assessment"}
               </Button>

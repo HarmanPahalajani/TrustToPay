@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
-import { cn } from "../../lib/utils";
+import { cn } from "@/lib/utils";
 
 export const Tabs = TabsPrimitive.Root;
 
@@ -11,7 +11,7 @@ export const TabsList = React.forwardRef<
   <TabsPrimitive.List
     ref={ref}
     className={cn(
-      "inline-flex min-h-9 flex-wrap items-center justify-start gap-1 rounded-lg border border-[#E5E1D7] bg-[#F0EEE7] p-1 text-[#69736D]",
+      "inline-flex min-h-10 flex-wrap items-center justify-start gap-1 rounded-lg border border-[#E4E9F2] bg-[#EDF0F6] p-1 text-[#4E596E]",
       className,
     )}
     {...props}
@@ -26,7 +26,7 @@ export const TabsTrigger = React.forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      "inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#365FEA] disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border data-[state=active]:border-[#E5E1D7] data-[state=active]:bg-[#FFFEFA] data-[state=active]:text-[#202722] data-[state=active]:shadow-surface",
+      "inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4263EB] disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border data-[state=active]:border-[#E4E9F2] data-[state=active]:bg-[#FFFFFF] data-[state=active]:text-[#141B2D] data-[state=active]:shadow-surface",
       className,
     )}
     {...props}
@@ -68,7 +68,7 @@ export function TabsBar<T extends string = string>({
     <div
       role="tablist"
       className={cn(
-        "inline-flex flex-wrap items-center gap-1 rounded-lg border border-[#E5E1D7] bg-[#F0EEE7] p-1",
+        "inline-flex flex-wrap items-center gap-1 rounded-lg border border-[#E4E9F2] bg-[#EDF0F6] p-1",
         className,
       )}
     >
@@ -83,24 +83,24 @@ export function TabsBar<T extends string = string>({
             aria-selected={active}
             onClick={() => onChange(item.value)}
             className={cn(
-              "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-all",
+              "inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4263EB]",
               active
-                ? "border border-[#E5E1D7] bg-[#FFFEFA] text-[#202722] shadow-surface"
-                : "border border-transparent text-[#69736D] hover:text-[#202722]",
+                ? "border-[#E4E9F2] bg-[#FFFFFF] text-[#141B2D] shadow-surface"
+                : "border-transparent text-[#4E596E] hover:text-[#141B2D]",
             )}
           >
-            {Icon && <Icon className="h-3.5 w-3.5" />}
+            {Icon ? <Icon className="size-3.5 shrink-0" /> : null}
             <span>{item.label}</span>
-            {typeof item.count === "number" && (
+            {typeof item.count === "number" ? (
               <span
                 className={cn(
-                  "rounded px-1.5 py-0.2 font-mono text-[10px]",
-                  active ? "bg-[#365FEA]/12 text-[#365FEA]" : "bg-[#E5E1D7]/70 text-[#69736D]",
+                  "rounded-full px-1.5 py-0.5 font-mono text-[10px] font-semibold tabular-nums",
+                  active ? "bg-[#4263EB]/10 text-[#2E4CCB]" : "bg-[#E4E9F2] text-[#4E596E]",
                 )}
               >
                 {item.count}
               </span>
-            )}
+            ) : null}
           </button>
         );
       })}

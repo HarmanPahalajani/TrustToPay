@@ -3,873 +3,930 @@ import { Link } from "react-router-dom";
 import {
   ArrowRight,
   Bot,
+  Check,
   CheckCircle2,
   Code2,
+  Copy,
+  Cpu,
   Database,
+  FileCheck2,
+  GitBranch,
+  KeyRound,
+  Layers,
+  Lock,
+  Search,
   ShieldCheck,
+  Sparkles,
   Terminal,
+  UserCheck,
+  Wallet,
 } from "lucide-react";
-import { PublicHeader, MarketingFooter } from "@/components/layout/public-layout";
-import { FibreArcCanvas, GrinIrisEye } from "@/components/hero/originkit-hero-shaders";
-import { Hero22NeuralBrain } from "@/components/hero/hero22-neural-brain";
 import { useAuth } from "@/context/AuthContext";
+import { PublicHeader, MarketingFooter } from "@/components/layout/public-layout";
+import {
+  PayPalLogo,
+  ElasticLogo,
+  RenderLogo,
+  GeminiLogo,
+  JinaAiLogo,
+  SupabaseLogo,
+} from "@/components/partner-logos";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 type WorkflowStep = {
-  number: string;
-  tabLabel: string;
+  num: string;
+  id: string;
   title: string;
-  phase: string;
-  actor: string;
-  endpoint: string;
+  subtitle: string;
   description: string;
-  invariants: string[];
+  system: string;
+  badge: string;
   payloadTitle: string;
-  payloadCode: string;
+  payload: string[];
 };
 
 const WORKFLOW_STEPS: WorkflowStep[] = [
   {
-    number: "01",
-    tabLabel: "Step 1 — AI encounters a blocker",
-    title: "AI Agent Hits a Blocker & Evaluates Confidence",
-    phase: "Detection & Guardrail",
-    actor: "Autonomous Agent / Server Analysis Engine",
-    endpoint: "POST /api/v1/sessions/:id/analyze",
+    num: "01",
+    id: "escalate",
+    title: "Agent Escalates Task",
+    subtitle: "Context, criteria & escrow",
     description:
-      "When an AI agent encounters contradictory evidence, missing runtime specifications, or security-sensitive code paths, the server-side analysis engine computes a structured confidence score and forces escalation on any critical conflict.",
-    invariants: [
-      "Critical specification or security conflicts force ESCALATE_TO_HUMAN regardless of raw score",
-      "Output is strictly schema-validated before persisting the analysis run",
-      "The client browser cannot override the server's escalation threshold",
+      "When an autonomous agent encounters conflicting requirements, ambiguous runtime behavior, or production risk, it packages a bounded escalation with acceptance criteria, evidence files, and escrow reward.",
+    system: "MCP / REST Ingestion",
+    badge: "Step 01",
+    payloadTitle: "POST /api/v1/tasks",
+    payload: [
+      'category: "PROGRAMMING"',
+      'title: "Verify JWT session revocation race under concurrent refresh"',
+      "rewardMinor: 4500 // $45.00 USD",
+      'acceptanceCriteria: ["Atomic token family invalidation", "Regression unit test"]',
     ],
-    payloadTitle: "Analysis Escalation Verdict",
-    payloadCode: `{
-  "recommendedAction": "ESCALATE_TO_HUMAN",
-  "confidenceScore": 0.41,
-  "threshold": 0.75,
-  "conflictingClaims": [
-    {
-      "severity": "CRITICAL",
-      "sourceA": "src/worker-pool.ts",
-      "claimA": "MAX_WORKERS = 4 (no AbortController timeout)",
-      "sourceB": "production-runbook.md",
-      "claimB": "12 workers with 30,000ms request abort bound"
-    }
-  ]
-}`,
   },
   {
-    number: "02",
-    tabLabel: "Step 2 — Task creation",
-    title: "Bounded Task Created with Explicit Acceptance Criteria",
-    phase: "Task Encapsulation",
-    actor: "Requester / Agent Operator",
-    endpoint: "POST /api/v1/tasks",
+    num: "02",
+    id: "matching",
+    title: "Semantic Matching",
+    subtitle: "Jina AI + Elasticsearch",
     description:
-      "The escalated blocker is packaged into a narrowly scoped review task containing the exact question, supplied evidence documents, verifiable acceptance criteria, required specialist skills, and minimum skill level (L1–L3).",
-    invariants: [
-      "Tasks start in AWAITING_FUNDING and cannot be claimed before funding capture",
-      "Reward bounds are validated in integer minor units on the server",
-      "Required skill tags and minimum verification level (L1–L3) are locked on creation",
+      "Jina AI embeds the technical problem description and acceptance requirements into dense vectors. Elasticsearch executes hybrid BM25 + semantic retrieval across indexed specialist profiles.",
+    system: "Jina AI · Elasticsearch",
+    badge: "Step 02",
+    payloadTitle: "Hybrid Vector + Lexical Query",
+    payload: [
+      "embedding_model: jina-embeddings-v3",
+      'bm25_fields: ["verified_skills", "domain_bio"]',
+      "vector_cosine_weight: 0.65",
+      "candidate_pool_size: 48 specialists evaluated",
     ],
-    payloadTitle: "Bounded Task Specification",
-    payloadCode: `{
-  "sessionId": "sess_9f3a81c2",
-  "category": "PROGRAMMING",
-  "minimumSkillLevel": 2,
-  "requiredSkills": ["Node.js Runtime", "Concurrency & Queues"],
-  "rewardMinor": 2500,
-  "currency": "USD",
-  "status": "AWAITING_FUNDING"
-}`,
   },
   {
-    number: "03",
-    tabLabel: "Step 3 — Intelligent specialist matching",
-    title: "Elastic Hybrid Discovery + PostgreSQL Source-of-Truth Revalidation",
-    phase: "Discovery & Ranking",
-    actor: "ElasticSpecialistDiscoveryService + MatchingEngine",
-    endpoint: "POST /api/v1/tasks/:id/dispatch-offers",
+    num: "03",
+    id: "ranking",
+    title: "Eligibility & Ranking",
+    subtitle: "PostgreSQL & Top-5 dispatch",
     description:
-      "Elasticsearch executes a hybrid BM25 keyword + Jina vector similarity search to discover specialists with relevant expertise. PostgreSQL then revalidates every candidate's account eligibility, sequential L1–L3 skill badges, and active workload.",
-    invariants: [
-      "Relational database remains the authoritative source of truth for eligibility and skill levels",
-      "Specialists at max concurrent workload (3 active tasks) are automatically filtered out",
-      "Graceful fallback to deterministic relational matching if Elastic is unconfigured or times out",
+      "PostgreSQL filters candidates by proctored skill level (L1 Foundation to L3 Advanced), active availability, and conflict-of-interest rules, then dispatches live offers to the top five specialists.",
+    system: "PostgreSQL · Ranking Engine",
+    badge: "Step 03",
+    payloadTitle: "Top-5 Offer Dispatch",
+    payload: [
+      "filter: verified_level >= required_level",
+      "exclude: requester_id == candidate_id",
+      "dispatch_window: top 5 ranked candidates",
+      'offer_status: "PENDING_RESPONSE"',
     ],
-    payloadTitle: "Hybrid Candidate Ranking",
-    payloadCode: `{
-  "discovery": {
-    "mode": "ELASTIC_HYBRID",
-    "embeddingModel": "jina-embeddings-v3",
-    "revalidatedInDatabase": true
-  },
-  "topCandidates": [
-    { "specialistId": "usr_elena", "verifiedLevel": 3, "score": 96, "activeWorkload": 1 },
-    { "specialistId": "usr_marcus", "verifiedLevel": 2, "score": 91, "activeWorkload": 0 }
-  ]
-}`,
   },
   {
-    number: "04",
-    tabLabel: "Step 4 — Top-five dispatch",
-    title: "Top-Five Parallel Offer Wave & Atomic First-Accept Locking",
-    phase: "Offer Broadcast",
-    actor: "OfferDispatchService",
-    endpoint: "POST /api/v1/tasks/:id/dispatch-offers",
+    num: "04",
+    id: "execution",
+    title: "Human Execution",
+    subtitle: "Certified specialist resolution",
     description:
-      "Instead of a slow single-queue assignment, TrustToPay dispatches expiring offers in parallel to the top 5 ranked specialists. The first eligible specialist to accept claims the task atomically inside a database transaction.",
-    invariants: [
-      "Up to 5 parallel expiring offers dispatched per batch wave",
-      "Atomic transaction lock guarantees exactly one winner and supersedes sibling offers",
-      "Expired batches can roll over to the next ranked specialist wave without duplicate assignment",
+      "An eligible specialist claims the offer, inspects attached specifications or diff context inside the workbench, and submits an immutable artifact bundle with supporting technical evidence.",
+    system: "Specialist Workbench",
+    badge: "Step 04",
+    payloadTitle: "Immutable Submission Bundle",
+    payload: [
+      "artifact_version: v1",
+      'files: ["src/auth/refresh.ts", "tests/refresh.test.ts"]',
+      "sha256: 8b94f1c2e7a0482b9d1305c6a4d09e12...",
+      "evidenceNotes: verified race fix under concurrent calls",
     ],
-    payloadTitle: "Atomic Offer Claim Transaction",
-    payloadCode: `{
-  "batchNumber": 1,
-  "dispatchedCount": 5,
-  "acceptedOffer": {
-    "offerId": "off_71b9",
-    "rank": 1,
-    "status": "ACCEPTED",
-    "supersededSiblingOffers": 4
-  },
-  "taskStatus": "REVIEWER_ASSIGNED"
-}`,
   },
   {
-    number: "05",
-    tabLabel: "Step 5 — Human resolves the problem",
-    title: "Specialist Submits Code Deliverable & Verbatim Evidence",
-    phase: "Human Resolution",
-    actor: "Assigned Specialist",
-    endpoint: "POST /api/v1/tasks/:id/submit",
+    num: "05",
+    id: "verification",
+    title: "Security & Verification",
+    subtitle: "Scanners, Gemini & Sandbox",
     description:
-      "The specialist submits a structured conclusion, technical explanation, authoritative HTTPS source with verbatim quoted excerpt, and optional code files or unified git diff patches canonicalized into an immutable SHA-256 artifact.",
-    invariants: [
-      "Every submission creates a versioned, immutable CodeArtifact with a canonical SHA-256 digest",
-      "Path traversal (../), absolute paths, and binary executables are rejected on upload",
-      "External URLs must be HTTPS and accompanied by a verbatim quoted excerpt",
+      "Before results can return to the AI workflow, submissions pass deterministic static security scanners, Google Gemini prompt-injection and policy inspection, and isolated sandbox execution.",
+    system: "Scanners · Gemini · Sandbox",
+    badge: "Step 05",
+    payloadTitle: "Layered Verification Gate",
+    payload: [
+      "deterministic_scanner: 0 critical findings",
+      "gemini_security_gate: PASS (prompt injection clean)",
+      "isolated_runner: PASSED (network: disabled, exit: 0)",
+      "criteria_checks: 4 / 4 verified",
     ],
-    payloadTitle: "Immutable Code Artifact Submission",
-    payloadCode: `{
-  "submissionVersion": 1,
-  "confidenceScore": 92,
-  "artifact": {
-    "version": 1,
-    "fileCount": 1,
-    "sha256Digest": "8f94d2c1b7e04a319c5d7e8b1204f9a3d6c8e1b2a4f09c3d8e7b6a5f4c3b2a10",
-    "files": [{ "path": "src/worker-pool.ts", "sizeBytes": 412 }]
-  }
-}`,
   },
   {
-    number: "06",
-    tabLabel: "Step 6 — Security review",
-    title: "Layered Deterministic + Gemini Security Gate",
-    phase: "Security Inspection",
-    actor: "SecurityGateService.inspectSubmission",
-    endpoint: "POST /api/v1/tasks/:id/verify",
+    num: "06",
+    id: "handback",
+    title: "Signed Result & Payment",
+    subtitle: "HMAC handback & PayPal settlement",
     description:
-      "Submitted artifacts pass through a two-layer security gate: first, a deterministic scanner checks for hardcoded secrets, prompt injection, shell execution, and dangerous APIs; second, Gemini evaluates semantic backdoors and risk.",
-    invariants: [
-      "Deterministic CRITICAL findings fail closed immediately regardless of LLM output",
-      "Gemini security gate returns a schema-validated verdict (APPROVE, NEEDS_REVIEW, REJECT)",
-      "Sensitive credentials or malicious patches are blocked before verification or agent handback",
+      "TrustToPay signs the final handback payload with HMAC-SHA256 so the caller can verify authenticity, unlocks PayPal Sandbox settlement in the ledger, and resumes the paused AI workflow.",
+    system: "HMAC-SHA256 · PayPal",
+    badge: "Step 06",
+    payloadTitle: "GET /api/v1/tasks/:id/handback",
+    payload: [
+      "header: X-TrustToPay-Signature: t=...,v1=...",
+      'verification_status: "PASSED"',
+      "artifact_sha256_verified: true",
+      'payment_ledger: "PAYPAL_SANDBOX_CAPTURED"',
     ],
-    payloadTitle: "SecurityGateService.inspectSubmission",
-    payloadCode: `{
-  "service": "SecurityGateService.inspectSubmission",
-  "verdict": "APPROVE",
-  "riskLevel": "LOW",
-  "deterministic": { "verdict": "CLEAN", "findingCount": 0 },
-  "gemini": {
-    "model": "gemini-2.5-flash",
-    "verdict": "APPROVE",
-    "confidence": 0.96
-  }
-}`,
-  },
-  {
-    number: "07",
-    tabLabel: "Step 7 — Independent verification",
-    title: "Isolated Verification Runner & Acceptance Checklist",
-    phase: "Verification & Execution",
-    actor: "IsolatedExecutionRunner + VerificationEngine",
-    endpoint: "GET /api/v1/tasks/:id",
-    description:
-      "An independent verification engine checks textual and structural coverage of every acceptance criterion and executes submitted code inside an isolated runner with outbound network disabled, memory caps, and strict timeouts.",
-    invariants: [
-      "Specialists can never self-approve or verify their own submissions",
-      "Isolated execution enforces networkAccess='DISABLED', memory cap, and timeout bounds",
-      "Soft risk flags route to NEEDS_MANUAL_REVIEW for explicit requester sign-off",
-    ],
-    payloadTitle: "Isolated Verification Run Record",
-    payloadCode: `{
-  "verificationStatus": "PASSED",
-  "checksPassed": 6,
-  "checksFailed": 0,
-  "executionSummary": {
-    "verdict": "PASS",
-    "exitCode": 0,
-    "durationMs": 142,
-    "limits": { "networkAccess": "DISABLED", "maxMemoryMb": 128 }
-  }
-}`,
-  },
-  {
-    number: "08",
-    tabLabel: "Step 8 — AI resumes",
-    title: "Signed Agent Handback (X-TrustToPay-Signature) & Session Resumption",
-    phase: "Trusted Resumption",
-    actor: "AgentHandbackService + SessionController",
-    endpoint: "GET /api/v1/tasks/:id/handback + POST /api/v1/sessions/:id/resume",
-    description:
-      "Once verified, TrustToPay generates an idempotent agent handback payload containing the verified answer, immutable artifact SHA-256 digest, and an HMAC-SHA256 signature header so the AI agent can resume execution with cryptographic proof.",
-    invariants: [
-      "Signed with X-TrustToPay-Signature (t=<timestamp>,v1=<hmac_sha256>) to prevent tampering",
-      "Verified deliverable is preserved for the agent even if a downstream payout requires reconciliation",
-      "Idempotency key guarantees safe replay across agent retries",
-    ],
-    payloadTitle: "Signed Agent Handback Header & Payload",
-    payloadCode: `X-TrustToPay-Signature: t=1730284012,v1=5a92f8c3d104e71b92a64c8f10e3b7d2
-{
-  "taskId": "task_84c1",
-  "status": "HANDED_OFF",
-  "handoffIdempotencyKey": "handoff_task_84c1_v1",
-  "artifact": {
-    "version": 1,
-    "sha256Digest": "8f94d2c1b7e04a319c5d7e8b1204f9a3d6c8e1b2a4f09c3d8e7b6a5f4c3b2a10"
-  }
-}`,
-  },
-  {
-    number: "09",
-    tabLabel: "Step 9 — Payment workflow",
-    title: "Decoupled PayPal Orders v2 Capture & Payouts v1 Settlement",
-    phase: "Financial Settlement",
-    actor: "PayPalPaymentService + Webhook Reconciler",
-    endpoint: "POST /api/v1/payments/tasks/:id/payout",
-    description:
-      "Funding and payout are strictly decoupled. Requesters fund tasks upfront via PayPal Orders v2 capture; specialist rewards are released via PayPal Payouts v1 only after verification passes and payout consent is confirmed.",
-    invariants: [
-      "Hard-wired to PayPal Sandbox / labelled simulation — live-money endpoints are unreachable",
-      "Server verifies captured minor-unit amounts, currency, and webhook signatures",
-      "Unknown or failed payout states require explicit reconciliation before retry",
-    ],
-    payloadTitle: "POST /api/v1/payments/tasks/:id/payout",
-    payloadCode: `POST /api/v1/payments/tasks/:id/payout
-{
-  "paymentId": "pay_902f1a",
-  "type": "PAYOUT",
-  "provider": "PAYPAL_SANDBOX",
-  "payoutBatchId": "BATCH-7741902",
-  "amountDisplay": "$25.00",
-  "currency": "USD",
-  "status": "COMPLETED"
-}`,
   },
 ];
 
-type WorkspacePreviewKey = "requester" | "specialist";
+const ARCHITECTURE_FLOW = [
+  {
+    step: "01",
+    name: "Jina AI Embeddings",
+    detail: "Encodes task blockers, logs & acceptance criteria into semantic vectors.",
+    accent: "bg-[#20BCE5]",
+  },
+  {
+    step: "02",
+    name: "Elasticsearch Hybrid Search",
+    detail: "Combines semantic similarity with exact lexical skill matching.",
+    accent: "bg-[#4263EB]",
+  },
+  {
+    step: "03",
+    name: "PostgreSQL Eligibility",
+    detail: "Enforces verified L1–L3 levels, payout consent & role separation.",
+    accent: "bg-[#7057F5]",
+  },
+  {
+    step: "04",
+    name: "Top-5 Ranking & Dispatch",
+    detail: "Ranks qualified candidates and routes time-bounded offers.",
+    accent: "bg-[#4263EB]",
+  },
+  {
+    step: "05",
+    name: "Human Execution",
+    detail: "Specialist produces code patches, evidence & confidence notes.",
+    accent: "bg-[#10172A]",
+  },
+  {
+    step: "06",
+    name: "Gemini + Sandbox Verification",
+    detail: "Deterministic scans, AI safety gate & signed HMAC handback.",
+    accent: "bg-[#12A875]",
+  },
+];
+
+const DEV_SNIPPETS: Record<
+  "mcp" | "rest" | "verify",
+  { label: string; filename: string; code: string }
+> = {
+  mcp: {
+    label: "MCP Server Config",
+    filename: "claude_desktop_config.json",
+    code: `{
+  "mcpServers": {
+    "trusttopay": {
+      "command": "node",
+      "args": ["dist/mcp-server.js"],
+      "env": {
+        "TRUSTTOPAY_API_URL": "https://trusttopay-backend.onrender.com",
+        "TRUSTTOPAY_API_KEY": "ttp_live_your_requester_token"
+      }
+    }
+  }
+}
+// Exposed MCP tools:
+// - trusttopay_create_task
+// - trusttopay_get_task_status
+// - trusttopay_get_verified_result
+// - trusttopay_cancel_task`,
+  },
+  rest: {
+    label: "REST Escalation",
+    filename: "escalate.ts",
+    code: `const response = await fetch("https://trusttopay-backend.onrender.com/api/v1/tasks", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: \`Bearer \${process.env.TRUSTTOPAY_TOKEN}\`,
+  },
+  body: JSON.stringify({
+    category: "PROGRAMMING",
+    title: "Audit Postgres RLS policy on multi-tenant billing table",
+    description: "Agent detected ambiguous fallback rule when tenant_id is null.",
+    rewardMinor: 5000,
+    urgency: "HIGH",
+    acceptanceCriteria: [
+      "Prevent cross-tenant row leakage",
+      "Include verification test script",
+    ],
+  }),
+});`,
+  },
+  verify: {
+    label: "Verify Handback Signature",
+    filename: "verify-handback.ts",
+    code: `import crypto from "node:crypto";
+
+const res = await fetch(\`\${API_URL}/api/v1/tasks/\${taskId}/handback\`, {
+  headers: { Authorization: \`Bearer \${TRUSTTOPAY_TOKEN}\` },
+});
+
+const signature = res.headers.get("x-trusttopay-signature") ?? "";
+const rawBody = await res.text();
+const [tPart, v1Part] = signature.split(",");
+const expected = crypto
+  .createHmac("sha256", process.env.HANDBACK_SIGNING_SECRET!)
+  .update(\`\${tPart.replace("t=", "")}.\${rawBody}\`)
+  .digest("hex");
+
+if (!crypto.timingSafeEqual(Buffer.from(v1Part.replace("v1=", "")), Buffer.from(expected))) {
+  throw new Error("Invalid TrustToPay handback signature");
+}`,
+  },
+};
 
 export default function LandingPage() {
   const { user } = useAuth();
-  const [activeWorkflowIdx, setActiveWorkflowIdx] = useState(0);
-  const [activeWorkspace, setActiveWorkspace] = useState<WorkspacePreviewKey>("requester");
+  const [activeStepIndex, setActiveStepIndex] = useState(0);
+  const [activeCodeTab, setActiveCodeTab] = useState<"mcp" | "rest" | "verify">("mcp");
+  const [copiedCode, setCopiedCode] = useState(false);
 
-  const currentWorkflow = WORKFLOW_STEPS[activeWorkflowIdx];
+  const currentStep = WORKFLOW_STEPS[activeStepIndex];
+  const snippet = DEV_SNIPPETS[activeCodeTab];
+
+  async function copySnippet() {
+    if (typeof navigator === "undefined" || !navigator.clipboard) return;
+    await navigator.clipboard.writeText(snippet.code);
+    setCopiedCode(true);
+    window.setTimeout(() => setCopiedCode(false), 1800);
+  }
 
   return (
-    <div className="min-h-dvh bg-[#F7F5EF] text-[#202722]">
+    <div className="min-h-dvh bg-[#F5F7FC] text-[#141B2D]">
       <PublicHeader />
 
+      {/* MANDATORY TOP PARTNER STRIP — Directly below Header, directly above Hero */}
+      <section
+        aria-label="Powered by technology partners"
+        className="border-b border-[#E4E9F2] bg-[#FFFFFF]"
+      >
+        <div className="mx-auto flex max-w-[1320px] flex-col items-center justify-center gap-3 px-4 py-3.5 sm:flex-row sm:justify-between sm:px-6 lg:px-8">
+          <span className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-[#68738A]">
+            POWERED BY
+          </span>
+          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 sm:gap-x-12">
+            <PayPalLogo className="h-6 sm:h-7" />
+            <ElasticLogo className="h-6 sm:h-7" />
+            <RenderLogo className="h-6 sm:h-7" />
+          </div>
+        </div>
+      </section>
+
       <main>
-        {/* 1A. NEW HERO 22 — ANATOMICAL NEURAL-BRAIN COORDINATION HERO */}
-        <Hero22NeuralBrain isAuthenticated={Boolean(user)} />
+        {/* HERO SECTION — Solid light surface + subtle dot texture (ZERO blue gradients) */}
+        <section id="product" className="ttp-grid-dots border-b border-[#E4E9F2] bg-[#F5F7FC]">
+          <div className="mx-auto max-w-[1320px] px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20">
+            <div className="grid items-center gap-10 lg:grid-cols-[1.08fr_0.92fr] lg:gap-12">
+              <div className="space-y-6">
+                <div className="inline-flex items-center gap-2 rounded-full border border-[#E4E9F2] bg-[#FFFFFF] px-3 py-1.5 text-xs font-semibold text-[#141B2D] shadow-surface">
+                  <span className="size-2 rounded-full bg-[#12A875]" aria-hidden="true" />
+                  <span>Human Execution Layer for Autonomous AI Agents</span>
+                </div>
 
-        {/* 1B. LOCKED EYE-PUPIL HERO SECTION (OriginKit Hero 49 Woven Fibre Arc + OriginKit Hero 51 Eye-Tracking & Readout Deck) */}
-        <section
-          className="ok-hero-composite border-b border-[#1B273D] pt-10 pb-16 lg:pt-14 lg:pb-20"
-          data-originkit-hero="hero-49-hero-51-composite"
-        >
-          {/* OriginKit Hero 49: Interactive Woven Fibre Arc WebGL Shader Canvas */}
-          <FibreArcCanvas
-            background="#04070F"
-            baseColor="#1B4FD8"
-            accentColor="#6FC8FF"
-            highlight="#FFFFFF"
-            density={26}
-            speed={90}
-            hover={190}
-            reach={24}
-            curve={24}
-            spread={105}
-            thickness={95}
-            comb={170}
-            className="pointer-events-none absolute inset-0 h-full w-full"
-          />
+                <h1 className="font-display text-3xl font-extrabold tracking-tight text-[#141B2D] sm:text-5xl sm:leading-[1.08]">
+                  When AI gets stuck, human expertise moves it forward.
+                </h1>
 
-          {/* OriginKit Hero 49: Directional 90-degree & vertical contrast scrim */}
-          <div className="ok-hero-scrim" aria-hidden="true" />
-
-          <div className="container relative z-10 mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
-            <div className="max-w-3xl pt-1">
-              <h2 className="font-display text-4xl font-bold leading-[1.05] tracking-[-0.035em] text-[#EEF3FF] sm:text-5xl lg:text-[3.45rem]">
-                Give your AI agents a human{" "}
-                <em className="ok-hero-serif-accent">when they need one.</em>
-              </h2>
-
-              {/* OriginKit Hero 51: Interactive Eye-Tracking Display Line with GrinIris 3D Eyeballs in "look" */}
-              <p
-                className="mt-5 font-display text-2xl font-semibold leading-[1.15] tracking-[-0.03em] text-[#EEF3FF]/90 sm:text-3xl"
-                aria-label="See where autonomous agents look when confidence drops."
-              >
-                <span className="text-[#EEF3FF]/50">See where agents </span>
-                <span className="inline-flex items-baseline text-[#EEF3FF]">
-                  l
-                  <GrinIrisEye irisColor="#3B82F6" scleraColor="#F8FAFC" collarColor="#10B981" scale={136} />
-                  <GrinIrisEye irisColor="#3B82F6" scleraColor="#F8FAFC" collarColor="#10B981" scale={136} />
-                  k
-                </span>{" "}
-                <span className="text-[#EEF3FF]/50">for verified truth.</span>
-              </p>
-
-              <p className="mt-4 font-display text-base font-medium text-[#CBD5E1]">
-                AI doesn&apos;t have to solve everything alone.
-              </p>
-
-              <p className="mt-2.5 max-w-[62ch] text-sm leading-6 text-[#94A3B8] sm:text-base sm:leading-7">
-                When an autonomous agent hits conflicting specifications, ambiguous runtime behavior, or high-risk
-                code paths, TrustToPay dispatches the blocker to a verified human specialist, runs deterministic and
-                Gemini security gates in isolation, settles escrow via PayPal, and returns a signed handback.
-              </p>
-
-              {/* OriginKit Hero 49: Verified Protocol Sources Strip */}
-              <div className="ok-hero49-sources mt-8" aria-label="Verified protocol layers">
-                <span>Verifies across</span>
-                <ul className="flex flex-wrap items-center gap-2 text-xs text-[#CBD5E1]">
-                  <li>Elastic Hybrid kNN</li>
-                  <li>L1–L3 Skill Gates</li>
-                  <li>SHA-256 Artifacts</li>
-                  <li>Gemini Code Audit</li>
-                  <li>PayPal Orders v2</li>
-                  <li>HMAC-SHA256 Handback</li>
-                </ul>
-              </div>
-            </div>
-
-            {/* OriginKit Hero 51: Signature 3-Column Bottom Architectural Deck (.below + .sub + .buttons + .readout dl) */}
-            <div className="mt-12 grid items-start gap-8 border-t border-[#EEF3FF]/15 pt-7 lg:grid-cols-[1.15fr_1fr_1.05fr] lg:gap-10">
-              {/* Column 1: Hero 51 Editorial Subcopy */}
-              <div>
-                <p className="max-w-[38ch] text-base leading-7 text-[#EEF3FF]/82">
-                  Send an autonomous escalation request when agent confidence drops below threshold. TrustToPay locks
-                  the PayPal reward, dispatches top-five verified specialists, and returns a signed code patch.
+                <p className="max-w-xl text-base leading-7 text-[#4E596E] sm:text-[17px]">
+                  TrustToPay is developer infrastructure that lets autonomous AI agents escalate blockers to qualified,
+                  assessed human specialists—returning verified, cryptographically signed artifacts settled through
+                  PayPal.
                 </p>
-              </div>
 
-              {/* Column 2: Hero 51 Primary Pill CTA + Underlined Protocol Link */}
-              <div className="flex flex-col items-start gap-3.5">
-                <div className="flex flex-wrap items-center gap-3">
-                  <Button
-                    asChild
-                    size="lg"
-                    className="h-11 rounded-full bg-[#EEF3FF] px-6 text-sm font-semibold text-[#04070F] hover:bg-[#6FC8FF] hover:text-[#04070F]"
-                  >
-                    <Link to={user ? "/app" : "/register"}>
-                      {user ? "Open Workspace" : "Get Started"} <ArrowRight className="size-4" />
+                <div className="flex flex-wrap items-center gap-3 pt-1">
+                  <Button asChild size="lg" variant="default">
+                    <Link to={user ? "/app/workspace" : "/register?role=REQUESTER"}>
+                      Start as a Requester <ArrowRight className="size-4" />
                     </Link>
                   </Button>
-                  <Button
-                    asChild
-                    size="lg"
-                    variant="outline"
-                    className="h-11 rounded-full border-[#1B273D] bg-[#0B101C]/90 px-6 text-sm font-semibold text-[#EEF3FF] hover:border-[#6FC8FF]/50 hover:bg-[#131C2E]"
-                  >
-                    <a href="#how-it-works">Explore 9-Step Protocol</a>
+                  <Button asChild size="lg" variant="navy">
+                    <Link to={user ? "/app/onboarding/skills" : "/register?role=REVIEWER"}>
+                      Become a Specialist <UserCheck className="size-4" />
+                    </Link>
+                  </Button>
+                  <Button asChild size="lg" variant="outline">
+                    <Link to="/app/docs">MCP &amp; API Docs</Link>
                   </Button>
                 </div>
-                <Link
-                  to="/app/docs"
-                  className="border-b border-[#EEF3FF]/35 pb-0.5 text-sm font-medium text-[#EEF3FF]/85 transition-colors hover:border-[#6FC8FF] hover:text-[#6FC8FF]"
-                >
-                  Read technical documentation and API specification
-                </Link>
+
+                <div className="grid grid-cols-1 gap-3 border-t border-[#E4E9F2] pt-5 sm:grid-cols-3">
+                  <div className="flex items-start gap-2.5">
+                    <Search className="mt-0.5 size-4 shrink-0 text-[#4263EB]" />
+                    <div>
+                      <p className="text-xs font-bold text-[#141B2D]">Hybrid Specialist Routing</p>
+                      <p className="text-[11px] leading-4 text-[#68738A]">Jina AI vectors + Elastic search</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <ShieldCheck className="mt-0.5 size-4 shrink-0 text-[#12A875]" />
+                    <div>
+                      <p className="text-xs font-bold text-[#141B2D]">Verified Artifacts</p>
+                      <p className="text-[11px] leading-4 text-[#68738A]">Scanners, Gemini &amp; isolated tests</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <KeyRound className="mt-0.5 size-4 shrink-0 text-[#7057F5]" />
+                    <div>
+                      <p className="text-xs font-bold text-[#141B2D]">Signed Handback</p>
+                      <p className="text-[11px] leading-4 text-[#68738A]">HMAC-SHA256 + SHA-256 hash</p>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              {/* Column 3: Hero 51 Live Session Telemetry Readout */}
-              <div className="ok-hero51-readout rounded-lg border border-[#1B273D] bg-[#080C16]/85 px-4 py-3.5">
-                <div className="mb-2 flex items-center justify-between border-b border-[#1B273D] pb-2">
-                  <span className="text-[11px] font-medium uppercase tracking-wider text-[#94A3B8]">
-                    Protocol Telemetry · Live Gate
+              {/* Custom Execution Pipeline Architecture Diagram */}
+              <div className="rounded-2xl border border-[#1E293B] bg-[#10172A] p-5 text-white shadow-elevated sm:p-6">
+                <div className="flex items-center justify-between border-b border-[#1E293B] pb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="size-2 rounded-full bg-[#12A875]" />
+                    <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-[#CBD5E1]">
+                      Execution Pipeline Schematic
+                    </span>
+                  </div>
+                  <span className="rounded bg-[#1B2541] px-2 py-0.5 font-mono text-[10px] text-[#20BCE5]">
+                    MCP / REST v1
                   </span>
-                  <span className="text-[11px] font-semibold text-[#10B981]">ACTIVE</span>
                 </div>
-                <dl className="m-0 space-y-1">
-                  <div className="flex justify-between">
-                    <dt>Confidence gate</dt>
-                    <dd className="text-[#EEF3FF]">0.41 &lt; 0.75 threshold</dd>
+
+                <div className="mt-5 space-y-3">
+                  {/* Node 1: AI Agent -> Orchestration */}
+                  <div className="grid items-center gap-3 sm:grid-cols-2">
+                    <div className="rounded-xl border border-[#2B3754] bg-[#162038] p-3.5">
+                      <div className="flex items-center justify-between">
+                        <span className="inline-flex items-center gap-1.5 text-xs font-bold text-white">
+                          <Bot className="size-4 text-[#20BCE5]" /> AI Agent
+                        </span>
+                        <span className="font-mono text-[10px] text-[#F5A623]">BLOCKED</span>
+                      </div>
+                      <p className="mt-1.5 font-mono text-[11px] text-[#94A3B8]">
+                        Escalates ambiguous auth race + $45 escrow
+                      </p>
+                    </div>
+
+                    <div className="rounded-xl border border-[#4263EB]/60 bg-[#182547] p-3.5">
+                      <div className="flex items-center justify-between">
+                        <span className="inline-flex items-center gap-1.5 text-xs font-bold text-white">
+                          <Cpu className="size-4 text-[#4263EB]" /> TrustToPay Engine
+                        </span>
+                        <span className="font-mono text-[10px] text-[#20BCE5]">MATCHING</span>
+                      </div>
+                      <p className="mt-1.5 font-mono text-[11px] text-[#CBD5E1]">
+                        Jina AI + Elastic → PostgreSQL Top-5
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <dt>Specialist discovery</dt>
-                    <dd className="text-[#EEF3FF]">Elastic kNN + PG L1–L3</dd>
+
+                  {/* Connector row */}
+                  <div className="flex items-center justify-center gap-2 py-0.5">
+                    <div className="h-4 w-px bg-[#334155]" />
+                    <span className="rounded-full border border-[#2B3754] bg-[#162038] px-2.5 py-0.5 font-mono text-[10px] text-[#94A3B8]">
+                      Ranked Offer Dispatch
+                    </span>
+                    <div className="h-4 w-px bg-[#334155]" />
                   </div>
-                  <div className="flex justify-between">
-                    <dt>Verification runner</dt>
-                    <dd className="text-[#EEF3FF]">AST + Gemini · Exit 0</dd>
+
+                  {/* Node 2: Specialist Nodes */}
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { role: "Security L3", score: "0.94 match", active: true },
+                      { role: "Backend L2", score: "0.89 match", active: false },
+                      { role: "Cloud L3", score: "0.84 match", active: false },
+                    ].map((node) => (
+                      <div
+                        key={node.role}
+                        className={cn(
+                          "rounded-lg border p-2.5 text-center",
+                          node.active
+                            ? "border-[#12A875] bg-[#12A875]/15"
+                            : "border-[#2B3754] bg-[#162038]",
+                        )}
+                      >
+                        <UserCheck
+                          className={cn(
+                            "mx-auto size-4",
+                            node.active ? "text-[#12A875]" : "text-[#94A3B8]",
+                          )}
+                        />
+                        <p className="mt-1 text-[11px] font-bold text-white">{node.role}</p>
+                        <p className="font-mono text-[10px] text-[#94A3B8]">{node.score}</p>
+                      </div>
+                    ))}
                   </div>
-                  <div className="flex justify-between">
-                    <dt>Settlement &amp; handback</dt>
-                    <dd className="text-[#10B981]">PayPal v2 · HMAC-SHA256</dd>
+
+                  {/* Node 3: Verification & Signed Handback */}
+                  <div className="rounded-xl border border-[#2B3754] bg-[#162038] p-3.5">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="inline-flex items-center gap-1.5 text-xs font-bold text-white">
+                        <ShieldCheck className="size-4 text-[#12A875]" /> Verification &amp; Security Layer
+                      </span>
+                      <span className="rounded bg-[#12A875]/20 px-2 py-0.5 font-mono text-[10px] font-semibold text-[#34D399]">
+                        ALL CHECKS PASSED
+                      </span>
+                    </div>
+                    <div className="mt-2.5 grid grid-cols-3 gap-2 font-mono text-[10px] text-[#CBD5E1]">
+                      <div className="rounded border border-[#2B3754] bg-[#10172A] px-2 py-1.5">
+                        Scanner: 0 alerts
+                      </div>
+                      <div className="rounded border border-[#2B3754] bg-[#10172A] px-2 py-1.5">
+                        Gemini: Safe
+                      </div>
+                      <div className="rounded border border-[#2B3754] bg-[#10172A] px-2 py-1.5">
+                        Sandbox: Exit 0
+                      </div>
+                    </div>
                   </div>
-                </dl>
+
+                  {/* Final Signed Return */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#12A875]/50 bg-[#12A875]/10 px-3.5 py-2.5">
+                    <div className="flex items-center gap-2 text-xs font-semibold text-white">
+                      <FileCheck2 className="size-4 text-[#12A875]" />
+                      <span>Signed Result Returned to AI Agent</span>
+                    </div>
+                    <span className="font-mono text-[10px] text-[#CBD5E1]">
+                      SHA-256 · HMAC Verified
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* 2. COMPLETE WORKFLOW EXPLANATION (#how-it-works) */}
-        <section id="how-it-works" className="scroll-mt-16 border-b border-[#E5E1D7] bg-[#F7F5EF] py-10 lg:py-14">
-          <div className="container mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
-            <div className="max-w-3xl">
-              <p className="font-mono text-[11px] font-semibold uppercase tracking-wider text-[#365FEA]">
-                Protocol Lifecycle · 9 Deterministic Stages
+        {/* HOW TRUSTTOPAY WORKS — 6-Step Interactive Workflow */}
+        <section id="workflow" className="border-b border-[#E4E9F2] bg-[#FFFFFF] py-14 sm:py-20">
+          <div className="mx-auto max-w-[1320px] px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl space-y-2">
+              <p className="font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[#4263EB]">
+                End-to-End Execution Lifecycle
               </p>
-              <h2 className="mt-1 font-heading text-2xl font-bold tracking-tight text-[#202722] sm:text-3xl">
-                How TrustToPay orchestrates AI-to-human delegation
+              <h2 className="font-display text-2xl font-bold tracking-tight text-[#141B2D] sm:text-3xl">
+                Six deterministic stages from blocker to verified handback.
               </h2>
-              <p className="mt-2 max-w-[68ch] text-xs leading-relaxed text-[#69736D] sm:text-sm">
-                Every task follows a server-enforced state machine. Select any step below to inspect the inputs,
-                security invariants, API routes, and structured payloads enforced by the platform.
+              <p className="text-sm leading-6 text-[#68738A]">
+                Every task follows an explicit, inspectable state machine spanning specialist matching, isolated
+                verification, and PayPal escrow settlement.
               </p>
             </div>
 
-            <div className="mt-6 grid gap-5 lg:grid-cols-[0.92fr_1.28fr]">
-              {/* Left step selector list */}
-              <div
-                role="tablist"
-                aria-label="TrustToPay 9-step workflow"
-                className="flex flex-col gap-1"
-              >
+            <div className="mt-8 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+              <div className="grid gap-2.5 sm:grid-cols-2" role="tablist" aria-label="Workflow steps">
                 {WORKFLOW_STEPS.map((step, idx) => {
-                  const isSelected = idx === activeWorkflowIdx;
+                  const active = idx === activeStepIndex;
                   return (
                     <button
-                      key={step.tabLabel}
+                      key={step.id}
                       type="button"
                       role="tab"
-                      aria-selected={isSelected}
-                      onClick={() => setActiveWorkflowIdx(idx)}
+                      aria-selected={active}
+                      onClick={() => setActiveStepIndex(idx)}
                       className={cn(
-                        "group flex items-center justify-between rounded-lg border px-3.5 py-2.5 text-left transition-colors",
-                        isSelected
-                          ? "border-[#365FEA] bg-[#FFFEFA] text-[#202722] shadow-surface"
-                          : "border-[#E5E1D7] bg-[#F0EEE7]/70 text-[#69736D] hover:border-[#D2CDC0] hover:bg-[#FFFEFA] hover:text-[#202722]",
+                        "flex flex-col items-start rounded-xl border p-4 text-left transition-all",
+                        active
+                          ? "border-[#4263EB] bg-[#F5F7FC] shadow-surface ring-1 ring-[#4263EB]/20"
+                          : "border-[#E4E9F2] bg-[#FFFFFF] hover:border-[#CBD5E1] hover:bg-[#F5F7FC]",
                       )}
                     >
-                      <div className="flex min-w-0 items-center gap-2.5">
+                      <div className="flex w-full items-center justify-between gap-2">
                         <span
                           className={cn(
-                            "font-mono text-xs font-bold tabular-nums",
-                            isSelected ? "text-[#365FEA]" : "text-[#69736D]",
+                            "rounded-md px-2 py-0.5 font-mono text-[11px] font-bold",
+                            active
+                              ? "bg-[#4263EB] text-white"
+                              : "bg-[#EDF0F6] text-[#4E596E]",
                           )}
                         >
-                          {step.number}
+                          {step.num}
                         </span>
-                        <span className="truncate text-xs font-semibold">{step.tabLabel}</span>
+                        <span className="font-mono text-[10px] text-[#68738A]">{step.system}</span>
                       </div>
-                      <span className="ml-2 shrink-0 font-mono text-[10px] text-[#69736D]">
-                        {step.phase}
-                      </span>
+                      <h3 className="mt-3 font-display text-sm font-bold text-[#141B2D]">{step.title}</h3>
+                      <p className="mt-0.5 text-xs text-[#68738A]">{step.subtitle}</p>
                     </button>
                   );
                 })}
               </div>
 
-              {/* Right synchronized telemetry inspector */}
-              <div className="rounded-xl border border-[#E5E1D7] bg-[#FFFEFA] p-5 shadow-surface lg:p-6">
-                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#E5E1D7] pb-3.5">
-                  <div>
-                    <span className="font-mono text-xs font-semibold text-[#365FEA]">
-                      {currentWorkflow.tabLabel}
-                    </span>
-                    <h3 className="mt-0.5 font-heading text-lg font-bold text-[#202722] sm:text-xl">
-                      {currentWorkflow.title}
-                    </h3>
+              {/* Active Step Inspector Panel */}
+              <div className="flex flex-col justify-between rounded-2xl border border-[#E4E9F2] bg-[#F5F7FC] p-6">
+                <div className="space-y-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <Badge tone="cobalt">{currentStep.badge}</Badge>
+                    <span className="font-mono text-xs font-medium text-[#68738A]">{currentStep.system}</span>
                   </div>
-                  <code className="rounded border border-[#E5E1D7] bg-[#F0EEE7] px-2.5 py-1 font-mono text-xs text-[#202722]">
-                    {currentWorkflow.endpoint}
-                  </code>
+                  <h3 className="font-display text-xl font-bold text-[#141B2D]">{currentStep.title}</h3>
+                  <p className="text-sm leading-6 text-[#4E596E]">{currentStep.description}</p>
                 </div>
 
-                <p className="mt-3 max-w-[68ch] text-xs leading-relaxed text-[#69736D] sm:text-sm">
-                  {currentWorkflow.description}
-                </p>
+                <div className="mt-6 rounded-xl border border-[#1E293B] bg-[#10172A] p-4 text-[#CBD5E1]">
+                  <div className="mb-2 flex items-center justify-between border-b border-[#1E293B] pb-2">
+                    <span className="font-mono text-[11px] font-semibold text-[#20BCE5]">
+                      {currentStep.payloadTitle}
+                    </span>
+                    <Terminal className="size-3.5 text-[#64748B]" />
+                  </div>
+                  <div className="space-y-1 font-mono text-xs leading-6">
+                    {currentStep.payload.map((line) => (
+                      <div key={line} className="truncate text-[#E2E8F0]">
+                        {line}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
-                <div className="mt-4">
-                  <p className="font-heading text-xs font-bold text-[#202722]">
-                    Enforced Server Invariants
+        {/* TWO-SIDED PLATFORM — AI Developers & Human Specialists */}
+        <section id="specialists" className="border-b border-[#E4E9F2] bg-[#F5F7FC] py-14 sm:py-20">
+          <div className="mx-auto max-w-[1320px] px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl space-y-2">
+              <p className="font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[#4263EB]">
+                Dual-Sided Execution Protocol
+              </p>
+              <h2 className="font-display text-2xl font-bold tracking-tight text-[#141B2D] sm:text-3xl">
+                Strict role isolation for Requesters and verified Specialists.
+              </h2>
+            </div>
+
+            <div className="mt-8 grid gap-6 lg:grid-cols-2">
+              {/* For AI Developers */}
+              <div className="flex flex-col justify-between rounded-2xl border border-[#E4E9F2] bg-[#FFFFFF] p-6 shadow-surface sm:p-8">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="inline-flex size-10 items-center justify-center rounded-xl bg-[#4263EB]/10 text-[#4263EB]">
+                      <Bot className="size-5" />
+                    </span>
+                    <Badge tone="cobalt">For AI Developers &amp; Requesters</Badge>
+                  </div>
+                  <h3 className="font-display text-xl font-bold text-[#141B2D]">
+                    Unblock autonomous pipelines without compromising trust
+                  </h3>
+                  <p className="text-sm leading-6 text-[#68738A]">
+                    Integrate directly via MCP tools or REST API. Escalate failing builds, ambiguous architecture calls,
+                    and compliance reviews with deterministic verification gating every handback.
                   </p>
-                  <ul className="mt-2 space-y-1.5">
-                    {currentWorkflow.invariants.map((inv) => (
-                      <li key={inv} className="flex items-start gap-2 text-xs leading-5 text-[#202722]">
-                        <CheckCircle2 className="mt-0.5 size-3.5 shrink-0 text-[#438866]" />
-                        <span>{inv}</span>
+                  <ul className="space-y-2.5 pt-2 text-xs text-[#141B2D]">
+                    {[
+                      "Structured blocker capture with acceptance criteria and attached files",
+                      "Hybrid semantic matching to top-5 verified specialists only",
+                      "Automatic PayPal Sandbox or labelled local escrow tracking",
+                      "HMAC-SHA256 signed response payloads ready for automated resume",
+                    ].map((item) => (
+                      <li key={item} className="flex items-start gap-2.5">
+                        <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#4263EB]" />
+                        <span>{item}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
+                <div className="mt-6 border-t border-[#E4E9F2] pt-5">
+                  <Button asChild variant="default">
+                    <Link to="/register?role=REQUESTER">
+                      Start as a Requester <ArrowRight className="size-4" />
+                    </Link>
+                  </Button>
+                </div>
+              </div>
 
-                <div className="mt-4">
-                  <div className="flex items-center justify-between rounded-t-lg border border-b-0 border-[#E5E1D7] bg-[#F0EEE7] px-3.5 py-2">
-                    <span className="font-mono text-[11px] font-semibold text-[#202722]">
-                      {currentWorkflow.payloadTitle}
+              {/* For Human Specialists */}
+              <div className="flex flex-col justify-between rounded-2xl border border-[#E4E9F2] bg-[#FFFFFF] p-6 shadow-surface sm:p-8">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="inline-flex size-10 items-center justify-center rounded-xl bg-[#12A875]/10 text-[#12A875]">
+                      <UserCheck className="size-5" />
                     </span>
-                    <span className="font-mono text-[10px] text-[#69736D]">{currentWorkflow.actor}</span>
+                    <Badge tone="success">For Verified Specialists</Badge>
                   </div>
-                  <pre className="overflow-x-auto rounded-b-lg border border-[#E5E1D7] bg-[#F7F5EF] p-3.5 font-mono text-xs leading-5 text-[#202722]">
-                    <code>{currentWorkflow.payloadCode}</code>
-                  </pre>
+                  <h3 className="font-display text-xl font-bold text-[#141B2D]">
+                    Prove technical proficiency through proctored assessments
+                  </h3>
+                  <p className="text-sm leading-6 text-[#68738A]">
+                    No self-reported star ratings or bidding wars. Certify concrete domain levels from L1 Foundation to
+                    L3 Advanced, receive high-fit offers, and earn verified rewards.
+                  </p>
+                  <ul className="space-y-2.5 pt-2 text-xs text-[#141B2D]">
+                    {[
+                      "Multi-domain skill catalogue spanning languages, security, cloud & systems",
+                      "Proctored camera & screen-share sequential credentialing (L1 → L2 → L3)",
+                      "Pre-funded task escrow visible before you claim any assignment",
+                      "Explicit PayPal recipient consent and transparent payment reconciliation",
+                    ].map((item) => (
+                      <li key={item} className="flex items-start gap-2.5">
+                        <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#12A875]" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-[#E5E1D7] pt-3.5">
-                  <span className="font-mono text-xs tabular-nums text-[#69736D]">
-                    Step {activeWorkflowIdx + 1} of {WORKFLOW_STEPS.length}
-                  </span>
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      disabled={activeWorkflowIdx === 0}
-                      onClick={() => setActiveWorkflowIdx((i) => Math.max(0, i - 1))}
-                    >
-                      Previous step
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      disabled={activeWorkflowIdx === WORKFLOW_STEPS.length - 1}
-                      onClick={() => setActiveWorkflowIdx((i) => Math.min(WORKFLOW_STEPS.length - 1, i + 1))}
-                    >
-                      Next step
-                    </Button>
-                  </div>
+                <div className="mt-6 border-t border-[#E4E9F2] pt-5">
+                  <Button asChild variant="navy">
+                    <Link to="/register?role=REVIEWER">
+                      Become a Specialist <ArrowRight className="size-4" />
+                    </Link>
+                  </Button>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* 3. PRODUCT & WORKSPACE PREVIEWS (#product) */}
-        <section id="product" className="scroll-mt-16 border-b border-[#E5E1D7] bg-[#FFFEFA] py-10 lg:py-14">
-          <div className="container mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
-              <div className="max-w-2xl">
-                <p className="font-mono text-[11px] font-semibold uppercase tracking-wider text-[#438866]">
-                  Role-Specific Workspaces
-                </p>
-                <h2 className="mt-1 font-heading text-2xl font-bold tracking-tight text-[#202722] sm:text-3xl">
-                  Purpose-built consoles for Requesters and Verified Specialists
-                </h2>
-                <p className="mt-2 max-w-[66ch] text-xs leading-relaxed text-[#69736D] sm:text-sm">
-                  TrustToPay separates agent escalation controls and specialist code &amp; evidence workbenches into
-                  dedicated, high-density workspaces.
-                </p>
-              </div>
+        {/* SECURITY ARCHITECTURE — High-Impact Deep Navy Section (#10172A, solid) */}
+        <section id="security" className="ttp-grid-dots-dark border-b border-[#1E293B] bg-[#10172A] py-14 text-white sm:py-20">
+          <div className="mx-auto max-w-[1320px] px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl space-y-2">
+              <p className="font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[#20BCE5]">
+                Defense-in-Depth Verification
+              </p>
+              <h2 className="font-display text-2xl font-bold tracking-tight text-white sm:text-3xl">
+                Every human deliverable is verified before an AI agent trusts it.
+              </h2>
+              <p className="text-sm leading-6 text-[#94A3B8]">
+                Submitted code, patches, and technical explanations pass multi-layer static analysis, LLM safety
+                inspection, and isolated execution checks before settlement.
+              </p>
+            </div>
 
-              {/* Workspace switcher */}
-              <div className="inline-flex flex-wrap gap-1 rounded-lg border border-[#E5E1D7] bg-[#F0EEE7] p-1">
+            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {[
+                {
+                  icon: Search,
+                  title: "Deterministic Code Scanning",
+                  desc: "Inspects submitted files and diffs for dangerous patterns, hardcoded secrets, and unsafe shell invocations before execution.",
+                  accent: "text-[#20BCE5]",
+                },
+                {
+                  icon: Sparkles,
+                  title: "Gemini Security Inspection",
+                  desc: "Evaluates deliverables for prompt-injection vectors, social engineering payloads, and alignment with the task specification.",
+                  accent: "text-[#4263EB]",
+                },
+                {
+                  icon: Terminal,
+                  title: "Isolated Verification Runner",
+                  desc: "Executes verification checks inside a memory-capped sandbox with outbound network access disabled.",
+                  accent: "text-[#12A875]",
+                },
+                {
+                  icon: Layers,
+                  title: "SHA-256 Artifact Digests",
+                  desc: "Every uploaded file tree and unified diff receives an immutable SHA-256 hash stored alongside its verification run.",
+                  accent: "text-[#7057F5]",
+                },
+                {
+                  icon: KeyRound,
+                  title: "HMAC-SHA256 Signed Handback",
+                  desc: "Handback endpoints emit a timestamped HMAC signature header so autonomous consumers validate payload authenticity.",
+                  accent: "text-[#12A875]",
+                },
+                {
+                  icon: Database,
+                  title: "Immutable Audit Ledger",
+                  desc: "Task transitions, security verdicts, and PayPal Sandbox order/payout events append to a verifiable event timeline.",
+                  accent: "text-[#F5A623]",
+                },
+              ].map((card) => {
+                const Icon = card.icon;
+                return (
+                  <div
+                    key={card.title}
+                    className="rounded-xl border border-[#1E293B] bg-[#162038] p-5"
+                  >
+                    <div className="flex size-9 items-center justify-center rounded-lg border border-[#2B3754] bg-[#10172A]">
+                      <Icon className={cn("size-4", card.accent)} />
+                    </div>
+                    <h3 className="mt-4 font-display text-sm font-bold text-white">{card.title}</h3>
+                    <p className="mt-1.5 text-xs leading-5 text-[#94A3B8]">{card.desc}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* TECHNOLOGY ARCHITECTURE & INFRASTRUCTURE PARTNERS */}
+        <section className="border-b border-[#E4E9F2] bg-[#FFFFFF] py-14 sm:py-20">
+          <div className="mx-auto max-w-[1320px] px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl space-y-2">
+              <p className="font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[#4263EB]">
+                Technical Architecture
+              </p>
+              <h2 className="font-display text-2xl font-bold tracking-tight text-[#141B2D] sm:text-3xl">
+                Built on production retrieval, relational integrity, and verifiable settlement.
+              </h2>
+            </div>
+
+            {/* Horizontal 6-Node Flow */}
+            <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
+              {ARCHITECTURE_FLOW.map((node) => (
+                <div
+                  key={node.step}
+                  className="flex flex-col justify-between rounded-xl border border-[#E4E9F2] bg-[#F5F7FC] p-4"
+                >
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-[11px] font-bold text-[#68738A]">{node.step}</span>
+                      <span className={cn("size-2 rounded-full", node.accent)} />
+                    </div>
+                    <h3 className="mt-3 font-display text-xs font-bold text-[#141B2D]">{node.name}</h3>
+                    <p className="mt-1.5 text-[11px] leading-4 text-[#68738A]">{node.detail}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Official Stack Strip (PayPal, Elastic, Render, Google Gemini, Jina AI, Supabase) */}
+            <div className="mt-10 rounded-2xl border border-[#E4E9F2] bg-[#F5F7FC] p-6">
+              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-[#68738A]">
+                Infrastructure &amp; AI Stack
+              </p>
+              <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {[
-                  { id: "requester" as const, label: "Requester Console", icon: Bot },
-                  { id: "specialist" as const, label: "Specialist Workbench", icon: Code2 },
-                ].map((tab) => {
-                  const Icon = tab.icon;
-                  const active = activeWorkspace === tab.id;
-                  return (
-                    <button
-                      key={tab.id}
-                      type="button"
-                      onClick={() => setActiveWorkspace(tab.id)}
-                      className={cn(
-                        "inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-colors",
-                        active
-                          ? "border border-[#E5E1D7] bg-[#FFFEFA] text-[#202722] shadow-surface"
-                          : "border border-transparent text-[#69736D] hover:text-[#202722]",
-                      )}
-                    >
-                      <Icon className="size-3.5 text-[#365FEA]" />
-                      {tab.label}
-                    </button>
-                  );
-                })}
+                  {
+                    logo: <PayPalLogo className="h-6" />,
+                    desc: "Orders v2 escrow funding checkout and Sandbox settlement tracking.",
+                  },
+                  {
+                    logo: <ElasticLogo className="h-6" />,
+                    desc: "Hybrid lexical and dense-vector specialist indexing and retrieval.",
+                  },
+                  {
+                    logo: <RenderLogo className="h-6" />,
+                    desc: "Managed cloud runtime hosting frontend, API services, and PostgreSQL.",
+                  },
+                  {
+                    logo: <GeminiLogo className="h-5" />,
+                    desc: "Security classification and artifact alignment inspection gate.",
+                  },
+                  {
+                    logo: <JinaAiLogo className="h-5" />,
+                    desc: "High-dimensional semantic embeddings for task-to-skill matching.",
+                  },
+                  {
+                    logo: <SupabaseLogo className="h-5" />,
+                    desc: "PKCE identity verification, password recovery, and session auth.",
+                  },
+                ].map((item, idx) => (
+                  <div
+                    key={idx}
+                    className="flex flex-col justify-between gap-2.5 rounded-xl border border-[#E4E9F2] bg-[#FFFFFF] p-4 shadow-surface"
+                  >
+                    <div>{item.logo}</div>
+                    <p className="text-xs leading-5 text-[#68738A]">{item.desc}</p>
+                  </div>
+                ))}
               </div>
-            </div>
-
-            {/* Active Workspace Screen Preview */}
-            <div className="mt-6 rounded-xl border border-[#E5E1D7] bg-[#F7F5EF] p-5 shadow-surface lg:p-6">
-              {activeWorkspace === "requester" ? (
-                <div className="grid gap-6 lg:grid-cols-[1fr_1.35fr]">
-                  <div className="space-y-3">
-                    <h3 className="font-heading text-xl font-bold text-[#202722]">
-                      Monitor agent confidence, fund escalations, and verify handbacks
-                    </h3>
-                    <p className="text-xs leading-relaxed text-[#69736D] sm:text-sm">
-                      Submit technical questions or connect autonomous agents via bearer API keys. When an analysis run
-                      identifies conflicting specifications, fund a bounded review via PayPal Orders v2 and resume the
-                      agent session once independent verification passes.
-                    </p>
-                    <ul className="space-y-2 pt-1 text-xs text-[#202722]">
-                      <li className="flex items-center gap-2">
-                        <CheckCircle2 className="size-4 text-[#438866]" />
-                        Deterministic conflict detection &amp; explicit escalation thresholds
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <CheckCircle2 className="size-4 text-[#438866]" />
-                        Upfront PayPal Orders v2 reward funding before marketplace dispatch
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <CheckCircle2 className="size-4 text-[#438866]" />
-                        Cryptographically signed <code className="font-mono text-[#365FEA]">X-TrustToPay-Signature</code>{" "}
-                        agent handback
-                      </li>
-                    </ul>
-                    <div className="pt-2">
-                      <Button asChild size="sm">
-                        <Link to={user ? "/app/workspace" : "/register"}>
-                          Open Agent Workspace <ArrowRight className="size-3.5" />
-                        </Link>
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="rounded-lg border border-[#E5E1D7] bg-[#FFFEFA] p-4 font-mono text-xs shadow-surface">
-                    <div className="flex items-center justify-between border-b border-[#E5E1D7] pb-2.5 text-[11px] text-[#69736D]">
-                      <span className="font-semibold text-[#202722]">
-                        SESSION · Worker Pool Concurrency &amp; AbortController Timeout
-                      </span>
-                      <span className="font-bold text-[#B4690E]">ESCALATE_TO_HUMAN</span>
-                    </div>
-                    <div className="mt-3 grid gap-2.5 sm:grid-cols-3">
-                      <div className="rounded border border-[#E5E1D7] bg-[#F7F5EF] p-2.5">
-                        <p className="text-[10px] text-[#69736D]">CONFIDENCE</p>
-                        <p className="mt-0.5 text-base font-bold tabular-nums text-[#B4690E]">41%</p>
-                        <p className="text-[10px] text-[#69736D]">Threshold: 75%</p>
-                      </div>
-                      <div className="rounded border border-[#E5E1D7] bg-[#F7F5EF] p-2.5">
-                        <p className="text-[10px] text-[#69736D]">ESCROW FUNDING</p>
-                        <p className="mt-0.5 text-base font-bold tabular-nums text-[#438866]">$25.00 USD</p>
-                        <p className="text-[10px] text-[#69736D]">PayPal Orders v2</p>
-                      </div>
-                      <div className="rounded border border-[#E5E1D7] bg-[#F7F5EF] p-2.5">
-                        <p className="text-[10px] text-[#69736D]">HANDBACK DIGEST</p>
-                        <p className="mt-0.5 truncate text-xs font-bold text-[#365FEA]">sha256:8f94d2c1…</p>
-                        <p className="text-[10px] text-[#69736D]">HMAC-SHA256 Signed</p>
-                      </div>
-                    </div>
-                    <div className="mt-2.5 rounded border border-[#E5E1D7] bg-[#F0EEE7]/70 p-2.5 text-[11px] leading-5 text-[#69736D]">
-                      <p className="font-semibold text-[#202722]">Critical Conflict Flagged</p>
-                      <p className="mt-0.5">
-                        Source A (<code className="text-[#202722]">src/worker-pool.ts</code>) configures 4 workers with
-                        no request timeout; Source B (<code className="text-[#202722]">runbook.md</code>) requires 12
-                        workers and a 30s <code className="text-[#202722]">AbortController</code> bound.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="grid gap-6 lg:grid-cols-[1fr_1.35fr]">
-                  <div className="space-y-3">
-                    <h3 className="font-heading text-xl font-bold text-[#202722]">
-                      Earn L1–L3 skill badges, claim top-five offers, and submit verified code artifacts
-                    </h3>
-                    <p className="text-xs leading-relaxed text-[#69736D] sm:text-sm">
-                      Specialists unlock sequential Foundation (L1), Practitioner (L2), and Advanced (L3) badges by
-                      passing timed technical assessments. Claim funded tasks atomically, upload code files or unified
-                      git diffs, and track PayPal Payouts in real time.
-                    </p>
-                    <ul className="space-y-2 pt-1 text-xs text-[#202722]">
-                      <li className="flex items-center gap-2">
-                        <CheckCircle2 className="size-4 text-[#438866]" />
-                        Sequential L1 → L2 → L3 skill verification tracks (no self-reported badges)
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <CheckCircle2 className="size-4 text-[#438866]" />
-                        Top-5 parallel offer wave with atomic first-accept locking
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <CheckCircle2 className="size-4 text-[#438866]" />
-                        Immutable SHA-256 code artifact &amp; unified git diff submission workbench
-                      </li>
-                    </ul>
-                    <div className="pt-2">
-                      <Button asChild size="sm">
-                        <Link to={user ? "/app/marketplace" : "/register"}>
-                          Explore Specialist Workbench <ArrowRight className="size-3.5" />
-                        </Link>
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="rounded-lg border border-[#E5E1D7] bg-[#FFFEFA] p-4 font-mono text-xs shadow-surface">
-                    <div className="flex items-center justify-between border-b border-[#E5E1D7] pb-2.5 text-[11px] text-[#69736D]">
-                      <span className="font-semibold text-[#202722]">SPECIALIST OFFER · Batch #1 · Rank #1 (96 pts)</span>
-                      <span className="font-bold tabular-nums text-[#438866]">L3 VERIFIED · $25.00 USD</span>
-                    </div>
-                    <div className="mt-2.5 rounded border border-[#E5E1D7] bg-[#F7F5EF] p-3">
-                      <p className="text-[11px] font-semibold text-[#202722]">
-                        Artifact v1 · src/worker-pool.ts (SHA-256: 8f94d2c1b7e04a31…)
-                      </p>
-                      <pre className="mt-1.5 overflow-x-auto text-[11px] leading-5 text-[#438866]">
-                        <code>{`+ const controller = new AbortController();
-+ const timer = setTimeout(() => controller.abort(), 30_000);
-+ try {
-+   return await fetch(job.endpoint, { signal: controller.signal });
-+ } finally {
-+   clearTimeout(timer);
-+ }`}</code>
-                      </pre>
-                    </div>
-                    <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 rounded border border-[#E5E1D7] bg-[#F0EEE7]/70 px-3 py-2 text-[11px] text-[#69736D]">
-                      <span>Security Gate: CLEAN · Gemini: APPROVE</span>
-                      <span className="font-semibold text-[#438866]">Isolated Runner: PASS (Exit 0)</span>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </section>
 
-        {/* 4. FOR DEVELOPERS & CRYPTOGRAPHIC HANDBACK (#developers) */}
-        <section id="developers" className="scroll-mt-16 border-b border-[#E5E1D7] bg-[#F7F5EF] py-10 lg:py-14">
-          <div className="container mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
-            <div className="grid items-start gap-8 lg:grid-cols-[1fr_1.15fr]">
-              <div className="space-y-3.5">
-                <p className="font-mono text-[11px] font-semibold uppercase tracking-wider text-[#365FEA]">
-                  Developer Integration Kit · MCP + Agent Skill + REST
+        {/* DEVELOPER INTEGRATION PREVIEW (MCP, REST, Handback) */}
+        <section id="developers" className="border-b border-[#E4E9F2] bg-[#F5F7FC] py-14 sm:py-20">
+          <div className="mx-auto max-w-[1320px] px-4 sm:px-6 lg:px-8">
+            <div className="grid items-start gap-8 lg:grid-cols-[0.85fr_1.15fr]">
+              <div className="space-y-4">
+                <p className="font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[#4263EB]">
+                  Developer Integration
                 </p>
-                <h2 className="font-heading text-2xl font-bold tracking-tight text-[#202722] sm:text-3xl">
-                  Integrate human escalation and signed handbacks in minutes
+                <h2 className="font-display text-2xl font-bold tracking-tight text-[#141B2D] sm:text-3xl">
+                  Connect via Model Context Protocol or standard REST.
                 </h2>
-                <p className="max-w-[65ch] text-xs leading-relaxed text-[#69736D] sm:text-sm">
-                  Authenticate autonomous agents with scoped <code className="font-mono text-xs text-[#202722]">ttp_ak_…</code>{" "}
-                  bearer keys or connect via the official TrustToPay MCP Server. Verify every human deliverable with{" "}
-                  <code className="font-mono text-xs text-[#202722]">X-TrustToPay-Signature</code> before applying
-                  patches or resuming execution.
+                <p className="text-sm leading-6 text-[#68738A]">
+                  Equip coding agents and automated workflows with dedicated MCP tools for escalation, status polling,
+                  and cryptographic handback retrieval.
                 </p>
 
-                <dl className="space-y-2.5 pt-1">
+                <div className="space-y-2.5 pt-2">
                   {[
                     {
                       icon: Terminal,
-                      title: "Official MCP Server + Open Agent Skill + REST API (/api/v1)",
-                      detail: "Connect Claude Code, Cursor, or custom agents via stdio MCP tools or OpenAPI REST endpoints.",
+                      title: "4 Built-In MCP Tools",
+                      desc: "trusttopay_create_task, trusttopay_get_task_status, trusttopay_get_verified_result, trusttopay_cancel_task",
                     },
                     {
-                      icon: ShieldCheck,
-                      title: "Cryptographic Artifact & Handback Integrity",
-                      detail: "Canonical SHA-256 digests over submitted files and unified diffs, signed with HMAC-SHA256.",
+                      icon: GitBranch,
+                      title: "Agent Skill & STDIO/HTTP Transport",
+                      desc: "Works locally over STDIO or over authenticated Streamable HTTP endpoints.",
                     },
                     {
-                      icon: Database,
-                      title: "Elastic Hybrid Search with Relational Fallback",
-                      detail: "Uses @elastic/elasticsearch for semantic + keyword specialist retrieval while preserving DB constraints.",
+                      icon: Wallet,
+                      title: "Explicit Payment State Labels",
+                      desc: "Clear runtime telemetry distinguishes SIMULATED demo mode from PayPal Sandbox orders.",
                     },
                   ].map((item) => {
                     const Icon = item.icon;
                     return (
-                      <div
-                        key={item.title}
-                        className="flex items-start gap-3 rounded-lg border border-[#E5E1D7] bg-[#FFFEFA] p-3.5 shadow-surface"
-                      >
-                        <Icon className="mt-0.5 size-4 shrink-0 text-[#365FEA]" />
+                      <div key={item.title} className="flex items-start gap-3 rounded-xl border border-[#E4E9F2] bg-[#FFFFFF] p-3.5">
+                        <Icon className="mt-0.5 size-4 shrink-0 text-[#4263EB]" />
                         <div>
-                          <dt className="font-heading text-xs font-bold text-[#202722]">{item.title}</dt>
-                          <dd className="mt-0.5 text-xs leading-5 text-[#69736D]">{item.detail}</dd>
+                          <p className="text-xs font-bold text-[#141B2D]">{item.title}</p>
+                          <p className="mt-0.5 font-mono text-[11px] text-[#68738A]">{item.desc}</p>
                         </div>
                       </div>
                     );
                   })}
-                </dl>
+                </div>
 
-                <div className="flex flex-wrap gap-2.5 pt-2">
+                <div className="pt-2">
                   <Button asChild variant="outline">
                     <Link to="/app/docs">
-                      Read Technical Documentation <ArrowRight className="size-4" />
+                      Read full developer documentation <ArrowRight className="size-4" />
                     </Link>
-                  </Button>
-                  <Button asChild variant="ghost">
-                    <a href="/api-docs" target="_blank" rel="noreferrer">
-                      OpenAPI / Swagger Spec
-                    </a>
                   </Button>
                 </div>
               </div>
 
-              {/* Developer code integration preview */}
-              <div className="overflow-hidden rounded-xl border border-[#E5E1D7] bg-[#FFFEFA] shadow-surface">
-                <div className="flex items-center justify-between border-b border-[#E5E1D7] bg-[#F0EEE7] px-4 py-2.5 font-mono text-xs text-[#202722]">
-                  <span className="font-semibold">verify-handback.ts</span>
-                  <span className="font-semibold text-[#438866]">HMAC-SHA256</span>
+              {/* Code Inspector */}
+              <div className="overflow-hidden rounded-2xl border border-[#1E293B] bg-[#10172A] shadow-elevated">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#1E293B] bg-[#162038] px-4 py-2.5">
+                  <div className="flex flex-wrap items-center gap-1" role="tablist" aria-label="Integration code snippets">
+                    {(["mcp", "rest", "verify"] as const).map((tabKey) => (
+                      <button
+                        key={tabKey}
+                        type="button"
+                        role="tab"
+                        aria-selected={activeCodeTab === tabKey}
+                        onClick={() => setActiveCodeTab(tabKey)}
+                        className={cn(
+                          "rounded-md px-2.5 py-1 text-xs font-semibold transition-colors",
+                          activeCodeTab === tabKey
+                            ? "bg-[#4263EB] text-white"
+                            : "text-[#94A3B8] hover:bg-[#1E293B] hover:text-white",
+                        )}
+                      >
+                        {DEV_SNIPPETS[tabKey].label}
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={copySnippet}
+                    className="inline-flex items-center gap-1.5 rounded-md border border-[#2B3754] bg-[#10172A] px-2.5 py-1 font-mono text-[11px] text-[#CBD5E1] hover:border-[#4263EB] hover:text-white"
+                  >
+                    {copiedCode ? <Check className="size-3 text-[#12A875]" /> : <Copy className="size-3" />}
+                    {copiedCode ? "Copied" : snippet.filename}
+                  </button>
                 </div>
-                <pre className="overflow-x-auto bg-[#FFFEFA] p-4 font-mono text-xs leading-6 text-[#202722]">
-                  <code>{`import crypto from "node:crypto";
-
-// 1. Fetch the verified specialist handback payload
-const res = await fetch(\`https://trusttopay.internal/api/v1/tasks/\${taskId}/handback\`, {
-  headers: { Authorization: \`Bearer \${process.env.TTP_AGENT_API_KEY}\` },
-});
-
-const signatureHeader = res.headers.get("x-trusttopay-signature") ?? "";
-const rawBody = await res.text();
-
-// 2. Verify X-TrustToPay-Signature (t=<timestamp>,v1=<hmac>)
-const [tPart, v1Part] = signatureHeader.split(",");
-const timestamp = tPart.replace("t=", "");
-const expectedHmac = crypto
-  .createHmac("sha256", process.env.TTP_HANDBACK_SECRET!)
-  .update(\`\${timestamp}.\${rawBody}\`)
-  .digest("hex");
-
-if (!crypto.timingSafeEqual(Buffer.from(v1Part.replace("v1=", "")), Buffer.from(expectedHmac))) {
-  throw new Error("Untrusted handback signature");
-}
-
-// 3. Apply verified artifact & resume agent session
-const { handback } = JSON.parse(rawBody);
-console.log("Verified artifact SHA-256:", handback.artifact.sha256Digest);`}</code>
+                <pre className="overflow-x-auto p-5 font-mono text-xs leading-6 text-[#E2E8F0]">
+                  <code>{snippet.code}</code>
                 </pre>
               </div>
             </div>
           </div>
         </section>
 
-        {/* 5. CONVERSION SECTION */}
-        <section className="bg-[#F7F5EF] py-10 lg:py-12">
-          <div className="container mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col items-start justify-between gap-5 rounded-xl border border-[#E5E1D7] bg-[#FFFEFA] p-6 shadow-surface sm:flex-row sm:items-center lg:p-8">
-              <div className="max-w-xl">
-                <h2 className="font-heading text-xl font-bold tracking-tight text-[#202722] sm:text-2xl">
-                  Start orchestrating verified human escalations for your AI agents.
+        {/* FINAL CALL TO ACTION */}
+        <section className="bg-[#FFFFFF] py-14 sm:py-20">
+          <div className="mx-auto max-w-[1320px] px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col items-start justify-between gap-6 rounded-2xl border border-[#E4E9F2] bg-[#F5F7FC] p-8 sm:flex-row sm:items-center sm:p-10">
+              <div className="max-w-xl space-y-2">
+                <p className="font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[#4263EB]">
+                  Ready to Deploy
+                </p>
+                <h2 className="font-display text-2xl font-bold tracking-tight text-[#141B2D] sm:text-3xl">
+                  Give your AI agents a way forward.
                 </h2>
-                <p className="mt-1.5 text-xs leading-relaxed text-[#69736D] sm:text-sm">
-                  Create a requester or specialist account, inspect the live verification and payment ledger, or review
-                  the system architecture documentation.
+                <p className="text-sm leading-6 text-[#68738A]">
+                  Create a Requester workspace to escalate tasks via API or MCP, or certify your domain skills as a
+                  Specialist.
                 </p>
               </div>
-              <div className="flex flex-wrap gap-2.5">
-                <Button asChild size="lg">
-                  <Link to={user ? "/app" : "/register"}>
-                    {user ? "Go to Workspace" : "Create Account"} <ArrowRight className="size-4" />
+              <div className="flex flex-wrap items-center gap-3">
+                <Button asChild size="lg" variant="default">
+                  <Link to="/register">
+                    Get Started <ArrowRight className="size-4" />
                   </Link>
                 </Button>
                 <Button asChild size="lg" variant="outline">
-                  <Link to="/login">Sign In</Link>
+                  <Link to="/app/integrations">
+                    <Code2 className="size-4" /> Integration Status
+                  </Link>
                 </Button>
               </div>
             </div>

@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { AlertCircle, CheckCircle2, CreditCard, Loader2 } from "lucide-react";
-import { api } from "../lib/api";
-import { formatCurrency } from "../lib/utils";
-import { Button } from "./ui/button";
+import { useQuery } from "@tanstack/react-query";
+import { Lock, CheckCircle2, CreditCard } from "lucide-react";
+import { api } from "@/lib/api";
+import { Button } from "@/components/ui/button";
+import { Alert } from "@/components/ui/alert";
+import { PayPalLogo } from "@/components/partner-logos";
 
 declare global {
   interface Window {
@@ -11,9 +13,9 @@ declare global {
         style?: Record<string, unknown>;
         createOrder: () => Promise<string>;
         onApprove: (data: { orderID: string }) => Promise<void>;
-        onError?: (err: unknown) => void;
+        onError: (err: unknown) => void;
       }) => {
-        render: (container: HTMLElement) => Promise<void>;
+        render: (selectorOrEl: string | HTMLElement) => Promise<void>;
       };
     };
   }
@@ -21,7 +23,7 @@ declare global {
 
 export function PayPalCheckoutCard({
   taskId,
-  amount,
+  amount: _amount,
   amountDisplay,
   currency,
   clientId,
@@ -31,21 +33,38 @@ export function PayPalCheckoutCard({
 }: {
   taskId: string;
   amount?: number;
-  amountDisplay?: string;
-  currency?: string;
+  amountDisplay: string;
+  currency: string;
   clientId?: string | null;
   enabled?: boolean;
   onCompleted: () => void | Promise<void>;
   label?: string;
 }) {
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [sdkReady, setSdkReady] = useState(false);
   const [sdkError, setSdkError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
+  const integrationQuery = useQuery({
+    queryKey: ["integrations", "status"],
+    queryFn: api.integrations.status,
+    staleTime: 60_000,
+    enabled: enabled === undefined || clientId === undefined,
+  });
+
+  const resolvedEnabled =
+    enabled !== undefined
+      ? enabled
+      : Boolean(
+          integrationQuery.data?.paypal.configured &&
+            integrationQuery.data?.paypal.paymentsMode === "SANDBOX",
+        );
+  const resolvedClientId =
+    clientId !== undefined ? clientId : (integrationQuery.data?.paypal.clientId ?? null);
+
   useEffect(() => {
-    if (!enabled || !clientId) return;
+    if (!resolvedEnabled || !resolvedClientId) return;
 
     const existing = document.querySelector<HTMLScriptElement>('script[data-paypal-sdk="true"]');
     if (existing && window.paypal) {
@@ -54,15 +73,16 @@ export function PayPalCheckoutCard({
     }
 
     const script = document.createElement("script");
-    script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(clientId)}&currency=${encodeURIComponent(
-      currency || "USD",
-    )}&intent=capture`;
+    script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(
+      resolvedClientId,
+    )}&currency=${encodeURIComponent(currency || "USD")}&intent=capture`;
     script.async = true;
     script.dataset.paypalSdk = "true";
     script.onload = () => setSdkReady(true);
-    script.onerror = () => setSdkError("Could not load PayPal JavaScript SDK. Use direct sandbox capture below.");
+    script.onerror = () =>
+      setSdkError("Could not load PayPal JavaScript SDK. Use direct sandbox capture below.");
     document.body.appendChild(script);
-  }, [enabled, clientId, currency]);
+  }, [resolvedEnabled, resolvedClientId, currency]);
 
   useEffect(() => {
     if (!sdkReady || !window.paypal || !containerRef.current) return;
@@ -73,10 +93,11 @@ export function PayPalCheckoutCard({
         layout: "horizontal",
         color: "gold",
         shape: "rect",
-        label: "pay",
-        height: 38,
+        height: 40,
+        tagline: false,
       },
       createOrder: async () => {
+        setSdkError(null);
         const res = await api.payments.createOrder(taskId);
         return res.paypal.orderId || "";
       },
@@ -100,9 +121,10 @@ export function PayPalCheckoutCard({
     });
   }, [sdkReady, taskId, onCompleted]);
 
-  const handleServerSideFlow = async () => {
+  async function handleServerSideFlow() {
     setBusy(true);
     setSdkError(null);
+    setMessage(null);
     try {
       const order = await api.payments.createOrder(taskId);
       if (order.paypal.orderId) {
@@ -115,53 +137,59 @@ export function PayPalCheckoutCard({
     } finally {
       setBusy(false);
     }
-  };
-
-  const displayPrice = amountDisplay || (typeof amount === "number" ? formatCurrency(amount, currency || "USD") : "—");
+  }
 
   return (
-    <div className="space-y-2.5 rounded-lg border border-[#E5E1D7] bg-[#FFFEFA] p-3.5 sm:p-4 shadow-surface">
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <CreditCard className="h-4 w-4 text-[#365FEA]" />
-          <span className="font-heading text-xs font-bold uppercase tracking-wider text-[#202722]">
-            {label || "PayPal Settlement Execution"}
+    <div className="space-y-3 rounded-xl border border-[#E4E9F2] bg-[#FFFFFF] p-4 shadow-surface">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#E4E9F2] pb-3">
+        <div className="flex items-center gap-2.5">
+          <PayPalLogo className="h-5" />
+          <span className="text-xs font-semibold text-[#141B2D]">
+            {label || "Escrow Funding Checkout"}
           </span>
         </div>
-        <span className="font-mono text-xs font-semibold text-[#202722]">
-          {displayPrice}
+        <span className="font-mono text-xs font-bold text-[#141B2D] tabular-nums">
+          {amountDisplay} {currency}
         </span>
       </div>
 
-      {enabled && clientId && (
-        <div ref={containerRef} className="min-h-[40px] rounded-md bg-[#F0EEE7] p-2" />
-      )}
+      {resolvedEnabled && resolvedClientId ? (
+        <div className="space-y-2">
+          <div ref={containerRef} className="min-h-[42px]" />
+          {!sdkReady && !sdkError ? (
+            <div className="text-[11px] text-[#68738A]">Initializing PayPal Sandbox Buttons…</div>
+          ) : null}
+        </div>
+      ) : null}
 
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-[11px] text-[#69736D]">
-          {enabled
-            ? "Creates a real PayPal Order v2 and captures settlement into the task ledger."
-            : "Creates and captures a deterministic simulated order in the task ledger."}
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[#E4E9F2] bg-[#F5F7FC] p-3">
+        <p className="min-w-0 flex-1 text-xs leading-5 text-[#4E596E]">
+          {resolvedEnabled
+            ? "Creates a PayPal Sandbox Order v2 and records verified funding into the task ledger."
+            : "Demo mode: creates and captures a labelled simulated funding order in the task ledger."}
         </p>
-        <Button size="sm" variant="primary" loading={busy} onClick={handleServerSideFlow}>
-          {busy && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-          {enabled ? "Create & Capture Sandbox Order" : "Execute Simulated Settlement"}
+        <Button size="sm" variant="default" loading={busy} onClick={handleServerSideFlow}>
+          <CreditCard className="size-3.5" />
+          {resolvedEnabled ? "Capture Sandbox Order" : "Simulate Escrow Funding"}
         </Button>
       </div>
 
-      {message && (
-        <div className="flex items-center gap-1.5 text-xs text-[#285E43]">
-          <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
-          <span>{message}</span>
-        </div>
-      )}
+      {sdkError ? <Alert tone="danger">{sdkError}</Alert> : null}
 
-      {sdkError && (
-        <div className="flex items-center gap-1.5 text-xs text-[#8C500B]">
-          <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-          <span>{sdkError}</span>
-        </div>
-      )}
+      {message ? (
+        <Alert tone="success" icon={<CheckCircle2 className="size-4 text-[#12A875]" />}>
+          {message}
+        </Alert>
+      ) : null}
+
+      <div className="flex items-center gap-1.5 text-[11px] text-[#68738A]">
+        <Lock className="size-3.5 shrink-0 text-[#4263EB]" />
+        <span>
+          {resolvedEnabled
+            ? "PayPal Sandbox Environment · No real funds are charged."
+            : "Deterministic Local Escrow · Labelled as Simulated."}
+        </span>
+      </div>
     </div>
   );
 }

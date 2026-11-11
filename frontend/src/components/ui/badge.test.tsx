@@ -8,13 +8,13 @@ describe("Badge", () => {
     render(<Badge tone="success">Verified</Badge>);
 
     const badge = screen.getByText("Verified");
-    expect(badge).toHaveClass("bg-[#438866]/12", "text-[#285E43]");
+    expect(badge).toHaveClass("bg-[#12A875]/10", "text-[#0B7D56]");
   });
 
   it("uses the neutral tone by default", () => {
     render(<Badge>Draft</Badge>);
 
-    expect(screen.getByText("Draft")).toHaveClass("bg-[#F0EEE7]", "text-[#69736D]");
+    expect(screen.getByText("Draft")).toHaveClass("bg-[#EDF0F6]", "text-[#4E596E]");
   });
 
   it("renders a decorative dot when requested", () => {

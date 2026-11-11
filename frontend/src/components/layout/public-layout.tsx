@@ -1,50 +1,46 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { ArrowRight, ExternalLink, Menu, X } from "lucide-react";
+import { ArrowRight, Menu, ShieldCheck, X } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
+import { PayPalLogo, ElasticLogo, RenderLogo } from "@/components/partner-logos";
 import { cn } from "@/lib/utils";
 
 /**
- * Original TrustToPay Geometric Mark (PRESERVED EXACTLY):
- * Represents an automated AI agent trajectory (left cobalt path) and a verified
- * human specialist trajectory (right slate/platinum path) converging at a central
- * cryptographic verification node (emerald core).
+ * TrustToPay bespoke brand mark:
+ * Deep navy rounded frame (#10172A) containing a cobalt agent branch (#4263EB),
+ * a crisp white human execution branch (#FFFFFF), and an emerald verification node (#12A875).
  */
 export function TrustToPayLogoMark({ className }: { className?: string }) {
   return (
     <svg
       viewBox="0 0 36 36"
       fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={cn("size-8 shrink-0", className)}
       aria-hidden="true"
+      className={cn("size-8 shrink-0", className)}
     >
-      <rect width="36" height="36" rx="8" fill="#0A0F1D" />
-      <rect x="0.75" y="0.75" width="34.5" height="34.5" rx="7.25" stroke="#1E293B" strokeWidth="1.5" />
-      {/* AI Agent Trajectory */}
+      <rect x="2" y="2" width="32" height="32" rx="8" fill="#10172A" stroke="#1E293B" strokeWidth="1.2" />
       <path
-        d="M8.5 12.5H15.5L19.5 18L15.5 23.5H8.5"
-        stroke="#3B82F6"
-        strokeWidth="2.25"
+        d="M10.5 11.5H17.5C20.2 11.5 22 13.3 22 15.8"
+        stroke="#4263EB"
+        strokeWidth="2.4"
         strokeLinecap="round"
-        strokeLinejoin="round"
       />
-      {/* Human Specialist Trajectory */}
       <path
-        d="M27.5 12.5H20.5L16.5 18L20.5 23.5H27.5"
-        stroke="#E2E8F0"
-        strokeWidth="2.25"
+        d="M10.5 24.5H17.5C20.2 24.5 22 22.7 22 20.2"
+        stroke="#FFFFFF"
+        strokeWidth="2.4"
         strokeLinecap="round"
-        strokeLinejoin="round"
       />
-      {/* Terminal Nodes */}
-      <circle cx="8.5" cy="12.5" r="2" fill="#3B82F6" />
-      <circle cx="8.5" cy="23.5" r="2" fill="#3B82F6" />
-      <circle cx="27.5" cy="12.5" r="2" fill="#E2E8F0" />
-      <circle cx="27.5" cy="23.5" r="2" fill="#10B981" />
-      {/* Central Verification Gate */}
-      <circle cx="18" cy="18" r="3.25" fill="#10B981" stroke="#0A0F1D" strokeWidth="1.5" />
+      <circle cx="10.5" cy="11.5" r="2.2" fill="#20BCE5" />
+      <circle cx="10.5" cy="24.5" r="2.2" fill="#FFFFFF" />
+      <circle cx="22" cy="18" r="3" fill="#12A875" />
+      <path
+        d="M25 18H27.5"
+        stroke="#12A875"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -53,103 +49,91 @@ export function Brand({
   to = "/",
   compact = false,
   tone = "default",
-  className,
 }: {
   to?: string;
   compact?: boolean;
   tone?: "default" | "inverse";
-  className?: string;
 }) {
   return (
     <Link
       to={to}
-      aria-label="TrustToPay home"
-      className={cn("group inline-flex items-center gap-2.5 whitespace-nowrap shrink-0", className)}
+      className="inline-flex items-center gap-2.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4263EB]"
     >
-      <TrustToPayLogoMark className="transition-transform duration-150 group-hover:scale-[1.03]" />
-      {!compact ? (
+      <TrustToPayLogoMark />
+      <div className="leading-tight">
         <span
           className={cn(
-            "font-heading text-base font-extrabold tracking-tight whitespace-nowrap shrink-0",
-            tone === "inverse" ? "text-[#FFFEFA]" : "text-[#202722]",
+            "font-display text-[17px] font-extrabold tracking-tight",
+            tone === "inverse" ? "text-white" : "text-[#141B2D]",
           )}
         >
           TrustToPay
         </span>
-      ) : null}
+        {!compact ? (
+          <span
+            className={cn(
+              "block font-mono text-[9.5px] font-medium uppercase tracking-[0.14em]",
+              tone === "inverse" ? "text-[#94A3B8]" : "text-[#68738A]",
+            )}
+          >
+            Human Execution Layer
+          </span>
+        ) : null}
+      </div>
     </Link>
   );
 }
 
-const PUBLIC_NAV_ITEMS = [
-  { label: "Product", href: "/#product", isHash: true },
-  { label: "How It Works", href: "/#how-it-works", isHash: true },
-  { label: "Developers", href: "/#developers", isHash: true },
-  { label: "Documentation", href: "/app/docs", isHash: false },
-] as const;
+const NAV_LINKS = [
+  { label: "Product", to: "/#product" },
+  { label: "How It Works", to: "/#workflow" },
+  { label: "For Developers", to: "/#developers" },
+  { label: "For Specialists", to: "/#specialists" },
+  { label: "Security", to: "/#security" },
+];
 
 export function PublicHeader() {
   const { user } = useAuth();
-  const location = useLocation();
-  const [scrolled, setScrolled] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    function onScroll() {
-      setScrolled(window.scrollY > 10);
-    }
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [location.pathname, location.hash]);
+  const { pathname, hash } = useLocation();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header
-      className={cn(
-        "sticky top-0 z-40 transition-colors duration-150",
-        scrolled
-          ? "border-b border-[#E5E1D7] bg-[#FFFEFA]/95 shadow-surface backdrop-blur-md"
-          : "border-b border-[#E5E1D7] bg-[#F7F5EF]/95 backdrop-blur-sm",
-      )}
-    >
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-6 px-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-40 border-b border-[#E4E9F2] bg-[#FFFFFF]/95 backdrop-blur-sm">
+      <div className="mx-auto flex h-16 max-w-[1320px] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <Brand />
 
-        <nav
-          aria-label="Primary navigation"
-          className="hidden items-center gap-6 text-xs font-semibold text-[#69736D] md:flex"
-        >
-          {PUBLIC_NAV_ITEMS.map((item) => (
-            <Link
-              key={item.label}
-              to={item.href}
-              className="whitespace-nowrap shrink-0 transition-colors hover:text-[#202722]"
-            >
-              {item.label}
-            </Link>
-          ))}
+        <nav aria-label="Main navigation" className="hidden items-center gap-1 lg:flex">
+          {NAV_LINKS.map((item) => {
+            const targetHash = item.to.replace("/", "");
+            const active = pathname === "/" && hash === targetHash;
+            return (
+              <Link
+                key={item.label}
+                to={item.to}
+                className={cn(
+                  "rounded-lg px-3 py-2 text-[13px] font-medium transition-colors hover:bg-[#EDF0F6] hover:text-[#141B2D]",
+                  active ? "bg-[#EDF0F6] font-semibold text-[#4263EB]" : "text-[#4E596E]",
+                )}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
         </nav>
 
-        <div className="hidden items-center gap-2.5 shrink-0 md:flex">
+        <div className="hidden items-center gap-2.5 lg:flex">
           {user ? (
-            <Button asChild size="sm">
+            <Button asChild size="default">
               <Link to="/app">
-                Open Console <ArrowRight className="size-3.5" />
+                Open Workspace <ArrowRight className="size-3.5" />
               </Link>
             </Button>
           ) : (
             <>
-              <Link
-                to="/login"
-                className="px-2.5 py-1.5 text-xs font-semibold text-[#69736D] transition-colors hover:text-[#202722] whitespace-nowrap shrink-0"
-              >
-                Sign In
-              </Link>
-              <Button asChild size="sm">
+              <Button asChild variant="ghost" size="default">
+                <Link to="/login">Log In</Link>
+              </Button>
+              <Button asChild variant="default" size="default">
                 <Link to="/register">
                   Get Started <ArrowRight className="size-3.5" />
                 </Link>
@@ -158,63 +142,48 @@ export function PublicHeader() {
           )}
         </div>
 
-        <div className="flex items-center gap-2 md:hidden">
-          {user ? (
-            <Button asChild size="sm" variant="outline">
-              <Link to="/app">Console</Link>
-            </Button>
-          ) : (
-            <Link
-              to="/login"
-              className="px-2 py-1 text-xs font-semibold text-[#69736D] hover:text-[#202722] whitespace-nowrap shrink-0"
-            >
-              Sign In
-            </Link>
-          )}
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
-            aria-expanded={mobileMenuOpen}
-            onClick={() => setMobileMenuOpen((prev) => !prev)}
-          >
-            {mobileMenuOpen ? <X className="size-4" /> : <Menu className="size-4" />}
-          </Button>
-        </div>
+        <button
+          type="button"
+          aria-label={mobileOpen ? "Close menu" : "Open menu"}
+          aria-expanded={mobileOpen}
+          onClick={() => setMobileOpen((prev) => !prev)}
+          className="inline-flex size-10 items-center justify-center rounded-lg border border-[#E4E9F2] bg-[#FFFFFF] text-[#141B2D] hover:bg-[#EDF0F6] lg:hidden"
+        >
+          {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+        </button>
       </div>
 
-      {mobileMenuOpen ? (
-        <div className="border-t border-[#E5E1D7] bg-[#FFFEFA] px-4 py-3.5 md:hidden">
-          <nav aria-label="Mobile navigation" className="flex flex-col space-y-1">
-            {PUBLIC_NAV_ITEMS.map((item) => (
+      {mobileOpen ? (
+        <div className="border-t border-[#E4E9F2] bg-[#FFFFFF] px-4 py-4 lg:hidden">
+          <nav aria-label="Mobile navigation" className="flex flex-col gap-1">
+            {NAV_LINKS.map((item) => (
               <Link
                 key={item.label}
-                to={item.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className="rounded-md px-3 py-2 text-xs font-semibold text-[#202722] transition-colors hover:bg-[#F0EEE7]"
+                to={item.to}
+                onClick={() => setMobileOpen(false)}
+                className="flex min-h-11 items-center rounded-lg px-3 text-sm font-medium text-[#141B2D] hover:bg-[#EDF0F6]"
               >
                 {item.label}
               </Link>
             ))}
           </nav>
-          <div className="mt-3 flex flex-col gap-2 border-t border-[#E5E1D7] pt-3">
+          <div className="mt-4 grid grid-cols-1 gap-2 border-t border-[#E4E9F2] pt-4 sm:grid-cols-2">
             {user ? (
-              <Button asChild size="sm" className="w-full">
-                <Link to="/app" onClick={() => setMobileMenuOpen(false)}>
-                  Open Console <ArrowRight className="size-3.5" />
+              <Button asChild size="lg" className="w-full">
+                <Link to="/app" onClick={() => setMobileOpen(false)}>
+                  Open Workspace <ArrowRight className="size-4" />
                 </Link>
               </Button>
             ) : (
               <>
-                <Button asChild variant="outline" size="sm" className="w-full">
-                  <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-                    Sign In
+                <Button asChild variant="outline" size="lg" className="w-full">
+                  <Link to="/login" onClick={() => setMobileOpen(false)}>
+                    Log In
                   </Link>
                 </Button>
-                <Button asChild size="sm" className="w-full">
-                  <Link to="/register" onClick={() => setMobileMenuOpen(false)}>
-                    Get Started <ArrowRight className="size-3.5" />
+                <Button asChild size="lg" className="w-full">
+                  <Link to="/register" onClick={() => setMobileOpen(false)}>
+                    Get Started
                   </Link>
                 </Button>
               </>
@@ -228,107 +197,113 @@ export function PublicHeader() {
 
 export function MarketingFooter() {
   return (
-    <footer className="border-t border-[#E5E1D7] bg-[#F0EEE7] text-[#69736D]">
-      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
-          <div className="space-y-2.5">
-            <Brand />
-            <p className="max-w-sm text-xs leading-relaxed text-[#69736D]">
-              Human-in-the-loop execution infrastructure for AI agents. When an autonomous agent encounters uncertainty,
-              TrustToPay dispatches verified human specialists, enforces deterministic verification, and settles via PayPal.
+    <footer className="border-t border-[#1E293B] bg-[#10172A] text-[#CBD5E1]">
+      <div className="mx-auto max-w-[1320px] px-4 py-12 sm:px-6 lg:px-8">
+        <div className="grid gap-10 lg:grid-cols-[1.4fr_repeat(3,1fr)]">
+          <div className="space-y-4">
+            <Brand tone="inverse" />
+            <p className="max-w-sm text-xs leading-6 text-[#94A3B8]">
+              The secure human execution layer for AI agents. Hybrid retrieval routes blockers to verified human
+              specialists, deterministic scanners and Gemini inspect deliverables, and PayPal supports checkout and
+              settlement tracking.
             </p>
-            <p className="font-mono text-[11px] text-[#69736D]">
-              PayPal Sandbox &amp; Isolated Verification Enforced
-            </p>
+            <div className="flex flex-wrap items-center gap-5 pt-1">
+              <PayPalLogo tone="inverse" className="h-5" />
+              <ElasticLogo tone="inverse" className="h-5" />
+              <RenderLogo tone="inverse" className="h-5" />
+            </div>
           </div>
 
-          <div>
-            <p className="font-heading text-xs font-bold text-[#202722]">Product</p>
-            <ul className="mt-2.5 space-y-2 text-xs">
+          <div className="space-y-2.5 text-xs">
+            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-white">Platform</p>
+            <ul className="space-y-2 text-[#94A3B8]">
               <li>
-                <Link to="/#product" className="transition-colors hover:text-[#202722]">
-                  Platform Overview
-                </Link>
-              </li>
-              <li>
-                <Link to="/#how-it-works" className="transition-colors hover:text-[#202722]">
+                <Link to="/#workflow" className="transition-colors hover:text-white">
                   How It Works
                 </Link>
               </li>
               <li>
-                <Link to="/app/workspace" className="transition-colors hover:text-[#202722]">
-                  Agent Workspace
+                <Link to="/#developers" className="transition-colors hover:text-white">
+                  For Developers
                 </Link>
               </li>
               <li>
-                <Link to="/app/marketplace" className="transition-colors hover:text-[#202722]">
-                  Specialist Marketplace
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <p className="font-heading text-xs font-bold text-[#202722]">Developers</p>
-            <ul className="mt-2.5 space-y-2 text-xs">
-              <li>
-                <Link to="/#developers" className="transition-colors hover:text-[#202722]">
-                  MCP &amp; REST API
+                <Link to="/#specialists" className="transition-colors hover:text-white">
+                  For Specialists
                 </Link>
               </li>
               <li>
-                <Link to="/app/docs" className="transition-colors hover:text-[#202722]">
-                  Documentation &amp; Setup
-                </Link>
-              </li>
-              <li>
-                <a
-                  href="/api-docs"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1 transition-colors hover:text-[#202722]"
-                >
-                  OpenAPI Reference <ExternalLink className="size-3" />
-                </a>
-              </li>
-              <li>
-                <Link to="/app/integrations" className="transition-colors hover:text-[#202722]">
-                  System &amp; Adapter Status
+                <Link to="/#security" className="transition-colors hover:text-white">
+                  Security Architecture
                 </Link>
               </li>
             </ul>
           </div>
 
-          <div>
-            <p className="font-heading text-xs font-bold text-[#202722]">Account &amp; Governance</p>
-            <ul className="mt-2.5 space-y-2 text-xs">
+          <div className="space-y-2.5 text-xs">
+            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-white">
+              Infrastructure
+            </p>
+            <ul className="space-y-2 text-[#94A3B8]">
               <li>
-                <Link to="/login" className="transition-colors hover:text-[#202722]">
+                <Link to="/app/docs" className="transition-colors hover:text-white">
+                  MCP &amp; REST Documentation
+                </Link>
+              </li>
+              <li>
+                <Link to="/app/integrations" className="transition-colors hover:text-white">
+                  Live Integration Status
+                </Link>
+              </li>
+              <li>
+                <Link to="/privacy" className="transition-colors hover:text-white">
+                  Data Governance &amp; Privacy
+                </Link>
+              </li>
+              <li>
+                <Link to="/contact" className="transition-colors hover:text-white">
+                  Support &amp; Security Ops
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          <div className="space-y-2.5 text-xs">
+            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-white">Workspace</p>
+            <ul className="space-y-2 text-[#94A3B8]">
+              <li>
+                <Link to="/login" className="transition-colors hover:text-white">
                   Sign In
                 </Link>
               </li>
               <li>
-                <Link to="/register" className="transition-colors hover:text-[#202722]">
+                <Link to="/register" className="transition-colors hover:text-white">
                   Create Account
                 </Link>
               </li>
               <li>
-                <Link to="/privacy" className="transition-colors hover:text-[#202722]">
-                  Privacy &amp; Data Handling
+                <Link to="/app/marketplace" className="transition-colors hover:text-white">
+                  Specialist Marketplace
                 </Link>
               </li>
               <li>
-                <Link to="/contact" className="transition-colors hover:text-[#202722]">
-                  Support &amp; Security
+                <Link to="/app/workspace" className="transition-colors hover:text-white">
+                  Agent Workspace
                 </Link>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-7 flex flex-col justify-between gap-2 border-t border-[#E5E1D7] pt-4 text-xs text-[#69736D] sm:flex-row sm:items-center">
-          <p>© {new Date().getFullYear()} TrustToPay. Licensed under MIT.</p>
-          <p className="font-mono text-[11px]">Verified human handoff · PayPal Sandbox checkout &amp; payouts</p>
+        <div className="mt-10 flex flex-col gap-3 border-t border-[#1E293B] pt-6 text-[11px] text-[#94A3B8] sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="size-4 shrink-0 text-[#12A875]" />
+            <span>
+              PayPal Sandbox environment with explicit simulated demo fallback labels. SHA-256 artifact digests &amp;
+              HMAC-SHA256 signed handbacks.
+            </span>
+          </div>
+          <p className="shrink-0 font-mono text-[11px]">© {new Date().getFullYear()} TrustToPay</p>
         </div>
       </div>
     </footer>

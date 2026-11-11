@@ -129,7 +129,7 @@ export default function IntegrationsPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-sm">
-              <AlertTriangle className="size-4 text-amber-600" /> Configuration notices
+              <AlertTriangle className="size-4 text-[#9A6100]" /> Configuration notices
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
@@ -152,7 +152,7 @@ export default function IntegrationsPage() {
           <CardHeader className="border-b border-border pb-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <CardTitle className="flex items-center gap-2">
-                <CreditCard className="size-4 text-blue-600" /> PayPal Checkout funding
+                <CreditCard className="size-4 text-[#4263EB]" /> PayPal Checkout funding
               </CardTitle>
               <Badge tone={paypal.checkoutReady ? "success" : "danger"} dot>
                 {paypal.checkoutReady ? "Ready" : "Not ready"}
@@ -197,7 +197,7 @@ export default function IntegrationsPage() {
           <CardHeader className="border-b border-border pb-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <CardTitle className="flex items-center gap-2">
-                <Wallet className="size-4 text-emerald-600" /> PayPal Payouts
+                <Wallet className="size-4 text-[#12A875]" /> PayPal Payouts
               </CardTitle>
               <Badge tone={paypal.payoutsEnabled ? "success" : "warning"} dot>
                 {paypal.payoutsEnabled ? "Enabled" : "Permission required"}
@@ -238,21 +238,21 @@ export default function IntegrationsPage() {
             </div>
           </CardHeader>
           <CardContent className="pt-4">
-            <pre className="overflow-x-auto rounded-md border border-border bg-slate-950 p-3 text-[10px] leading-5 text-slate-200">
+            <pre className="overflow-x-auto rounded-md border border-[#1E293B] bg-[#10172A] p-3 text-[11px] leading-5 text-[#F5F7FC]">
               <code>{ENV_SNIPPET}</code>
             </pre>
             <div className="mt-3 space-y-2 text-[11px] leading-5 text-muted-foreground">
               <p className="flex gap-2">
-                <Lock className="mt-0.5 size-3.5 shrink-0 text-emerald-600" />
+                <Lock className="mt-0.5 size-3.5 shrink-0 text-[#12A875]" />
                 Put secrets in <code>.env</code> locally or your platform&apos;s secret settings. Never send them in
                 chat or commit them.
               </p>
               <p className="flex gap-2">
-                <ShieldCheck className="mt-0.5 size-3.5 shrink-0 text-emerald-600" />
+                <ShieldCheck className="mt-0.5 size-3.5 shrink-0 text-[#12A875]" />
                 The server refuses live PayPal. The adapter is hard-wired to the Sandbox API base URL.
               </p>
               <p className="flex gap-2">
-                <ShieldAlert className="mt-0.5 size-3.5 shrink-0 text-amber-600" />
+                <ShieldAlert className="mt-0.5 size-3.5 shrink-0 text-[#F5A623]" />
                 Restart the backend after changing <code>DEMO_MODE</code> or credentials so the server reloads config.
               </p>
             </div>
@@ -366,7 +366,7 @@ export default function IntegrationsPage() {
                 server-stored minor units. Mismatches become failures, not silent successes.
               </p>
             </div>
-            <div className="rounded-md border border-amber-500/30 bg-amber-500/10 p-2.5 text-[11px] leading-5 text-amber-200">
+            <div className="rounded-md border border-[#F5A623]/30 bg-[#F5A623]/10 p-2.5 text-[11px] leading-5 text-[#9A6100]">
               Without <code>PAYPAL_WEBHOOK_ID</code>, webhook requests are rejected. The payment ledger still has manual
               reconcile controls for funding and payout state.
             </div>

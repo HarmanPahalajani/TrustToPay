@@ -68,7 +68,7 @@ function ProtectedOrPublicDocsShell() {
   if (!user) {
     if (isPublicFriendlyRoute) {
       return (
-        <div className="flex min-h-dvh flex-col bg-[#F7F5EF] text-[#202722]">
+        <div className="flex min-h-dvh flex-col bg-[#F5F7FC] text-[#141B2D]">
           <PublicHeader />
           <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 lg:px-8">
             <Outlet />

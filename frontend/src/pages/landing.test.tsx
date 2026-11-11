@@ -15,8 +15,8 @@ vi.mock("@/context/AuthContext", () => ({
   }),
 }));
 
-describe("LandingPage dark obsidian redesign & interactive workflow", () => {
-  it("renders the preserved brand identity, primary navigation links, and hero headline", () => {
+describe("LandingPage SaaS redesign, partner strip, and interactive workflow", () => {
+  it("renders the core headline, POWERED BY partner strip, and primary navigation links", () => {
     render(
       <MemoryRouter>
         <LandingPage />
@@ -24,22 +24,20 @@ describe("LandingPage dark obsidian redesign & interactive workflow", () => {
     );
 
     expect(
-      screen.getByRole("heading", { name: /Give your AI agents a human when they need one\./i }),
+      screen.getByRole("heading", { name: /When AI gets stuck, human expertise moves it forward\./i }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/AI doesn't have to solve everything alone\./i)).toBeInTheDocument();
-    expect(
-      screen.getByLabelText(/See where autonomous agents look when confidence drops\./i),
-    ).toBeInTheDocument();
-    expect(screen.getByText(/Verifies across/i)).toBeInTheDocument();
-    expect(screen.getByText(/Confidence gate/i)).toBeInTheDocument();
+    expect(screen.getByText("POWERED BY")).toBeInTheDocument();
+    const strip = screen.getByLabelText(/Powered by technology partners/i);
+    expect(strip).toBeInTheDocument();
+    expect(strip).toHaveTextContent(/PayPal/i);
+    expect(strip).toHaveTextContent(/Elastic/i);
+    expect(strip).toHaveTextContent(/Render/i);
 
     expect(screen.getAllByText("TrustToPay").length).toBeGreaterThanOrEqual(2);
     expect(screen.getAllByRole("link", { name: "Product" })[0]).toHaveAttribute("href", "/#product");
-    expect(screen.getAllByRole("link", { name: "How It Works" })[0]).toHaveAttribute("href", "/#how-it-works");
-    expect(screen.getAllByRole("link", { name: "Developers" })[0]).toHaveAttribute("href", "/#developers");
-    const docLinks = screen.getAllByRole("link", { name: "Documentation" });
-    expect(docLinks.length).toBeGreaterThanOrEqual(1);
-    expect(docLinks[0]).toHaveAttribute("href", "/app/docs");
+    expect(screen.getAllByRole("link", { name: "How It Works" })[0]).toHaveAttribute("href", "/#workflow");
+    expect(screen.getAllByRole("link", { name: "For Developers" })[0]).toHaveAttribute("href", "/#developers");
+    expect(screen.getAllByRole("link", { name: "Security" })[0]).toHaveAttribute("href", "/#security");
   });
 
   it("excludes seeded example tasks, demo credentials, and hackathon badges from the public homepage", () => {
@@ -53,9 +51,10 @@ describe("LandingPage dark obsidian redesign & interactive workflow", () => {
     expect(screen.queryByText(/AnchorVolt/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/Demo1234!/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/Hackathon project/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Smart India Hackathon/i)).not.toBeInTheDocument();
   });
 
-  it("renders all 9 sequential workflow steps and updates the synchronized telemetry inspector on selection", () => {
+  it("renders all 6 architecture workflow tabs and updates the synchronized inspector on selection", () => {
     render(
       <MemoryRouter>
         <LandingPage />
@@ -63,31 +62,28 @@ describe("LandingPage dark obsidian redesign & interactive workflow", () => {
     );
 
     const expectedSteps = [
-      "Step 1 — AI encounters a blocker",
-      "Step 2 — Task creation",
-      "Step 3 — Intelligent specialist matching",
-      "Step 4 — Top-five dispatch",
-      "Step 5 — Human resolves the problem",
-      "Step 6 — Security review",
-      "Step 7 — Independent verification",
-      "Step 8 — AI resumes",
-      "Step 9 — Payment workflow",
+      "Agent Escalates Task",
+      "Semantic Matching",
+      "Eligibility & Ranking",
+      "Human Execution",
+      "Security & Verification",
+      "Signed Result & Payment",
     ];
 
     for (const stepTitle of expectedSteps) {
       expect(screen.getAllByText(stepTitle).length).toBeGreaterThanOrEqual(1);
     }
 
-    // Select Step 6 — Security review
-    const step6Tab = screen.getByRole("tab", { name: /Step 6 — Security review/i });
-    fireEvent.click(step6Tab);
-    expect(step6Tab).toHaveAttribute("aria-selected", "true");
-    expect(screen.getAllByText(/SecurityGateService\.inspectSubmission/i).length).toBeGreaterThanOrEqual(1);
+    // Select Security & Verification tab
+    const securityTab = screen.getByRole("tab", { name: /Security & Verification/i });
+    fireEvent.click(securityTab);
+    expect(securityTab).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByText(/Layered Verification Gate/i)).toBeInTheDocument();
 
-    // Select Step 9 — Payment workflow
-    const step9Tab = screen.getByRole("tab", { name: /Step 9 — Payment workflow/i });
-    fireEvent.click(step9Tab);
-    expect(step9Tab).toHaveAttribute("aria-selected", "true");
-    expect(screen.getAllByText(/POST \/api\/v1\/payments\/tasks\/:id\/payout/i).length).toBeGreaterThanOrEqual(1);
+    // Select Signed Result & Payment tab
+    const paymentTab = screen.getByRole("tab", { name: /Signed Result & Payment/i });
+    fireEvent.click(paymentTab);
+    expect(paymentTab).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByText(/GET \/api\/v1\/tasks\/:id\/handback/i)).toBeInTheDocument();
   });
 });

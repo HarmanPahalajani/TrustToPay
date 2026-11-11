@@ -2,19 +2,20 @@ import { useMemo, useState } from "react";
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  Award,
   Bell,
   BookOpen,
-  Bot,
-  ChevronDown,
+  BriefcaseBusiness,
+  Check,
+  CheckCheck,
   CreditCard,
-  ExternalLink,
+  Inbox,
   LayoutDashboard,
   LogOut,
   Menu,
   Plug,
-  Search,
   ShieldCheck,
-  Store,
+  Sparkles,
   UserRound,
   Wallet,
   X,
@@ -22,52 +23,61 @@ import {
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { Brand } from "@/components/layout/public-layout";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { humanize, initials, timeAgo } from "@/lib/format";
+import { cn } from "@/lib/utils";
 
-type NavItem = { to: string; label: string; icon: typeof Bot; end?: boolean };
+interface NavItem {
+  to: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  end?: boolean;
+}
 
 function navFor(role: string | undefined): { primary: NavItem[]; secondary: NavItem[] } {
   if (role === "REVIEWER") {
     return {
       primary: [
         { to: "/app", label: "Overview", icon: LayoutDashboard, end: true },
-        { to: "/app/onboarding/skills", label: "Skill Certifications", icon: ShieldCheck },
-        { to: "/app/marketplace", label: "Available Offers", icon: Store },
-        { to: "/app/reviews", label: "Active Tasks", icon: Bot },
+        { to: "/app/marketplace", label: "Marketplace & Offers", icon: BriefcaseBusiness },
+        { to: "/app/reviews", label: "My Active Tasks", icon: Inbox },
+        { to: "/app/onboarding/skills", label: "Skill Verification", icon: Award },
         { to: "/app/earnings", label: "Earnings & Payouts", icon: Wallet },
+        { to: "/app/payments", label: "Payment Ledger", icon: CreditCard },
       ],
       secondary: [
-        { to: "/app/profile", label: "Skills & Profile", icon: UserRound },
-        { to: "/app/integrations", label: "Integrations", icon: Plug },
+        { to: "/app/profile", label: "Settings & Profile", icon: UserRound },
         { to: "/app/docs", label: "Documentation", icon: BookOpen },
+        { to: "/app/integrations", label: "Integrations", icon: Plug },
       ],
     };
   }
+
   return {
     primary: [
       { to: "/app", label: "Overview", icon: LayoutDashboard, end: true },
-      { to: "/app/workspace", label: "Agent Workspace", icon: Bot },
-      { to: "/app/requests", label: "My Requests", icon: Search },
-      { to: "/app/payments", label: "Payments", icon: CreditCard },
+      { to: "/app/workspace", label: "Agent Workspace", icon: Sparkles },
+      { to: "/app/requests", label: "Escalated Tasks", icon: Inbox },
+      { to: "/app/payments", label: "Payments & Escrow", icon: CreditCard },
     ],
     secondary: [
-      { to: "/app/profile", label: "Profile & API Keys", icon: UserRound },
-      { to: "/app/integrations", label: "Integrations", icon: Plug },
-      { to: "/app/docs", label: "Documentation", icon: BookOpen },
+      { to: "/app/integrations", label: "Integrations & Keys", icon: Plug },
+      { to: "/app/docs", label: "API & MCP Docs", icon: BookOpen },
+      { to: "/app/profile", label: "Settings & Profile", icon: UserRound },
     ],
   };
 }
 
-function NotificationBell() {
-  const [open, setOpen] = useState(false);
+function NotificationsBell() {
   const queryClient = useQueryClient();
+  const [open, setOpen] = useState(false);
   const { data } = useQuery({
     queryKey: ["notifications"],
     queryFn: api.auth.notifications,
     refetchInterval: 60_000,
   });
+
   const unread = data?.items.filter((item) => !item.readAt).length ?? 0;
 
   const markAll = useMutation({
@@ -78,23 +88,32 @@ function NotificationBell() {
     },
   });
 
+  const markOne = useMutation({
+    mutationFn: (id: string) => api.auth.markRead(id),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      await queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
+    },
+  });
+
   return (
     <div className="relative">
       <Button
-        variant="ghost"
+        variant="outline"
         size="icon"
         aria-label={`Notifications${unread ? ` (${unread} unread)` : ""}`}
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
-        className="relative text-[#202722]"
+        className="relative"
       >
-        <Bell className="size-4" />
+        <Bell className="size-4 text-[#141B2D]" />
         {unread > 0 ? (
-          <span className="absolute right-1.5 top-1.5 flex size-4 items-center justify-center rounded-full bg-[#365FEA] font-mono text-[9px] font-semibold text-[#FFFEFA]">
+          <span className="absolute -right-1 -top-1 flex size-4 items-center justify-center rounded-full bg-[#4263EB] font-mono text-[9px] font-bold text-white tabular-nums">
             {unread > 9 ? "9+" : unread}
           </span>
         ) : null}
       </Button>
+
       {open ? (
         <>
           <button
@@ -103,53 +122,81 @@ function NotificationBell() {
             className="fixed inset-0 z-40 cursor-default"
             onClick={() => setOpen(false)}
           />
-          <div className="absolute right-0 top-10 z-50 w-80 rounded-lg border border-[#E5E1D7] bg-[#FFFEFA] shadow-elevated">
-            <div className="flex items-center justify-between border-b border-[#E5E1D7] px-3.5 py-2.5">
-              <p className="font-heading text-xs font-bold text-[#202722]">Notifications</p>
+          <div className="absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-xl border border-[#E4E9F2] bg-[#FFFFFF] shadow-elevated sm:w-96">
+            <div className="flex items-center justify-between border-b border-[#E4E9F2] bg-[#F5F7FC] px-4 py-3">
+              <div>
+                <p className="font-display text-xs font-bold text-[#141B2D]">Notifications</p>
+                <p className="text-[11px] text-[#68738A]">{unread} unread update{unread === 1 ? "" : "s"}</p>
+              </div>
               <button
                 type="button"
-                className="text-[11px] font-semibold text-[#365FEA] hover:underline disabled:opacity-50"
+                className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-semibold text-[#4263EB] hover:bg-[#4263EB]/10 disabled:opacity-50"
                 disabled={unread === 0 || markAll.isPending}
                 onClick={() => markAll.mutate()}
               >
-                Mark all read
+                <CheckCheck className="size-3.5" /> Mark all read
               </button>
             </div>
-            <div className="max-h-72 overflow-y-auto">
+
+            <div className="max-h-96 divide-y divide-[#E4E9F2] overflow-y-auto">
               {!data || data.items.length === 0 ? (
-                <p className="px-4 py-6 text-center text-xs text-[#69736D]">No notifications yet.</p>
+                <div className="px-4 py-8 text-center">
+                  <Bell className="mx-auto mb-2 size-5 text-[#94A3B8]" />
+                  <p className="text-xs font-medium text-[#68738A]">No notifications recorded yet.</p>
+                </div>
               ) : (
-                data.items.slice(0, 10).map((notification) => {
-                  const itemClasses = cn(
-                    "block border-b border-[#E5E1D7] px-3.5 py-2.5 transition-colors last:border-0 hover:bg-[#F0EEE7]",
-                    !notification.readAt && "bg-[#365FEA]/[0.05]",
-                  );
-                  const content = (
-                    <>
-                      <div className="flex items-start justify-between gap-2">
-                        <p className="text-xs font-semibold text-[#202722]">{notification.title}</p>
-                        <time className="shrink-0 font-mono text-[10px] tabular-nums text-[#69736D]">
+                data.items.slice(0, 12).map((notification) => {
+                  const isUnread = !notification.readAt;
+                  const inner = (
+                    <div className="min-w-0 flex-1 space-y-0.5">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="truncate text-xs font-semibold text-[#141B2D]">{notification.title}</p>
+                        <span className="shrink-0 font-mono text-[10px] text-[#68738A]">
                           {timeAgo(notification.createdAt)}
-                        </time>
+                        </span>
                       </div>
-                      <p className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-[#69736D]">
-                        {notification.body}
-                      </p>
-                    </>
+                      <p className="line-clamp-2 text-[11px] leading-4 text-[#4E596E]">{notification.body}</p>
+                    </div>
                   );
 
-                  return notification.link ? (
-                    <Link
+                  return (
+                    <div
                       key={notification.id}
-                      to={notification.link}
-                      onClick={() => setOpen(false)}
-                      className={itemClasses}
+                      className={cn(
+                        "flex items-start gap-2.5 px-4 py-3 transition-colors hover:bg-[#F5F7FC]",
+                        isUnread && "bg-[#4263EB]/[0.04]",
+                      )}
                     >
-                      {content}
-                    </Link>
-                  ) : (
-                    <div key={notification.id} className={itemClasses}>
-                      {content}
+                      <span
+                        className={cn(
+                          "mt-1.5 size-2 shrink-0 rounded-full",
+                          isUnread ? "bg-[#4263EB]" : "bg-[#E4E9F2]",
+                        )}
+                      />
+                      {notification.link ? (
+                        <Link
+                          to={notification.link}
+                          onClick={() => {
+                            if (isUnread) markOne.mutate(notification.id);
+                            setOpen(false);
+                          }}
+                          className="min-w-0 flex-1"
+                        >
+                          {inner}
+                        </Link>
+                      ) : (
+                        <div className="min-w-0 flex-1">{inner}</div>
+                      )}
+                      {isUnread ? (
+                        <button
+                          type="button"
+                          aria-label="Mark notification read"
+                          onClick={() => markOne.mutate(notification.id)}
+                          className="mt-0.5 rounded p-1 text-[#68738A] hover:bg-[#EDF0F6] hover:text-[#141B2D]"
+                        >
+                          <Check className="size-3.5" />
+                        </button>
+                      ) : null}
                     </div>
                   );
                 })
@@ -164,11 +211,10 @@ function NotificationBell() {
 
 export function AppShell() {
   const { user, logout } = useAuth();
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const integrations = useQuery({
+  const integration = useQuery({
     queryKey: ["integrations", "status"],
     queryFn: api.integrations.status,
     staleTime: 60_000,
@@ -177,249 +223,174 @@ export function AppShell() {
   const nav = useMemo(() => navFor(user?.role), [user?.role]);
 
   async function handleLogout() {
-    setMenuOpen(false);
+    setSidebarOpen(false);
     await logout();
-    navigate("/login");
+    navigate("/");
   }
 
-  const mode = integrations.data?.paypal.paymentsMode;
-  const roleLabel =
-    user?.role === "REVIEWER"
-      ? "Verified Specialist"
-      : "Requester / Agent Operator";
+  const paypalMode = integration.data?.paypal.paymentsMode;
+  const aiEngine = integration.data?.ai.engine;
 
-  return (
-    <div className="min-h-dvh bg-[#F7F5EF] text-[#202722]">
-      {/* Mobile top bar */}
-      <div className="sticky top-0 z-40 flex h-13 items-center justify-between border-b border-[#E5E1D7] bg-[#FFFEFA] px-4 py-2.5 lg:hidden">
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" aria-label="Open navigation" onClick={() => setMobileOpen(true)}>
-            <Menu className="size-4" />
-          </Button>
-          <Brand />
-        </div>
-        <div className="flex items-center gap-1.5">
-          <NotificationBell />
-        </div>
-      </div>
-
-      <div className="flex min-h-dvh">
-        {/* Sidebar */}
-        <aside
-          className={cn(
-            "fixed inset-y-0 left-0 z-50 flex w-60 flex-col border-r border-[#E5E1D7] bg-[#F0EEE7] transition-transform lg:sticky lg:top-0 lg:h-dvh lg:translate-x-0",
-            mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
-          )}
-        >
-          <div className="flex h-14 items-center justify-between border-b border-[#E5E1D7] bg-[#FFFEFA] px-4">
-            <Brand />
-            <Button
-              variant="ghost"
-              size="icon"
-              className="lg:hidden"
-              aria-label="Close navigation"
-              onClick={() => setMobileOpen(false)}
-            >
-              <X className="size-4" />
-            </Button>
-          </div>
-
-          <div className="px-3 pt-3 pb-1.5">
-            <div className="rounded-md border border-[#E5E1D7] bg-[#FFFEFA] px-3 py-2 shadow-surface">
-              <p className="font-mono text-[10px] font-medium uppercase tracking-wider text-[#69736D]">
-                Active Workspace
-              </p>
-              <p className="mt-0.5 truncate font-heading text-xs font-bold text-[#202722]">{roleLabel}</p>
-            </div>
-          </div>
-
-          <nav className="flex-1 space-y-0.5 overflow-y-auto px-2.5 py-2" aria-label="Main">
-            {nav.primary.map((item) => {
-              const Icon = item.icon;
-              return (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  end={item.end}
-                  onClick={() => setMobileOpen(false)}
-                  className={({ isActive }) =>
-                    cn(
-                      "flex items-center gap-2.5 rounded-md px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors",
-                      isActive
-                        ? "bg-[#365FEA] text-[#FFFEFA] shadow-surface"
-                        : "text-[#69736D] hover:bg-[#FFFEFA] hover:text-[#202722]",
-                    )
-                  }
-                >
-                  <Icon className="size-3.5 shrink-0" aria-hidden />
-                  <span>{item.label}</span>
-                </NavLink>
-              );
-            })}
-
-            <div className="pt-4">
-              <p className="px-3 pb-1 font-mono text-[10px] font-semibold uppercase tracking-wider text-[#69736D]">
-                Platform
-              </p>
-              {nav.secondary.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <NavLink
-                    key={item.to}
-                    to={item.to}
-                    onClick={() => setMobileOpen(false)}
-                    className={({ isActive }) =>
-                      cn(
-                        "flex items-center gap-2.5 rounded-md px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors",
-                        isActive
-                          ? "bg-[#365FEA] text-[#FFFEFA] shadow-surface"
-                          : "text-[#69736D] hover:bg-[#FFFEFA] hover:text-[#202722]",
-                      )
-                    }
-                  >
-                    <Icon className="size-3.5 shrink-0" aria-hidden />
-                    <span>{item.label}</span>
-                  </NavLink>
-                );
-              })}
-            </div>
-          </nav>
-
-          <div className="space-y-2 border-t border-[#E5E1D7] p-2.5">
-            <div className="rounded-md border border-[#E5E1D7] bg-[#FFFEFA] px-2.5 py-2">
-              <div className="flex items-center justify-between gap-2 text-[11px]">
-                <span className="text-[#69736D]">Settlement Mode</span>
-                <span className="font-mono text-[10px] font-semibold text-[#202722]">
-                  {mode === "SIMULATED" ? "Simulated" : "PayPal Sandbox"}
-                </span>
-              </div>
-              <p className="mt-0.5 text-[10px] leading-4 text-[#69736D]">
-                {mode === "SIMULATED"
-                  ? "Simulated transactions · No money moves"
-                  : "PayPal Sandbox checkout & payouts"}
-              </p>
-            </div>
-            <div className="flex items-center justify-between gap-2 rounded-md border border-[#E5E1D7] bg-[#FFFEFA] px-2.5 py-1.5 lg:hidden">
-              <div className="min-w-0">
-                <p className="truncate text-xs font-semibold text-[#202722]">{user?.name}</p>
-                <p className="truncate text-[10px] text-[#69736D]">{user?.email}</p>
-              </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={handleLogout}
-                className="shrink-0 text-xs text-[#CA2B2B] hover:bg-[#CA2B2B]/10"
-              >
-                <LogOut className="size-3.5" /> Sign out
-              </Button>
-            </div>
-          </div>
-        </aside>
-
-        {mobileOpen ? (
+  const railContent = (
+    <div className="flex h-full flex-col justify-between bg-[#10172A] px-3 py-5 text-[#CBD5E1]">
+      <div className="space-y-6">
+        <div className="flex items-center justify-between px-2">
+          <Brand tone="inverse" to="/app" />
           <button
             type="button"
-            aria-label="Close navigation overlay"
-            className="fixed inset-0 z-40 bg-[#202722]/40 lg:hidden"
-            onClick={() => setMobileOpen(false)}
-          />
+            aria-label="Close navigation menu"
+            onClick={() => setSidebarOpen(false)}
+            className="inline-flex size-8 items-center justify-center rounded-lg text-[#94A3B8] hover:bg-[#1E293B] hover:text-white lg:hidden"
+          >
+            <X className="size-4" />
+          </button>
+        </div>
+
+        <nav aria-label="Workspace primary" className="space-y-1">
+          <p className="px-3 pb-1 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-[#64748B]">
+            {user?.role === "REVIEWER" ? "Specialist Workbench" : "Requester Operations"}
+          </p>
+          {nav.primary.map((item) => {
+            const Icon = item.icon;
+            return (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.end}
+                onClick={() => setSidebarOpen(false)}
+                className={({ isActive }) =>
+                  cn(
+                    "flex min-h-10 items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] font-medium transition-colors",
+                    isActive
+                      ? "bg-[#4263EB] font-semibold text-white"
+                      : "text-[#CBD5E1] hover:bg-[#1B2541] hover:text-white",
+                  )
+                }
+              >
+                <Icon className="size-4 shrink-0" />
+                <span className="truncate">{item.label}</span>
+              </NavLink>
+            );
+          })}
+        </nav>
+
+        <nav aria-label="Workspace secondary" className="space-y-1">
+          <p className="px-3 pb-1 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-[#64748B]">
+            Configuration
+          </p>
+          {nav.secondary.map((item) => {
+            const Icon = item.icon;
+            return (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                onClick={() => setSidebarOpen(false)}
+                className={({ isActive }) =>
+                  cn(
+                    "flex min-h-10 items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] font-medium transition-colors",
+                    isActive
+                      ? "bg-[#1B2541] font-semibold text-white"
+                      : "text-[#94A3B8] hover:bg-[#1B2541] hover:text-white",
+                  )
+                }
+              >
+                <Icon className="size-4 shrink-0" />
+                <span className="truncate">{item.label}</span>
+              </NavLink>
+            );
+          })}
+        </nav>
+      </div>
+
+      <div className="space-y-3 border-t border-[#1E293B] pt-4">
+        {user ? (
+          <div className="flex items-center gap-2.5 rounded-lg bg-[#162038] p-2.5">
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#4263EB] font-display text-xs font-bold text-white">
+              {initials(user.name)}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-xs font-semibold text-white">{user.name}</p>
+              <p className="truncate font-mono text-[10px] text-[#94A3B8]">
+                {user.role === "REVIEWER" ? "Specialist" : "Requester"} · {humanize(user.role)}
+              </p>
+            </div>
+          </div>
         ) : null}
 
-        <div className="flex min-w-0 flex-1 flex-col">
-          {/* Desktop top bar */}
-          <header className="sticky top-0 z-30 hidden h-14 items-center justify-between border-b border-[#E5E1D7] bg-[#FFFEFA]/95 px-6 backdrop-blur lg:flex">
-            <div className="flex items-center gap-2.5 text-xs text-[#69736D]">
-              <span className="font-heading font-bold text-[#202722]">{roleLabel}</span>
-              <span aria-hidden="true">·</span>
-              <a
-                href="/api-docs"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1 transition-colors hover:text-[#202722]"
-              >
-                OpenAPI Reference <ExternalLink className="size-3" />
-              </a>
-            </div>
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="flex min-h-10 w-full items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] font-medium text-[#CBD5E1] transition-colors hover:bg-[#1B2541] hover:text-white"
+        >
+          <LogOut className="size-4 shrink-0" />
+          <span>Sign out</span>
+        </button>
+      </div>
+    </div>
+  );
 
-            <div className="flex items-center gap-2">
-              <NotificationBell />
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setMenuOpen((value) => !value)}
-                  className="flex items-center gap-2 rounded-md border border-[#E5E1D7] bg-[#F7F5EF] px-2.5 py-1 text-xs transition-colors hover:bg-[#F0EEE7]"
-                  aria-expanded={menuOpen}
-                >
-                  <span className="flex size-5 items-center justify-center rounded bg-[#365FEA]/12 font-mono text-[10px] font-semibold text-[#365FEA]">
-                    {initials(user?.name ?? "TP")}
-                  </span>
-                  <span className="hidden max-w-36 truncate text-xs font-semibold text-[#202722] xl:block">
-                    {user?.name}
-                  </span>
-                  <ChevronDown className="size-3.5 text-[#69736D]" />
-                </button>
-                {menuOpen ? (
-                  <>
-                    <button
-                      type="button"
-                      aria-label="Close menu"
-                      className="fixed inset-0 z-40 cursor-default"
-                      onClick={() => setMenuOpen(false)}
-                    />
-                    <div className="absolute right-0 top-10 z-50 w-56 rounded-lg border border-[#E5E1D7] bg-[#FFFEFA] p-1 shadow-elevated">
-                      <div className="border-b border-[#E5E1D7] px-3 py-2">
-                        <p className="truncate text-xs font-bold text-[#202722]">{user?.name}</p>
-                        <p className="truncate text-[11px] text-[#69736D]">{user?.email}</p>
-                        <p className="mt-0.5 font-mono text-[10px] font-semibold uppercase text-[#365FEA]">
-                          {humanize(user?.role)}
-                        </p>
-                      </div>
-                      <Link
-                        to="/app/profile"
-                        onClick={() => setMenuOpen(false)}
-                        className="mt-1 flex items-center gap-2 rounded-md px-3 py-1.5 text-xs font-medium text-[#202722] hover:bg-[#F0EEE7]"
-                      >
-                        <UserRound className="size-3.5 text-[#69736D]" /> Profile &amp; Settings
-                      </Link>
-                      <Link
-                        to="/app/integrations"
-                        onClick={() => setMenuOpen(false)}
-                        className="flex items-center gap-2 rounded-md px-3 py-1.5 text-xs font-medium text-[#202722] hover:bg-[#F0EEE7]"
-                      >
-                        <Plug className="size-3.5 text-[#69736D]" /> System Integrations
-                      </Link>
-                      <button
-                        type="button"
-                        onClick={handleLogout}
-                        className="flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-left text-xs font-medium text-[#CA2B2B] hover:bg-[#CA2B2B]/10"
-                      >
-                        <LogOut className="size-3.5" /> Sign out
-                      </button>
-                    </div>
-                  </>
-                ) : null}
-              </div>
-            </div>
-          </header>
+  return (
+    <div className="flex min-h-dvh bg-[#F5F7FC] text-[#141B2D]">
+      {/* Fixed desktop left rail */}
+      <aside className="hidden w-64 shrink-0 border-r border-[#1E293B] lg:block">{railContent}</aside>
 
-          <main className="flex-1 px-4 py-5 sm:px-6 lg:px-8 lg:py-6">
-            <div className="mx-auto w-full max-w-6xl">
-              <Outlet />
-            </div>
-          </main>
-
-          <footer className="border-t border-[#E5E1D7] bg-[#FFFEFA] px-4 py-3 text-xs text-[#69736D] sm:px-6 lg:px-8">
-            <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2">
-              <span className="font-medium text-[#202722]">TrustToPay · Human-in-the-Loop Escalation &amp; Settlement</span>
-              <span className="font-mono text-[11px]">
-                {mode === "SIMULATED"
-                  ? "Simulated payment mode — no money moves."
-                  : "PayPal Sandbox mode — no live-money transactions."}
-              </span>
-            </div>
-          </footer>
+      {/* Mobile slide-over drawer */}
+      {sidebarOpen ? (
+        <div className="fixed inset-0 z-50 flex lg:hidden">
+          <button
+            type="button"
+            aria-label="Close sidebar overlay"
+            className="fixed inset-0 bg-[#10172A]/60"
+            onClick={() => setSidebarOpen(false)}
+          />
+          <aside className="relative z-10 w-72 max-w-[85vw] shrink-0 shadow-elevated">{railContent}</aside>
         </div>
+      ) : null}
+
+      {/* Main workspace column */}
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-[#E4E9F2] bg-[#FFFFFF] px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              aria-label="Open workspace navigation"
+              onClick={() => setSidebarOpen(true)}
+              className="inline-flex size-10 items-center justify-center rounded-lg border border-[#E4E9F2] bg-[#FFFFFF] text-[#141B2D] hover:bg-[#EDF0F6] lg:hidden"
+            >
+              <Menu className="size-5" />
+            </button>
+            <div className="hidden flex-wrap items-center gap-2 sm:flex">
+              {paypalMode ? (
+                <Badge tone={paypalMode === "SIMULATED" ? "warning" : "info"} dot>
+                  {paypalMode === "SIMULATED" ? "Simulated Escrow" : "PayPal Sandbox"}
+                </Badge>
+              ) : null}
+              {aiEngine ? (
+                <Badge tone="neutral">
+                  <ShieldCheck className="size-3 text-[#12A875]" />
+                  {aiEngine === "demo" ? "Deterministic Analyzer" : `AI: ${humanize(aiEngine)}`}
+                </Badge>
+              ) : null}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2.5">
+            {user?.role === "REQUESTER" ? (
+              <Button asChild size="sm">
+                <Link to="/app/workspace">New Escalation</Link>
+              </Button>
+            ) : (
+              <Button asChild size="sm" variant="outline">
+                <Link to="/app/marketplace">Browse Marketplace</Link>
+              </Button>
+            )}
+            <NotificationsBell />
+          </div>
+        </header>
+
+        <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 py-6 sm:px-6 lg:px-8">
+          <Outlet />
+        </main>
       </div>
     </div>
   );

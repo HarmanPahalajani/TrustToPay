@@ -287,7 +287,7 @@ export default function ProfilePage() {
                   ) : null}
 
                   {activeAttempt ? (
-                    <div className="space-y-3 rounded-lg border border-primary/30 bg-muted/20 p-3.5">
+                    <div className="space-y-3 rounded-lg border border-[#4263EB]/30 bg-[#F5F7FC] p-3.5">
                       <div className="flex items-center justify-between gap-2">
                         <div>
                           <p className="text-xs font-semibold text-foreground">
@@ -403,7 +403,7 @@ export default function ProfilePage() {
                                     className="h-7 px-2 text-[11px]"
                                   >
                                     {stage.passed ? (
-                                      <CheckCircle2 className="size-3 text-emerald-600" />
+                                      <CheckCircle2 className="size-3 text-[#12A875]" />
                                     ) : canStart ? (
                                       <Play className="size-3 text-primary" />
                                     ) : (
@@ -516,13 +516,13 @@ export default function ProfilePage() {
           </Card>
 
           {reviewer ? (
-            <Card className={ready ? "border-emerald-500/30" : "border-amber-500/30"}>
+            <Card className={ready ? "border-[#12A875]/35" : "border-[#F5A623]/40"}>
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-sm">
                   {ready ? (
-                    <BadgeCheck className="size-4 text-emerald-400" />
+                    <BadgeCheck className="size-4 text-[#12A875]" />
                   ) : (
-                    <Mail className="size-4 text-amber-400" />
+                    <Mail className="size-4 text-[#F5A623]" />
                   )}
                   Payout readiness
                 </CardTitle>

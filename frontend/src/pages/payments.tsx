@@ -345,11 +345,11 @@ function PaymentRow({
         </p>
         <p className="text-[9px] text-muted-foreground">{formatDate(payment.createdAt)}</p>
         {payment.failureMessage ? (
-          <p className="mt-0.5 line-clamp-2 text-[10px] leading-4 text-red-400">{payment.failureMessage}</p>
+          <p className="mt-0.5 line-clamp-2 text-[10px] leading-4 text-[#C1282D]">{payment.failureMessage}</p>
         ) : null}
       </div>
       <div className="flex items-center gap-1.5 text-xs">
-        {payment.type === "FUNDING" ? <CreditCard className="size-3.5 text-blue-600" /> : <Wallet className="size-3.5 text-emerald-600" />}
+        {payment.type === "FUNDING" ? <CreditCard className="size-3.5 text-[#4263EB]" /> : <Wallet className="size-3.5 text-[#0B7D56]" />}
         {humanize(payment.type)}
       </div>
       <div className="space-y-1">

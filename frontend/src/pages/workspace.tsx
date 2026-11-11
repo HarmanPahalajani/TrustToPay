@@ -1,28 +1,18 @@
-import { useMemo, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowRight,
-  Bot,
+  Cpu,
   FileText,
-  FlaskConical,
-  Loader2,
   Plus,
   Search,
   Sparkles,
   Trash2,
-  Wand2,
   X,
 } from "lucide-react";
 import { api, ApiError, type CreateSessionInput } from "@/lib/api";
 import type { AgentSession } from "@/lib/types";
-import {
-  CATEGORY_EXAMPLES,
-  CATEGORY_META,
-  CATEGORY_VALUES,
-  categoryLabel,
-  type CategoryValue,
-} from "@/lib/categories";
 import { PageHeader, SectionHeading } from "@/components/common";
 import { PaymentModeBanner } from "@/components/payment-mode-banner";
 import { StatusBadge } from "@/components/status-badges";
@@ -30,9 +20,17 @@ import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Field, Input, Textarea } from "@/components/ui/input";
+import { Field, Input, Select, Textarea } from "@/components/ui/input";
 import { EmptyState, ErrorState, LoadingBlock } from "@/components/ui/states";
-import { formatDate, humanize, truncate } from "@/lib/format";
+import {
+  CATEGORY_EXAMPLES,
+  CATEGORY_META,
+  CATEGORY_VALUES,
+  DEFAULT_CATEGORY,
+  type CategoryValue,
+  categoryLabel,
+} from "@/lib/categories";
+import { timeAgo, truncate } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 type DocumentDraft = {
@@ -45,29 +43,35 @@ type DocumentDraft = {
 };
 
 function makeKey() {
-  return Math.random().toString(36).slice(2);
+  return `doc_${Math.random().toString(36).slice(2, 9)}`;
 }
 
 function emptyDocument(): DocumentDraft {
-  return { key: makeKey(), title: "", url: "", publisher: "", sourceType: "DOCUMENT", content: "" };
+  return {
+    key: makeKey(),
+    title: "",
+    url: "",
+    publisher: "",
+    sourceType: "DOCUMENT",
+    content: "",
+  };
 }
 
 export default function WorkspacePage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [params, setParams] = useSearchParams();
-  const showForm = params.get("new") === "1";
   const [search, setSearch] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [showForm, setShowForm] = useState(false);
 
+  const [category, setCategory] = useState<CategoryValue>(DEFAULT_CATEGORY);
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState<CategoryValue>("CONCEPTUAL");
   const [question, setQuestion] = useState("");
   const [models, setModels] = useState("");
   const [specs, setSpecs] = useState("");
   const [documents, setDocuments] = useState<DocumentDraft[]>([emptyDocument()]);
+  const [error, setError] = useState<string | null>(null);
 
-  const sessions = useQuery({
+  const query = useQuery({
     queryKey: ["sessions", { search }],
     queryFn: () => api.sessions.list({ q: search || undefined, pageSize: 50 }),
   });
@@ -76,22 +80,11 @@ export default function WorkspacePage() {
     mutationFn: (input: CreateSessionInput) => api.sessions.create(input),
     onSuccess: async (data) => {
       await queryClient.invalidateQueries({ queryKey: ["sessions"] });
-      navigate(`/app/sessions/${data.session.id}?analyze=1`);
+      await queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      navigate(`/app/sessions/${data.session.id}`);
     },
-    onError: (err) => setError(err instanceof ApiError ? err.message : "Could not create the session."),
+    onError: (err) => setError(err instanceof ApiError ? err.message : "Could not create agent session."),
   });
-
-  const filtered = useMemo(() => sessions.data?.items ?? [], [sessions.data]);
-
-  function openForm() {
-    setParams({ new: "1" });
-    setError(null);
-  }
-
-  function closeForm() {
-    setParams({});
-    setError(null);
-  }
 
   function loadExample(nextCategory: CategoryValue = category) {
     const example = CATEGORY_EXAMPLES[nextCategory];
@@ -104,8 +97,8 @@ export default function WorkspacePage() {
       example.documents.map((document) => ({
         key: makeKey(),
         title: document.title,
-        url: document.url ?? "",
-        publisher: document.publisher ?? "",
+        url: document.url,
+        publisher: document.publisher,
         sourceType: document.sourceType,
         content: document.content,
       })),
@@ -113,15 +106,21 @@ export default function WorkspacePage() {
     setError(null);
   }
 
-  function updateDocument(key: string, patch: Partial<DocumentDraft>) {
-    setDocuments((current) => current.map((document) => (document.key === key ? { ...document, ...patch } : document)));
+  function openForm() {
+    setShowForm(true);
+    setError(null);
+  }
+
+  function closeForm() {
+    setShowForm(false);
+    setError(null);
   }
 
   function submit(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
-    if (question.trim().length < 10) {
-      setError("Enter a question of at least 10 characters.");
+    if (question.trim().length < 15) {
+      setError("Question must be at least 15 characters.");
       return;
     }
     const cleanedDocuments = documents
@@ -149,12 +148,14 @@ export default function WorkspacePage() {
     });
   }
 
+  const sessions = query.data?.items ?? [];
+
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <PageHeader
-        eyebrow="Agent workspace"
-        title="Escalate what your agent should not guess"
-        description="Submit a programming, crypto, conceptual or hardware question with its evidence. The analysis is schema-validated and the server decides whether a human review is required."
+        eyebrow="Agent Workspace"
+        title="Escalate what your AI agent should not guess"
+        description="Submit a technical blocker, architectural conflict, or verification task with supporting context. The analysis run determines confidence and prepares a bounded escalation task."
         actions={
           showForm ? (
             <Button variant="outline" onClick={closeForm}>
@@ -172,16 +173,18 @@ export default function WorkspacePage() {
 
       {showForm ? (
         <Card>
-          <CardHeader className="border-b border-border">
-            <div className="flex flex-wrap items-start justify-between gap-2">
+          <CardHeader className="border-b border-[#E4E9F2] pb-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
-                <CardTitle>New agent session</CardTitle>
-                <p className="mt-0.5 text-xs leading-5 text-muted-foreground">
-                  No API key is needed in demo mode. Supplied documents are attached to this session only.
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Cpu className="size-4 text-[#4263EB]" /> Create escalation session
+                </CardTitle>
+                <p className="mt-1 text-xs text-[#68738A]">
+                  Select a domain template or supply custom specifications and evidence documents.
                 </p>
               </div>
-              <Button type="button" variant="outline" size="sm" onClick={() => loadExample()}>
-                <Wand2 className="size-3.5" /> Load {CATEGORY_META[category].shortLabel.toLowerCase()} example
+              <Button type="button" variant="outline" size="sm" onClick={() => loadExample(category)}>
+                <Sparkles className="size-3.5 text-[#4263EB]" /> Load {categoryLabel(category)} example
               </Button>
             </div>
           </CardHeader>
@@ -189,327 +192,284 @@ export default function WorkspacePage() {
             <form onSubmit={submit} className="space-y-5" noValidate>
               {error ? <Alert tone="danger">{error}</Alert> : null}
 
-              <div>
-                <p className="text-xs font-medium">Question type</p>
-                <div className="mt-1.5 flex flex-wrap gap-1.5">
-                  {CATEGORY_VALUES.map((value) => (
-                    <button
-                      key={value}
-                      type="button"
-                      onClick={() => setCategory(value)}
-                      aria-pressed={category === value}
-                      className={cn(
-                        "rounded-md border px-3 py-1 text-xs font-medium transition-colors",
-                        category === value
-                          ? "border-primary bg-primary text-primary-foreground"
-                          : "border-border bg-card text-muted-foreground hover:border-primary/40 hover:text-foreground",
-                      )}
-                    >
-                      {CATEGORY_META[value].label}
-                    </button>
-                  ))}
+              {/* Category selector pills */}
+              <div className="space-y-2">
+                <span className="block text-xs font-semibold text-[#141B2D]">Task Category</span>
+                <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
+                  {CATEGORY_VALUES.map((val) => {
+                    const meta = CATEGORY_META[val];
+                    const selected = category === val;
+                    return (
+                      <button
+                        key={val}
+                        type="button"
+                        onClick={() => setCategory(val)}
+                        className={cn(
+                          "rounded-xl border p-3 text-left transition-colors",
+                          selected
+                            ? "border-[#4263EB] bg-[#4263EB]/[0.06] ring-1 ring-[#4263EB]/25"
+                            : "border-[#E4E9F2] bg-[#FFFFFF] hover:border-[#CBD5E1]",
+                        )}
+                      >
+                        <p className="font-display text-xs font-bold text-[#141B2D]">{meta.label}</p>
+                        <p className="mt-0.5 line-clamp-2 text-[11px] leading-4 text-[#68738A]">{meta.description}</p>
+                      </button>
+                    );
+                  })}
                 </div>
-                <p className="mt-1.5 text-[11px] text-muted-foreground">{CATEGORY_META[category].description}</p>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Session title" htmlFor="session-title" hint="Optional. Defaults to the first part of the question.">
+                <Field label="Short title" htmlFor="session-title" hint="Optional concise summary">
                   <Input
                     id="session-title"
                     value={title}
                     onChange={(event) => setTitle(event.target.value)}
                     placeholder={CATEGORY_EXAMPLES[category].title}
-                    maxLength={160}
+                    maxLength={140}
                   />
                 </Field>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <Field label="Product models" htmlFor="models" hint="Comma separated">
-                    <Input
-                      id="models"
-                      value={models}
-                      onChange={(event) => setModels(event.target.value)}
-                      placeholder={CATEGORY_META[category].modelsPlaceholder}
-                    />
-                  </Field>
-                  <div className="flex items-end">
-                    <div className="w-full rounded-md border border-dashed border-border bg-muted/30 px-3 py-2 text-[11px] leading-4 text-muted-foreground">
-                      Critical conflicts always force human review, regardless of score.
-                    </div>
-                  </div>
-                </div>
+                <Field label="Target models / systems" htmlFor="session-models" hint="Comma-separated">
+                  <Input
+                    id="session-models"
+                    value={models}
+                    onChange={(event) => setModels(event.target.value)}
+                    placeholder="e.g. Node 20, PostgreSQL 16, Redis 7"
+                    maxLength={300}
+                  />
+                </Field>
               </div>
 
               <Field
-                label="Question for the agent"
-                htmlFor="question"
-                hint="Include the decision you need and the configuration that matters."
-                error={question.length > 0 && question.trim().length < 10 ? "Use at least 10 characters." : undefined}
+                label="Question or agent blocker"
+                htmlFor="session-question"
+                required
+                hint="Describe where the agent stopped, what conflict exists, and what must be confirmed."
               >
                 <Textarea
-                  id="question"
+                  id="session-question"
                   value={question}
                   onChange={(event) => setQuestion(event.target.value)}
                   rows={4}
-                  maxLength={4000}
-                  placeholder={CATEGORY_META[category].questionPlaceholder}
+                  maxLength={5000}
+                  placeholder={CATEGORY_EXAMPLES[category].question}
                 />
               </Field>
 
               <Field
-                label="Specifications"
-                htmlFor="specs"
-                hint="One documented requirement per line. These are evidence, not assumptions."
+                label="Specifications & runtime constraints"
+                htmlFor="session-specs"
+                hint="One constraint or assertion per line"
               >
                 <Textarea
-                  id="specs"
+                  id="session-specs"
                   value={specs}
                   onChange={(event) => setSpecs(event.target.value)}
                   rows={3}
-                  placeholder={CATEGORY_META[category].specsPlaceholder}
+                  maxLength={3000}
+                  placeholder="Optional runtime constraints, version pins, or policy rules..."
                 />
               </Field>
 
-              <div className="space-y-3">
+              {/* Evidence Documents */}
+              <div className="space-y-3 border-t border-[#E4E9F2] pt-4">
                 <SectionHeading
-                  title="Supplied evidence"
-                  description="Add listings, datasheets, support pages or documents. The verification engine checks the reviewer's answer against what you supply."
+                  title={`Evidence documents (${documents.length})`}
+                  description="Attach official specifications, source files, or error excerpts."
                   actions={
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
-                      onClick={() => setDocuments((current) => [...current, emptyDocument()])}
+                      onClick={() => setDocuments((prev) => [...prev, emptyDocument()])}
                     >
-                      <Plus className="size-3.5" /> Add document
+                      <Plus className="size-3.5" /> Add evidence
                     </Button>
                   }
                 />
-                {documents.map((document, index) => (
-                  <div key={document.key} className="rounded-lg border border-border bg-background p-3.5">
-                    <div className="mb-3 flex items-center justify-between gap-2">
-                      <p className="flex items-center gap-1.5 text-xs font-semibold">
-                        <FileText className="size-3.5 text-muted-foreground" /> Document {index + 1}
-                      </p>
-                      {documents.length > 1 ? (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="text-destructive"
-                          onClick={() => setDocuments((current) => current.filter((item) => item.key !== document.key))}
-                        >
-                          <Trash2 className="size-3.5" /> Remove
-                        </Button>
-                      ) : null}
-                    </div>
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <Field label="Title" htmlFor={`doc-title-${document.key}`}>
-                        <Input
-                          id={`doc-title-${document.key}`}
-                          value={document.title}
-                          onChange={(event) => updateDocument(document.key, { title: event.target.value })}
-                          placeholder="Manufacturer support article"
-                          maxLength={250}
-                        />
-                      </Field>
-                      <Field label="Source type" htmlFor={`doc-type-${document.key}`}>
-                        <select
-                          id={`doc-type-${document.key}`}
-                          value={document.sourceType}
+
+                <div className="space-y-3">
+                  {documents.map((doc, idx) => (
+                    <div
+                      key={doc.key}
+                      className="space-y-3 rounded-xl border border-[#E4E9F2] bg-[#F5F7FC] p-4"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-mono text-[11px] font-semibold text-[#68738A]">
+                          Document #{idx + 1}
+                        </span>
+                        {documents.length > 1 ? (
+                          <button
+                            type="button"
+                            onClick={() => setDocuments((prev) => prev.filter((item) => item.key !== doc.key))}
+                            className="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium text-[#E5484D] hover:bg-[#E5484D]/10"
+                          >
+                            <Trash2 className="size-3.5" /> Remove
+                          </button>
+                        ) : null}
+                      </div>
+
+                      <div className="grid gap-3 sm:grid-cols-3">
+                        <Field label="Title" htmlFor={`${doc.key}-title`}>
+                          <Input
+                            id={`${doc.key}-title`}
+                            value={doc.title}
+                            onChange={(event) =>
+                              setDocuments((prev) =>
+                                prev.map((d) => (d.key === doc.key ? { ...d, title: event.target.value } : d)),
+                              )
+                            }
+                            placeholder="Spec or log title"
+                          />
+                        </Field>
+                        <Field label="Source type" htmlFor={`${doc.key}-type`}>
+                          <Select
+                            id={`${doc.key}-type`}
+                            value={doc.sourceType}
+                            onChange={(event) =>
+                              setDocuments((prev) =>
+                                prev.map((d) =>
+                                  d.key === doc.key
+                                    ? {
+                                        ...d,
+                                        sourceType: event.target.value as DocumentDraft["sourceType"],
+                                      }
+                                    : d,
+                                ),
+                              )
+                            }
+                          >
+                            <option value="OFFICIAL_MANUAL">Official Manual</option>
+                            <option value="SPECIFICATION">Specification</option>
+                            <option value="VENDOR_ADVISORY">Vendor Advisory</option>
+                            <option value="LOCAL_FILE">Source File / Diff</option>
+                            <option value="OTHER">Other</option>
+                          </Select>
+                        </Field>
+                        <Field label="Reference URL" htmlFor={`${doc.key}-url`}>
+                          <Input
+                            id={`${doc.key}-url`}
+                            value={doc.url}
+                            onChange={(event) =>
+                              setDocuments((prev) =>
+                                prev.map((d) => (d.key === doc.key ? { ...d, url: event.target.value } : d)),
+                              )
+                            }
+                            placeholder="https://..."
+                          />
+                        </Field>
+                      </div>
+
+                      <Field label="Document excerpt or log payload" htmlFor={`${doc.key}-content`}>
+                        <Textarea
+                          id={`${doc.key}-content`}
+                          value={doc.content}
                           onChange={(event) =>
-                            updateDocument(document.key, {
-                              sourceType: event.target.value as DocumentDraft["sourceType"],
-                            })
+                            setDocuments((prev) =>
+                              prev.map((d) => (d.key === doc.key ? { ...d, content: event.target.value } : d)),
+                            )
                           }
-                          className="flex h-9 w-full rounded-md border border-input bg-card px-2.5 py-1 text-sm shadow-sm"
-                        >
-                          <option value="MANUFACTURER">Manufacturer</option>
-                          <option value="RETAILER">Retailer</option>
-                          <option value="MARKETPLACE">Marketplace</option>
-                          <option value="FORUM">Forum</option>
-                          <option value="DOCUMENT">Document</option>
-                        </select>
-                      </Field>
-                      <Field label="URL" htmlFor={`doc-url-${document.key}`} hint="Optional, but useful evidence.">
-                        <Input
-                          id={`doc-url-${document.key}`}
-                          value={document.url}
-                          onChange={(event) => updateDocument(document.key, { url: event.target.value })}
-                          placeholder="https://support.example.com/article"
-                          maxLength={1000}
-                        />
-                      </Field>
-                      <Field label="Publisher" htmlFor={`doc-publisher-${document.key}`}>
-                        <Input
-                          id={`doc-publisher-${document.key}`}
-                          value={document.publisher}
-                          onChange={(event) => updateDocument(document.key, { publisher: event.target.value })}
-                          placeholder="VoltEdge"
-                          maxLength={200}
+                          rows={3}
+                          placeholder="Paste relevant specification paragraphs, error traces, or file excerpts..."
                         />
                       </Field>
                     </div>
-                    <Field label="Content" htmlFor={`doc-content-${document.key}`} className="mt-3">
-                      <Textarea
-                        id={`doc-content-${document.key}`}
-                        value={document.content}
-                        onChange={(event) => updateDocument(document.key, { content: event.target.value })}
-                        rows={3}
-                        maxLength={20000}
-                        placeholder="Paste the relevant text. The demo AI analyses this content locally."
-                      />
-                    </Field>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
 
-              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
-                <p className="max-w-md text-[11px] leading-5 text-muted-foreground">
-                  Your session is saved immediately. The AI analysis runs next and may ask for more information or
-                  recommend a human review.
-                </p>
-                <div className="flex gap-2">
-                  <Button type="button" variant="outline" onClick={closeForm}>
-                    Cancel
-                  </Button>
-                  <Button type="submit" loading={create.isPending}>
-                    <Sparkles className="size-4" /> Create & analyze
-                  </Button>
-                </div>
+              <div className="flex flex-wrap items-center justify-end gap-2 border-t border-[#E4E9F2] pt-4">
+                <Button type="button" variant="outline" onClick={closeForm}>
+                  Cancel
+                </Button>
+                <Button type="submit" loading={create.isPending}>
+                  Create &amp; Analyze Session <ArrowRight className="size-4" />
+                </Button>
               </div>
             </form>
           </CardContent>
         </Card>
       ) : null}
 
-      <div className="grid gap-5 lg:grid-cols-[1fr_280px]">
-        <div>
-          <SectionHeading
-            title="Your agent sessions"
-            description="Each session keeps the question, supplied evidence and every analysis run."
-            actions={
-              <div className="relative w-56">
-                <Search className="pointer-events-none absolute left-2.5 top-2.5 size-3.5 text-muted-foreground" />
-                <Input
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Search sessions"
-                  className="pl-8"
-                  aria-label="Search sessions"
-                />
-              </div>
+      {/* Sessions list & filter */}
+      <div className="space-y-4">
+        <SectionHeading
+          title={`Agent sessions (${sessions.length})`}
+          description="Select a session to run analysis, inspect evidence conflicts, create a review task, or resume an unblocked workflow."
+          actions={
+            <div className="relative w-full sm:w-72">
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#68738A]" />
+              <Input
+                type="search"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Search sessions…"
+                className="pl-9"
+              />
+            </div>
+          }
+        />
+
+        {query.isLoading ? (
+          <LoadingBlock label="Loading agent sessions…" />
+        ) : query.error ? (
+          <ErrorState
+            message={(query.error as Error)?.message ?? "Could not fetch sessions."}
+            onRetry={() => query.refetch()}
+          />
+        ) : sessions.length === 0 ? (
+          <EmptyState
+            icon={<FileText className="size-5" />}
+            title={search ? "No matching sessions" : "No agent sessions yet"}
+            description="Create a session to capture a technical blocker, attach specifications, and run confidence analysis."
+            action={
+              <Button size="sm" onClick={openForm}>
+                <Plus className="size-4" /> Create first session
+              </Button>
             }
           />
-
-          {sessions.isLoading ? (
-            <LoadingBlock label="Loading sessions…" />
-          ) : sessions.error ? (
-            <ErrorState
-              message={(sessions.error as Error).message}
-              onRetry={() => sessions.refetch()}
-            />
-          ) : filtered.length === 0 ? (
-            <EmptyState
-              icon={<Bot className="size-5" />}
-              title={search ? "No sessions match that search" : "Start your first agent session"}
-              description={
-                search
-                  ? "Try a different search term, or clear the search."
-                  : "Submit a question with evidence. The demo AI works without credentials and explains why it escalates."
-              }
-              action={
-                search ? (
-                  <Button variant="outline" size="sm" onClick={() => setSearch("")}>
-                    Clear search
-                  </Button>
-                ) : (
-                  <Button size="sm" onClick={openForm}>
-                    <Plus className="size-4" /> New question
-                  </Button>
-                )
-              }
-            />
-          ) : (
-            <div className="space-y-2.5">
-              {filtered.map((session) => (
-                <SessionRow key={session.id} session={session} />
-              ))}
-            </div>
-          )}
-        </div>
-
-        <aside className="space-y-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-sm">
-                <FlaskConical className="size-4 text-amber-400" /> How the demo AI decides
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-xs leading-5 text-muted-foreground">
-              <p>The demo engine is deterministic and rule-based. It compares claims in your documents and flags gaps that matter for the selected question type.</p>
-              <ul className="space-y-1.5">
-                <li>• A critical conflict always forces escalation.</li>
-                <li>• Conflicting numbers, signatures or configuration values lower confidence.</li>
-                <li>• Missing runtime, chain or decision details are listed explicitly.</li>
-                <li>• The server, not the browser, applies the threshold.</li>
-              </ul>
-            </CardContent>
-          </Card>
-          <Card className="border-dashed">
-            <CardContent className="space-y-2 p-4">
-              <p className="flex items-center gap-1.5 text-xs font-semibold">
-                <Sparkles className="size-3.5 text-primary" /> Try a conflict case
-              </p>
-              <p className="text-xs leading-5 text-muted-foreground">
-                Load an example for the selected type: a 45W port limit, a conflicting pool size, a replay-prone permit or a disputed throughput benchmark.
-              </p>
-              <Button variant="outline" size="sm" className="w-full" onClick={() => { openForm(); loadExample(); }}>
-                Open {CATEGORY_META[category].shortLabel.toLowerCase()} example
-              </Button>
-            </CardContent>
-          </Card>
-        </aside>
+        ) : (
+          <div className="space-y-3">
+            {sessions.map((session) => (
+              <SessionRow key={session.id} session={session} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
 function SessionRow({ session }: { session: AgentSession }) {
-  const analysis = session.latestAnalysis ?? session.analysisRuns?.[0] ?? null;
-  const task = session.latestTask ?? session.tasks?.[0] ?? null;
+  const latest = session.analysisRuns?.[0];
   return (
-    <Card className="transition-colors hover:border-primary/30">
-      <Link to={`/app/sessions/${session.id}`} className="block p-4">
-        <div className="flex flex-wrap items-start justify-between gap-2">
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-1.5">
-              <p className="text-sm font-semibold">{session.title}</p>
-              <StatusBadge status={session.status} dot={false} />
-              <Badge tone="neutral">{categoryLabel(session.category)}</Badge>
-            </div>
-            <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground">
-              {truncate(session.question, 190)}
-            </p>
+    <Link
+      to={`/app/sessions/${session.id}`}
+      className="group block rounded-xl border border-[#E4E9F2] bg-[#FFFFFF] p-4 shadow-surface transition-all hover:border-[#4263EB]/45 hover:shadow-elevated"
+    >
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0 flex-1 space-y-1.5">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <StatusBadge status={session.status} />
+            <Badge tone="neutral">{categoryLabel(session.category)}</Badge>
+            {latest ? (
+              <Badge tone="info">
+                Confidence {Math.round(latest.confidenceScore * 100)}%
+              </Badge>
+            ) : null}
           </div>
-          <ArrowRight className="mt-1 size-4 shrink-0 text-muted-foreground" />
+          <h3 className="font-display text-[15px] font-bold text-[#141B2D] group-hover:text-[#4263EB]">
+            {session.title}
+          </h3>
+          <p className="text-xs leading-5 text-[#68738A]">{truncate(session.question, 180)}</p>
         </div>
-        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
-          <span>{formatDate(session.createdAt)}</span>
-          {analysis ? (
-            <span className="inline-flex items-center gap-1">
-              confidence <strong className="text-foreground">{Math.round(analysis.confidenceScore * 100)}%</strong>
-            </span>
-          ) : (
-            <span>No analysis yet</span>
-          )}
-          {analysis ? <Badge tone="neutral">{humanize(analysis.recommendedAction)}</Badge> : null}
-          {task ? (
-            <span className="inline-flex items-center gap-1">
-              Task <StatusBadge status={task.status} dot={false} />
-            </span>
-          ) : null}
+        <div className="flex shrink-0 items-center justify-between gap-3 sm:flex-col sm:items-end">
+          <span className="font-mono text-[11px] text-[#68738A]">{timeAgo(session.createdAt)}</span>
+          <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#4263EB]">
+            Inspect <ArrowRight className="size-3.5" />
+          </span>
         </div>
-      </Link>
-    </Card>
+      </div>
+    </Link>
   );
 }

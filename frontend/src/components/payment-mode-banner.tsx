@@ -1,21 +1,17 @@
-import { FlaskConical, ShieldCheck, ShieldAlert } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { FlaskConical, ShieldCheck, AlertTriangle } from "lucide-react";
 import { api } from "@/lib/api";
 import { Alert } from "@/components/ui/alert";
 import { PayoutAvailabilityBadge } from "@/components/status-badges";
 
-/**
- * Always-visible payment mode banner. The frontend never decides the payment
- * mode: it only renders the mode the server reports.
- */
 export function PaymentModeBanner({ compact = false }: { compact?: boolean }) {
   const { data } = useQuery({
     queryKey: ["integrations", "status"],
     queryFn: api.integrations.status,
     staleTime: 60_000,
   });
-
   if (!data) return null;
+
   const { paypal } = data;
   const availability =
     paypal.payoutAvailability ??
@@ -29,15 +25,14 @@ export function PaymentModeBanner({ compact = false }: { compact?: boolean }) {
     return (
       <Alert
         tone="warning"
-        icon={<FlaskConical className="size-4" />}
-        className={compact ? "py-2.5" : undefined}
+        icon={<FlaskConical className="size-4 text-[#D48806]" />}
+        className={compact ? "py-2.5 text-[11px]" : "text-xs"}
       >
         <div className="flex flex-wrap items-center gap-2">
-          <span className="font-medium">Demo payments are simulated.</span>
+          <span className="font-semibold text-[#141B2D]">Demo payment mode (SIMULATED).</span>
           <PayoutAvailabilityBadge availability={availability} />
-          <span className="opacity-90">
-            No PayPal money moves. Set DEMO_MODE=false and add Sandbox credentials to make genuine
-            Sandbox API calls.
+          <span className="text-[#4E596E]">
+            No real or PayPal funds move. Set DEMO_MODE=false with Sandbox credentials to run live Sandbox API calls.
           </span>
         </div>
       </Alert>
@@ -48,17 +43,17 @@ export function PaymentModeBanner({ compact = false }: { compact?: boolean }) {
     return (
       <Alert
         tone="info"
-        icon={<ShieldCheck className="size-4" />}
-        className={compact ? "py-2.5" : undefined}
+        icon={<ShieldCheck className="size-4 text-[#4263EB]" />}
+        className={compact ? "py-2.5 text-[11px]" : "text-xs"}
       >
         <div className="flex flex-wrap items-center gap-2">
-          <span className="font-medium">Genuine PayPal Sandbox mode.</span>
+          <span className="font-semibold text-[#141B2D]">PayPal Sandbox mode active.</span>
           <PayoutAvailabilityBadge availability={availability} />
-          <span className="opacity-90">
+          <span className="text-[#4E596E]">
             Checkout {paypal.payoutsEnabled ? "and Payouts are" : "is"} enabled.
             {paypal.payoutsEnabled
-              ? " No real money is used."
-              : " Indian merchant Sandbox accounts support Orders v2 checkout, while Payouts requires separate regional approval (PAYOUT_UNAVAILABLE unless DEMO_MODE=true)."}
+              ? " Only Sandbox test funds are used."
+              : " Indian merchant Sandbox accounts support Orders v2 checkout, while Payouts requires separate regional approval."}
           </span>
         </div>
       </Alert>
@@ -67,16 +62,15 @@ export function PaymentModeBanner({ compact = false }: { compact?: boolean }) {
 
   return (
     <Alert
-      tone="danger"
-      icon={<ShieldAlert className="size-4" />}
-      className={compact ? "py-2.5" : undefined}
+      tone="warning"
+      icon={<AlertTriangle className="size-4 text-[#D48806]" />}
+      className={compact ? "py-2.5 text-[11px]" : "text-xs"}
     >
       <div className="flex flex-wrap items-center gap-2">
-        <span className="font-medium">PayPal Sandbox is requested but not configured.</span>
+        <span className="font-semibold text-[#141B2D]">PayPal Sandbox requested but not configured.</span>
         <PayoutAvailabilityBadge availability={availability} />
-        <span className="opacity-90">
-          Add PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET, or set DEMO_MODE=true for labelled simulated
-          payments. See Integrations for setup steps.
+        <span className="text-[#4E596E]">
+          Add PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET or set DEMO_MODE=true for labelled simulated settlement.
         </span>
       </div>
     </Alert>

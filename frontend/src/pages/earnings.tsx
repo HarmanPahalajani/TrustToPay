@@ -228,7 +228,7 @@ export default function EarningsPage() {
         </div>
 
         <aside className="space-y-4">
-          <Card className={profileReady ? "border-emerald-500/30" : "border-amber-500/30"}>
+          <Card className={profileReady ? "border-[#12A875]/35" : "border-[#F5A623]/40"}>
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-sm">
                 <BadgeCheck className="size-4 text-primary" /> Payout profile
@@ -260,7 +260,7 @@ export default function EarningsPage() {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-sm">
-                <FlaskConical className="size-4 text-amber-600" /> What the labels mean
+                <FlaskConical className="size-4 text-[#9A6100]" /> What the labels mean
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-[11px] leading-5 text-muted-foreground">
