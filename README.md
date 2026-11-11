@@ -220,15 +220,15 @@ TrustToPay exposes **strictly 4 scoped MCP tools** for autonomous AI agents (nev
 Install the reusable skill directly via the Agent Skills CLI:
 
 ```bash
-npx skills add https://github.com/HarmanPahalajani/TTP_H --skill trusttopay
+npx skills add https://github.com/HarmanPahalajani/TrustToPay --skill trusttopay
 ```
 
 Or install manually from a local clone into your agent's skills directory (`.agents/skills/`, `.claude/skills/`, or `.cursor/skills/`):
 
 ```bash
 # Clone the repository
-git clone https://github.com/HarmanPahalajani/TTP_H.git
-cd TTP_H
+git clone https://github.com/HarmanPahalajani/TrustToPay.git
+cd TrustToPay
 
 # Option A: Project-level Agent Skills directory (.agents/skills/)
 mkdir -p .agents/skills

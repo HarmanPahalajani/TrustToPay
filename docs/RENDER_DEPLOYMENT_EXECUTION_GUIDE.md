@@ -1,6 +1,6 @@
 # TrustToPay — Hosted Render Deployment & Operations Guide
 
-This guide details the complete deployment architecture for TrustToPay on Render using the GitHub repository [`HarmanPahalajani/TTP_H`](https://github.com/HarmanPahalajani/TTP_H) on branch `Harman`.
+This guide details the complete deployment architecture for TrustToPay on Render using the GitHub repository [`HarmanPahalajani/TrustToPay`](https://github.com/HarmanPahalajani/TrustToPay) on branch `Harman`.
 
 ---
 
@@ -22,7 +22,7 @@ This guide details the complete deployment architecture for TrustToPay on Render
 ### Method A: Render Blueprint (Recommended — 1 Click)
 1. Go to [Render Dashboard](https://dashboard.render.com).
 2. Click **New +** $\rightarrow$ **Blueprint**.
-3. Connect repository `HarmanPahalajani/TTP_H` and select branch `Harman`.
+3. Connect repository `HarmanPahalajani/TrustToPay` and select branch `Harman`.
 4. Render will read `render.yaml` and provision:
    * **`trusttopay-backend`** (Web Service, Node.js, Oregon, Free)
    * **`trusttopay-frontend`** (Static Site, Oregon, Free)
