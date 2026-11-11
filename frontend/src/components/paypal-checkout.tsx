@@ -80,7 +80,7 @@ export function PayPalCheckoutCard({
     script.dataset.paypalSdk = "true";
     script.onload = () => setSdkReady(true);
     script.onerror = () =>
-      setSdkError("PayPal checkout could not load in this frame. You can complete test funding below.");
+      setSdkError("PayPal checkout could not load in this frame. You can complete your payment below.");
     document.body.appendChild(script);
   }, [resolvedEnabled, resolvedClientId, currency]);
 
@@ -105,7 +105,7 @@ export function PayPalCheckoutCard({
         setBusy(true);
         try {
           await api.payments.capture(data.orderID);
-          setMessage("Payment authorized and ready for task work.");
+          setMessage("Payment complete. We are now finding a specialist for your task.");
           await onCompleted();
         } finally {
           setBusy(false);
@@ -117,7 +117,7 @@ export function PayPalCheckoutCard({
     });
 
     buttons.render(containerRef.current).catch(() => {
-      setSdkError("PayPal Buttons could not initialize here. Use direct checkout below.");
+      setSdkError("PayPal checkout could not load here. Use direct checkout below.");
     });
   }, [sdkReady, taskId, onCompleted]);
 
@@ -130,7 +130,7 @@ export function PayPalCheckoutCard({
       if (order.paypal.orderId) {
         await api.payments.capture(order.paypal.orderId);
       }
-      setMessage("Payment confirmed. Task is now ready for specialist matching.");
+      setMessage("Payment complete. We are now finding a specialist for your task.");
       await onCompleted();
     } catch (error) {
       setSdkError(error instanceof Error ? error.message : "Payment could not complete.");
@@ -140,19 +140,19 @@ export function PayPalCheckoutCard({
   }
 
   return (
-    <div className="space-y-4 rounded-xl border border-[#E4E9F2] bg-[#FFFFFF] p-5 shadow-surface">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E4E9F2] pb-4">
+    <div className="space-y-4 rounded-xl border border-[#E5E1D7] bg-[#FFFEFA] p-5 shadow-surface">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E5E1D7] pb-4">
         <div className="space-y-1">
           <PayPalLogo className="h-5" />
-          <p className="text-sm font-semibold text-[#141B2D]">
-            {label || "Task reward payment"}
+          <p className="text-sm font-semibold text-[#202722]">
+            {label || "Task budget payment"}
           </p>
         </div>
         <div className="text-right">
-          <div className="font-sans text-[28px] font-bold leading-none tracking-tight text-[#141B2D] tabular-nums">
+          <div className="font-sans text-[28px] font-bold leading-none tracking-tight text-[#202722] tabular-nums">
             {amountDisplay}
           </div>
-          <span className="text-xs font-medium text-[#68738A]">{currency}</span>
+          <span className="text-xs font-medium text-[#69736D]">{currency}</span>
         </div>
       </div>
 
@@ -160,34 +160,32 @@ export function PayPalCheckoutCard({
         <div className="space-y-2">
           <div ref={containerRef} className="min-h-[44px]" />
           {!sdkReady && !sdkError ? (
-            <div className="text-xs text-[#68738A]">Loading PayPal checkout…</div>
+            <div className="text-xs text-[#69736D]">Loading PayPal checkout…</div>
           ) : null}
         </div>
       ) : null}
 
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-[#F5F7FC] p-3.5">
-        <p className="min-w-0 flex-1 text-xs leading-5 text-[#4E596E]">
-          {resolvedEnabled
-            ? "Authorize your task reward through PayPal before matching begins."
-            : "Authorize this test reward to notify matching specialists."}
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-[#F0EEE7] p-3.5">
+        <p className="min-w-0 flex-1 text-xs leading-5 text-[#69736D]">
+          Confirm your task budget so we can match a qualified specialist right away.
         </p>
         <Button size="default" variant="default" loading={busy} onClick={handleServerSideFlow}>
           <CreditCard className="size-4" />
-          {resolvedEnabled ? "Complete Test Payment" : "Complete Simulated Payment"}
+          Complete Payment
         </Button>
       </div>
 
       {sdkError ? <Alert tone="danger">{sdkError}</Alert> : null}
 
       {message ? (
-        <Alert tone="success" icon={<CheckCircle2 className="size-4 text-[#12A875]" />}>
+        <Alert tone="success" icon={<CheckCircle2 className="size-4 text-[#438866]" />}>
           {message}
         </Alert>
       ) : null}
 
-      <div className="flex items-center gap-2 text-xs text-[#68738A]">
-        <Lock className="size-3.5 shrink-0 text-[#4263EB]" />
-        <span>Test payment — no real money will be charged.</span>
+      <div className="flex items-center gap-2 text-xs text-[#69736D]">
+        <Lock className="size-3.5 shrink-0 text-[#365FEA]" />
+        <span>Protected by PayPal checkout.</span>
       </div>
     </div>
   );

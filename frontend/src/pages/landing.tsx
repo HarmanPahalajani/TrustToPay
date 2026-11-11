@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
   Bot,
   Check,
   CheckCircle2,
   Copy,
-  FileCheck2,
   GitBranch,
   History,
   KeyRound,
@@ -18,6 +17,8 @@ import {
   UserCheck,
   Wallet,
 } from "lucide-react";
+import { NeuralDiagram } from "@/components/originkit/ui/hero-22/neural-diagram";
+import VenomButton from "@/components/originkit/venom-button";
 import { useAuth } from "@/context/AuthContext";
 import { PublicHeader, MarketingFooter } from "@/components/layout/public-layout";
 import {
@@ -134,15 +135,6 @@ const WORKFLOW_STEPS: WorkflowStep[] = [
   },
 ];
 
-const HERO_FLOW_NODES = [
-  { label: "AI Agent", state: "Stuck on task", tone: "amber" },
-  { label: "TrustToPay", state: "Finds match", tone: "cobalt" },
-  { label: "Human Specialist", state: "Completes work", tone: "neutral" },
-  { label: "Security Checks", state: "Passes safety review", tone: "cyan" },
-  { label: "Verified Result", state: "Signed & checked", tone: "emerald" },
-  { label: "AI Agent", state: "Resumes cleanly", tone: "emerald" },
-] as const;
-
 const DEV_SNIPPETS: Record<"mcp" | "rest" | "verify", { label: string; filename: string; code: string }> = {
   mcp: {
     label: "MCP Server Config",
@@ -212,6 +204,7 @@ if (!crypto.timingSafeEqual(Buffer.from(v1Part.replace("v1=", "")), Buffer.from(
 
 export default function LandingPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [activeStepIndex, setActiveStepIndex] = useState(0);
   const [activeCodeTab, setActiveCodeTab] = useState<"mcp" | "rest" | "verify">("mcp");
@@ -323,58 +316,9 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              {/* Clean Execution Flow Visual (AI Agent -> TrustToPay -> Human Specialist -> Security Checks -> Verified Result -> AI Agent) */}
-              <div className="min-w-0 rounded-2xl border border-[#1E293B] bg-[#162038] p-5 sm:p-6">
-                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#2B3754] pb-4">
-                  <div className="flex items-center gap-2">
-                    <span className="size-2.5 rounded-full bg-[#12A875]" aria-hidden="true" />
-                    <span className="font-display text-sm font-semibold text-white">
-                      End-to-End Task Flow
-                    </span>
-                  </div>
-                  <span className="rounded-full bg-[#10172A] px-3 py-1 text-xs font-medium text-[#CBD5E1]">
-                    6 verified stages
-                  </span>
-                </div>
-
-                <ol className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  {HERO_FLOW_NODES.map((node, index) => {
-                    const dotColor =
-                      node.tone === "emerald"
-                        ? "bg-[#12A875]"
-                        : node.tone === "amber"
-                          ? "bg-[#F5A623]"
-                          : node.tone === "cyan"
-                            ? "bg-[#20BCE5]"
-                            : node.tone === "cobalt"
-                              ? "bg-[#4263EB]"
-                              : "bg-[#CBD5E1]";
-                    return (
-                      <li
-                        key={`${node.label}-${index}`}
-                        className="flex items-start justify-between gap-3 rounded-xl border border-[#2B3754] bg-[#10172A] p-3.5"
-                      >
-                        <div className="min-w-0">
-                          <span className="text-[11px] font-semibold text-[#94A3B8] tabular-nums">
-                            0{index + 1}
-                          </span>
-                          <p className="mt-0.5 font-display text-sm font-semibold text-white">
-                            {node.label}
-                          </p>
-                          <p className="mt-0.5 text-xs text-[#CBD5E1]">{node.state}</p>
-                        </div>
-                        <span className={cn("mt-1.5 size-2 shrink-0 rounded-full", dotColor)} aria-hidden="true" />
-                      </li>
-                    );
-                  })}
-                </ol>
-
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#12A875]/35 bg-[#12A875]/10 px-4 py-3">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-white">
-                    <FileCheck2 className="size-4 shrink-0 text-[#12A875]" />
-                    <span>AI Agent → TrustToPay → Specialist → Security Checks → Verified Result → AI Agent</span>
-                  </div>
-                </div>
+              {/* Originkit Hero 22 neural diagram visual */}
+              <div className="min-w-0">
+                <NeuralDiagram />
               </div>
             </div>
           </div>
@@ -789,13 +733,29 @@ export default function LandingPage() {
                   Open a Requester workspace to escalate tasks, or sign up as a Specialist to verify your skills.
                 </p>
               </div>
-              <div className="flex flex-wrap items-center gap-3">
-                <Button asChild size="lg" variant="default">
-                  <Link to="/register">
-                    Get Started <ArrowRight className="size-4" />
-                  </Link>
-                </Button>
-                <Button asChild size="lg" variant="outline">
+              <div className="flex w-full flex-col items-stretch gap-3 sm:w-auto sm:flex-row sm:items-center">
+                <div className="h-[156px] w-full sm:w-[270px]">
+                  <VenomButton
+                    background="transparent"
+                    label="Get Started"
+                    size={48}
+                    reach={110}
+                    cursor="glove"
+                    autoplay={true}
+                    onClick={() => navigate("/register")}
+                    font={{
+                      fontSize: 15,
+                      fontWeight: 600,
+                      fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif",
+                    }}
+                    advanced={{
+                      sense: 195,
+                      release: 160,
+                      gloveScale: 128,
+                    }}
+                  />
+                </div>
+                <Button asChild size="lg" variant="outline" className="self-center sm:self-auto">
                   <Link to="/app/docs">API &amp; MCP Docs</Link>
                 </Button>
               </div>

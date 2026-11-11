@@ -40,7 +40,6 @@ import { useAuth } from "@/context/AuthContext";
 import { PageHeader, SectionHeading, DataRow } from "@/components/common";
 import { PayPalCheckout } from "@/components/paypal-checkout";
 import {
-  ModeBadge,
   PaymentStatusBadge,
   PayoutAvailabilityBadge,
   RiskBadge,
@@ -131,7 +130,7 @@ export default function TaskDetailPage() {
       setError(null);
     },
     onError: (err) =>
-      setError(err instanceof ApiError ? err.message : "Could not retrieve verified agent handback."),
+      setError(err instanceof ApiError ? err.message : "Could not load completed work summary."),
   });
 
   const submit = useMutation({
@@ -229,7 +228,7 @@ export default function TaskDetailPage() {
       <PageHeader
         breadcrumbs={[
           {
-            label: user?.role === "REVIEWER" ? "Marketplace" : "Escalated Tasks",
+            label: user?.role === "REVIEWER" ? "Available Tasks" : "My Tasks",
             to: user?.role === "REVIEWER" ? "/app/marketplace" : "/app/requests",
           },
           { label: task.title },
@@ -240,13 +239,13 @@ export default function TaskDetailPage() {
           <>
             <Button asChild variant="outline">
               <Link to={task.session ? `/app/sessions/${task.session.id}` : "/app"}>
-                <ArrowLeft className="size-4" /> {task.session ? "Agent session" : "Back"}
+                <ArrowLeft className="size-4" /> {task.session ? "Task conversation" : "Back"}
               </Link>
             </Button>
             {latestVerification ? (
               <Button asChild variant="outline">
                 <Link to={`/app/tasks/${task.id}/verification`}>
-                  <FileCheck2 className="size-4 text-[#4263EB]" /> Verification report
+                  <FileCheck2 className="size-4 text-[#365FEA]" /> Safety &amp; quality report
                 </Link>
               </Button>
             ) : null}
@@ -271,34 +270,34 @@ export default function TaskDetailPage() {
         <div className="min-w-0 space-y-6">
           {/* Task Requirements & Supplied Evidence */}
           <Card>
-            <CardHeader className="border-b border-[#E4E9F2] pb-3.5">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <ClipboardCheck className="size-4 text-[#4263EB]" /> Task details &amp; requirements
+            <CardHeader className="border-b border-[#E5E1D7] pb-3.5">
+              <CardTitle className="flex items-center gap-2 text-base text-[#202722]">
+                <ClipboardCheck className="size-4 text-[#365FEA]" /> Task details &amp; requirements
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 pt-4">
               {task.question ? (
                 <div>
-                  <p className="text-xs font-semibold text-[#68738A]">
-                    What the AI agent needed help with
+                  <p className="text-xs font-semibold text-[#69736D]">
+                    What needs to be completed
                   </p>
-                  <p className="mt-1 whitespace-pre-line text-sm leading-6 text-[#141B2D]">{task.question}</p>
+                  <p className="mt-1 whitespace-pre-line text-sm leading-6 text-[#202722]">{task.question}</p>
                 </div>
               ) : null}
 
               <div>
-                <p className="text-xs font-semibold text-[#68738A]">
-                  Acceptance criteria
+                <p className="text-xs font-semibold text-[#69736D]">
+                  What should the completed work include
                 </p>
-                <div className="mt-1.5 rounded-xl bg-[#F5F7FC] p-3.5 whitespace-pre-line text-xs leading-6 text-[#141B2D]">
+                <div className="mt-1.5 rounded-xl bg-[#F0EEE7] p-3.5 whitespace-pre-line text-xs leading-6 text-[#202722]">
                   {task.acceptanceCriteria}
                 </div>
               </div>
 
               {task.requiredSkills && task.requiredSkills.length > 0 ? (
                 <div>
-                  <p className="text-xs font-semibold text-[#68738A]">
-                    Required specialist skills
+                  <p className="text-xs font-semibold text-[#69736D]">
+                    Required skills
                   </p>
                   <div className="mt-1.5 flex flex-wrap gap-1.5">
                     {task.requiredSkills.map((skill) => (
@@ -311,22 +310,22 @@ export default function TaskDetailPage() {
               ) : null}
 
               {task.evidence && task.evidence.length > 0 ? (
-                <div className="space-y-2 border-t border-[#E4E9F2] pt-4">
+                <div className="space-y-2 border-t border-[#E5E1D7] pt-4">
                   <SectionHeading
-                    title="Supplied evidence"
-                    description="Specialists and automated verifiers inspect deliverables against these sources."
+                    title="Attached files or notes"
+                    description="Specialists and safety reviewers check submitted work against these materials."
                   />
                   <div className="space-y-2">
                     {task.evidence.map((item) => (
                       <details
                         key={item.id}
-                        className="rounded-xl border border-[#E4E9F2] bg-[#F5F7FC] p-3"
+                        className="rounded-xl border border-[#E5E1D7] bg-[#F0EEE7] p-3"
                       >
-                        <summary className="flex cursor-pointer flex-wrap items-center justify-between gap-2 text-xs font-bold text-[#141B2D]">
+                        <summary className="flex cursor-pointer flex-wrap items-center justify-between gap-2 text-xs font-bold text-[#202722]">
                           <span>{item.title}</span>
                           <Badge tone="neutral">{humanize(item.sourceType)}</Badge>
                         </summary>
-                        <p className="mt-2 whitespace-pre-line text-xs leading-5 text-[#4E596E]">
+                        <p className="mt-2 whitespace-pre-line text-xs leading-5 text-[#444D47]">
                           {item.content}
                         </p>
                         {item.url ? (
@@ -334,7 +333,7 @@ export default function TaskDetailPage() {
                             href={item.url}
                             target="_blank"
                             rel="noreferrer"
-                            className="mt-1.5 inline-flex items-center gap-1 text-[11px] font-medium text-[#4263EB] underline underline-offset-2"
+                            className="mt-1.5 inline-flex items-center gap-1 text-[11px] font-medium text-[#365FEA] underline underline-offset-2"
                           >
                             {item.url} <ExternalLink className="size-3" />
                           </a>
@@ -371,22 +370,22 @@ export default function TaskDetailPage() {
               task={task}
               onSubmit={(input) => submit.mutate(input)}
               submitting={submit.isPending}
-              title="Submit your evidenced answer & code artifact"
+              title="Submit your completed work"
             />
           ) : (
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="flex items-center gap-2 text-sm">
-                  <ClipboardCheck className="size-4 text-[#4263EB]" /> Deliverable status
+                <CardTitle className="flex items-center gap-2 text-sm text-[#202722]">
+                  <ClipboardCheck className="size-4 text-[#365FEA]" /> Submission status
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-xs leading-5 text-[#68738A]">
+                <p className="text-xs leading-5 text-[#69736D]">
                   {isAssignedReviewer
-                    ? "Your deliverable and independent verification record will appear here once submitted."
+                    ? "Your completed work and safety review results will appear here once submitted."
                     : isOpenMarket
-                      ? "Accept this task in the action panel to claim ownership and submit an artifact."
-                      : "No submission has been recorded yet. An eligible specialist must claim and submit an artifact."}
+                      ? "Accept this task in the action panel to get started and submit your work."
+                      : "No work has been submitted yet. A matched specialist needs to accept and complete the task."}
                 </p>
               </CardContent>
             </Card>
@@ -403,64 +402,48 @@ export default function TaskDetailPage() {
             />
           ) : null}
 
-          {/* Signed Agent Handback Certificate */}
+          {/* Completed Work Summary */}
           {handbackPreview ? (
-            <Card className="border-[#12A875]/40">
-              <CardHeader className="border-b border-[#E4E9F2] bg-[#12A875]/[0.05] pb-3.5">
+            <Card className="border-[#438866]/40">
+              <CardHeader className="border-b border-[#E5E1D7] bg-[#438866]/[0.06] pb-3.5">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <KeyRound className="size-4 text-[#12A875]" /> Verified Results Certificate &amp; Signed Handback
+                    <KeyRound className="size-4 text-[#438866]" /> Completed Work Summary
                   </CardTitle>
-                  <div className="flex items-center gap-1.5">
-                    <Badge tone="success" dot>
-                      {handbackPreview.signature.algorithm}
-                    </Badge>
-                    {handbackPreview.idempotentReplay ? (
-                      <Badge tone="neutral">Idempotent Replay</Badge>
-                    ) : null}
-                  </div>
+                  <Badge tone="success" dot>
+                    Verified
+                  </Badge>
                 </div>
               </CardHeader>
               <CardContent className="space-y-3 pt-4 text-xs">
-                <div className="grid gap-2.5 rounded-xl bg-[#F5F7FC] p-4">
+                <div className="grid gap-2.5 rounded-xl bg-[#F0EEE7] p-4">
                   <div>
-                    <span className="font-semibold text-[#68738A]">
-                      File v{handbackPreview.handback.artifact.version} integrity (SHA-256):{" "}
-                    </span>
-                    <span className="break-all font-mono text-[11px] text-[#141B2D]">
-                      {handbackPreview.handback.artifact.sha256Digest}
+                    <span className="font-semibold text-[#69736D]">Submission version: </span>
+                    <span className="font-medium text-[#202722]">
+                      v{handbackPreview.handback.artifact.version}
                     </span>
                   </div>
                   <div>
-                    <span className="font-semibold text-[#68738A]">Secure digital signature: </span>
-                    <span className="break-all font-mono text-[11px] text-[#141B2D]">
-                      {handbackPreview.signature.header}
+                    <span className="font-semibold text-[#69736D]">Integrity status: </span>
+                    <span className="font-medium text-[#202722]">
+                      Safety and quality checks passed
                     </span>
                   </div>
                   <div>
-                    <span className="font-semibold text-[#68738A]">Result reference key: </span>
-                    <span className="break-all font-mono text-[11px] text-[#141B2D]">
-                      {handbackPreview.handback.handoffIdempotencyKey}
+                    <span className="font-semibold text-[#69736D]">Approval confirmation: </span>
+                    <span className="font-medium text-[#202722]">
+                      Verified and ready for delivery
                     </span>
                   </div>
                 </div>
-
-                <details className="rounded-xl bg-[#10172A] p-4 text-[#E2E8F0]">
-                  <summary className="cursor-pointer font-mono text-xs font-semibold text-[#20BCE5]">
-                    Inspect JSON Agent Result Payload
-                  </summary>
-                  <pre className="mt-2 max-h-64 overflow-auto font-mono text-[11px] leading-5">
-                    {JSON.stringify(handbackPreview.handback, null, 2)}
-                  </pre>
-                </details>
               </CardContent>
             </Card>
           ) : null}
 
           {/* Workflow Timeline */}
           <Card>
-            <CardHeader className="border-b border-[#E4E9F2] pb-3">
-              <CardTitle className="text-sm">Task activity history</CardTitle>
+            <CardHeader className="border-b border-[#E5E1D7] pb-3">
+              <CardTitle className="text-sm text-[#202722]">Task activity history</CardTitle>
             </CardHeader>
             <CardContent className="pt-4">
               <TaskTimeline events={task.events ?? []} />
@@ -519,26 +502,19 @@ export default function TaskDetailPage() {
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm">Task details</CardTitle>
+              <CardTitle className="text-sm text-[#202722]">Task overview</CardTitle>
             </CardHeader>
             <CardContent>
               <dl>
                 <DataRow label="Category">{categoryLabel(task.category)}</DataRow>
-                <DataRow label="Reward">{formatMoney(task.rewardMinor, task.currency)}</DataRow>
-                <DataRow label="Reward status">
-                  {task.reward ? <Badge tone="neutral">{humanize(task.reward.status)}</Badge> : "—"}
-                </DataRow>
-                <DataRow label="Payout status">
+                <DataRow label="Budget">{formatMoney(task.rewardMinor, task.currency)}</DataRow>
+                <DataRow label="Payment status">
                   <PayoutAvailabilityBadge availability={task.payoutAvailability} />
                 </DataRow>
                 <DataRow label="Created">{formatDate(task.createdAt)}</DataRow>
-                <DataRow label="Funded">{task.fundedAt ? formatDate(task.fundedAt) : "Not yet"}</DataRow>
-                <DataRow label="Verified">{task.verifiedAt ? formatDate(task.verifiedAt) : "Not yet"}</DataRow>
-                <DataRow label="Handed off">{task.handedOffAt ? formatDate(task.handedOffAt) : "Not yet"}</DataRow>
+                <DataRow label="Paid">{task.fundedAt ? formatDate(task.fundedAt) : "Not yet"}</DataRow>
+                <DataRow label="Reviewed">{task.verifiedAt ? formatDate(task.verifiedAt) : "Not yet"}</DataRow>
                 <DataRow label="Completed">{task.completedAt ? formatDate(task.completedAt) : "Not yet"}</DataRow>
-                <DataRow label="Task ID" mono>
-                  {task.id}
-                </DataRow>
               </dl>
             </CardContent>
           </Card>
@@ -546,17 +522,17 @@ export default function TaskDetailPage() {
           {task.reviewerPayout ? (
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="flex items-center gap-2 text-sm">
-                  <HandCoins className="size-4 text-[#4263EB]" /> Specialist payout profile
+                <CardTitle className="flex items-center gap-2 text-sm text-[#202722]">
+                  <HandCoins className="size-4 text-[#365FEA]" /> Specialist payout details
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2 text-xs">
                 {task.reviewerPayout.consent && task.reviewerPayout.email ? (
-                  <div className="flex items-start gap-2 rounded-lg bg-[#12A875]/[0.08] p-3 text-[#141B2D]">
-                    <BadgeCheck className="mt-0.5 size-4 shrink-0 text-[#12A875]" />
+                  <div className="flex items-start gap-2 rounded-lg bg-[#438866]/[0.09] p-3 text-[#202722]">
+                    <BadgeCheck className="mt-0.5 size-4 shrink-0 text-[#438866]" />
                     <div className="min-w-0">
-                      <p className="font-semibold text-[#0B7D56]">Payout consent recorded</p>
-                      <p className="mt-0.5 truncate text-xs text-[#141B2D]">
+                      <p className="font-semibold text-[#2E6248]">Payout details ready</p>
+                      <p className="mt-0.5 truncate text-xs text-[#202722]">
                         {task.reviewerPayout.email}
                       </p>
                     </div>
@@ -566,7 +542,7 @@ export default function TaskDetailPage() {
                     Payout details incomplete. The specialist must add a PayPal email and confirm payout consent.
                   </Alert>
                 )}
-                <p className="text-xs text-[#68738A]">Provider: {task.reviewerPayout.provider}</p>
+                <p className="text-xs text-[#69736D]">Method: {task.reviewerPayout.provider}</p>
               </CardContent>
             </Card>
           ) : null}
@@ -590,10 +566,10 @@ export default function TaskDetailPage() {
       <Dialog open={cancelOpen} onOpenChange={setCancelOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Cancel this review task?</DialogTitle>
+            <DialogTitle>Cancel this task?</DialogTitle>
             <DialogDescription>
-              The task will be marked cancelled and the reward will no longer be payable. Captured funding is not
-              automatically refunded by this application.
+              The task will be marked cancelled and the budget will no longer be payable. Completed payments are not
+              automatically refunded from this page.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -633,22 +609,22 @@ function MatchingProgressCard({
   const assigned = Boolean(task.assignment);
 
   const steps = [
-    { label: "Jina Embeddings", done: funded },
-    { label: "Elastic Hybrid Search", done: funded },
-    { label: "PostgreSQL Eligibility", done: matched || assigned },
-    { label: "Top-5 Offer Dispatch", done: matched || assigned },
+    { label: "Reviewing task requirements", done: funded },
+    { label: "Finding qualified specialists", done: funded },
+    { label: "Checking availability and skills", done: matched || assigned },
+    { label: "Inviting top specialists", done: matched || assigned },
   ];
 
   return (
     <Card>
-      <CardHeader className="border-b border-[#E4E9F2] pb-3">
+      <CardHeader className="border-b border-[#E5E1D7] pb-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <CardTitle className="flex items-center gap-2 text-sm">
-            <Search className="size-4 text-[#4263EB]" /> Hybrid Specialist Routing &amp; Top-5 Offers
+          <CardTitle className="flex items-center gap-2 text-sm text-[#202722]">
+            <Search className="size-4 text-[#365FEA]" /> Specialist matching progress
           </CardTitle>
           {["FUNDED", "OFFERED"].includes(task.status) && !assigned ? (
             <Button size="sm" variant="outline" onClick={onDispatchOffers} loading={dispatching}>
-              <Sparkles className="size-3.5 text-[#4263EB]" /> Re-dispatch Offers
+              <Sparkles className="size-3.5 text-[#365FEA]" /> Resend invites
             </Button>
           ) : null}
         </div>
@@ -661,12 +637,12 @@ function MatchingProgressCard({
               className={cn(
                 "rounded-lg border p-2.5 text-xs",
                 step.done
-                  ? "border-[#12A875]/35 bg-[#12A875]/[0.06] text-[#141B2D]"
-                  : "border-[#E4E9F2] bg-[#F5F7FC] text-[#68738A]",
+                  ? "border-[#438866]/35 bg-[#438866]/[0.07] text-[#202722]"
+                  : "border-[#E5E1D7] bg-[#F0EEE7] text-[#69736D]",
               )}
             >
               <div className="flex items-center gap-1.5 font-semibold">
-                <CheckCircle2 className={cn("size-3.5 shrink-0", step.done ? "text-[#12A875]" : "text-[#94A3B8]")} />
+                <CheckCircle2 className={cn("size-3.5 shrink-0", step.done ? "text-[#438866]" : "text-[#94A3B8]")} />
                 <span className="truncate">{step.label}</span>
               </div>
             </div>
@@ -674,24 +650,24 @@ function MatchingProgressCard({
         </div>
 
         {offers.length === 0 ? (
-          <p className="text-xs text-[#68738A]">
-            No specialist offers sent yet. Send invites after funding to notify the top 5 matches.
+          <p className="text-xs text-[#69736D]">
+            No specialist invites sent yet. Send invites after payment to notify matched specialists.
           </p>
         ) : (
-          <div className="divide-y divide-[#E4E9F2]">
+          <div className="divide-y divide-[#E5E1D7]">
             {offers.map((offer) => (
               <div
                 key={offer.id}
                 className="flex flex-wrap items-center justify-between gap-2 py-2.5 text-xs first:pt-0 last:pb-0"
               >
                 <div className="flex min-w-0 items-center gap-2">
-                  <Badge tone="neutral">Rank #{offer.rank}</Badge>
-                  <span className="truncate font-semibold text-[#141B2D]">
-                    {offer.specialist?.name ?? `Specialist ${offer.specialistId.slice(0, 8)}`}
+                  <Badge tone="neutral">#{offer.rank}</Badge>
+                  <span className="truncate font-semibold text-[#202722]">
+                    {offer.specialist?.name ?? "Matched specialist"}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium text-[#4E596E] tabular-nums">{offer.score} pts</span>
+                  <span className="text-xs font-medium text-[#444D47] tabular-nums">{offer.score} match score</span>
                   <Badge
                     tone={
                       offer.status === "ACCEPTED"
@@ -795,21 +771,21 @@ function ActionCard({
   const pendingMyOffer = task.myOffer?.status === "PENDING" ? task.myOffer : null;
 
   return (
-    <Card className="border-[#4263EB]/25">
+    <Card className="border-[#E5E1D7]">
       <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2 text-sm">
-          <Flag className="size-4 text-[#4263EB]" /> Next action
+        <CardTitle className="flex items-center gap-2 text-sm text-[#202722]">
+          <Flag className="size-4 text-[#365FEA]" /> Next action
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         {["AWAITING_FUNDING", "FUNDING_FAILED"].includes(task.status) && (isRequester || isAdmin) ? (
           <>
-            <p className="text-xs leading-5 text-[#68738A]">
-              Fund the escrow reward to make this task available to specialists.
+            <p className="text-xs leading-5 text-[#69736D]">
+              Complete payment to make this task available to qualified specialists.
             </p>
             {task.status === "FUNDING_FAILED" ? (
               <Alert tone="warning">
-                Previous funding attempt failed. Reconcile or capture a new funding order below.
+                Previous payment attempt did not complete. Please refresh the status or try again below.
               </Alert>
             ) : null}
             <PayPalCheckout
@@ -817,21 +793,21 @@ function ActionCard({
               amountDisplay={formatMoney(task.rewardMinor, task.currency)}
               currency={task.currency}
               onCompleted={onFunded}
-              label={`Fund ${formatMoney(task.rewardMinor, task.currency)}`}
+              label={`Pay ${formatMoney(task.rewardMinor, task.currency)}`}
             />
             <Button variant="outline" size="sm" className="w-full" onClick={onEditReward}>
-              <CircleDollarSign className="size-3.5" /> Change reward before funding
+              <CircleDollarSign className="size-3.5" /> Update budget before payment
             </Button>
           </>
         ) : null}
 
         {["FUNDED", "OFFERED"].includes(task.status) && (isRequester || isAdmin) && !task.assignment ? (
-          <div className="space-y-2 rounded-xl bg-[#F5F7FC] p-3.5 text-xs">
-            <p className="font-semibold text-[#141B2D]">Notify matched specialists</p>
-            <p className="text-[#68738A]">
+          <div className="space-y-2 rounded-xl bg-[#F0EEE7] p-3.5 text-xs">
+            <p className="font-semibold text-[#202722]">Notify matched specialists</p>
+            <p className="text-[#69736D]">
               {task.offers && task.offers.length > 0
                 ? `${task.offers.filter((o) => o.status === "PENDING").length} specialist invite(s) waiting for a response.`
-                : "Invite up to 5 top-matched verified specialists to claim this task."}
+                : "Invite top-matched specialists to accept this task."}
             </p>
             <Button
               variant="outline"
@@ -840,7 +816,7 @@ function ActionCard({
               onClick={onDispatchOffers}
               loading={dispatchingOffers}
             >
-              <Sparkles className="size-3.5 text-[#4263EB]" /> Send specialist invites
+              <Sparkles className="size-3.5 text-[#365FEA]" /> Send specialist invites
             </Button>
           </div>
         ) : null}
@@ -848,20 +824,20 @@ function ActionCard({
         {isOpenMarket ? (
           <>
             {pendingMyOffer ? (
-              <div className="space-y-1.5 rounded-xl bg-[#4263EB]/[0.07] p-3.5 text-xs">
+              <div className="space-y-1.5 rounded-xl bg-[#365FEA]/[0.08] p-3.5 text-xs">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-semibold text-[#2E4CCB] tabular-nums">
-                    Direct offer #{pendingMyOffer.rank} ({pendingMyOffer.score} pts)
+                  <span className="font-semibold text-[#2949C6] tabular-nums">
+                    Direct invite #{pendingMyOffer.rank} ({pendingMyOffer.score} pts)
                   </span>
-                  <Badge tone="indigo">Batch #{pendingMyOffer.batchNumber}</Badge>
+                  <Badge tone="indigo">Round #{pendingMyOffer.batchNumber}</Badge>
                 </div>
-                <p className="text-xs text-[#4E596E] tabular-nums">
+                <p className="text-xs text-[#444D47] tabular-nums">
                   Expires {formatDate(pendingMyOffer.expiresAt)}. Accept to start working on this task.
                 </p>
               </div>
             ) : (
-              <p className="text-xs leading-5 text-[#68738A]">
-                This funded task is open in the marketplace. Claim it to begin work.
+              <p className="text-xs leading-5 text-[#69736D]">
+                This paid task is open to qualified specialists. Accept it to begin work.
               </p>
             )}
             <div className="flex gap-2">
@@ -878,32 +854,32 @@ function ActionCard({
         ) : null}
 
         {isAssignedReviewer && ["REVIEWER_ASSIGNED", "ASSIGNED", "IN_PROGRESS"].includes(task.status) ? (
-          <p className="text-xs leading-5 text-[#68738A]">
-            You claimed this task. Submit your work and notes in the submission panel.
+          <p className="text-xs leading-5 text-[#69736D]">
+            You accepted this task. Submit your completed work and notes in the submission panel.
           </p>
         ) : null}
 
         {task.status === "VERIFICATION_PENDING" ? (
-          <div className="flex items-center gap-2 rounded-lg bg-[#F5F7FC] p-3 text-xs font-medium text-[#141B2D]">
-            <Loader2 className="size-4 animate-spin text-[#4263EB]" /> Security and quality checks running…
+          <div className="flex items-center gap-2 rounded-lg bg-[#F0EEE7] p-3 text-xs font-medium text-[#202722]">
+            <Loader2 className="size-4 animate-spin text-[#365FEA]" /> Safety review in progress…
           </div>
         ) : null}
 
         {payable ? (
           <>
-            <div className="rounded-xl bg-[#12A875]/[0.08] p-3.5 text-xs leading-5 text-[#141B2D]">
+            <div className="rounded-xl bg-[#438866]/[0.09] p-3.5 text-xs leading-5 text-[#202722]">
               <div className="flex flex-wrap items-center justify-between gap-1.5">
-                <p className="font-semibold text-[#0B7D56]">Verified and ready for payout</p>
+                <p className="font-semibold text-[#2E6248]">Ready for payment</p>
                 <PayoutAvailabilityBadge availability={task.payoutAvailability} />
               </div>
-              <p className="mt-1 text-[#4E596E] tabular-nums">
+              <p className="mt-1 text-[#444D47] tabular-nums">
                 Release {formatMoney(task.rewardMinor, task.currency)} to{" "}
                 {task.assignment?.reviewer.name ?? "the specialist"}.{" "}
                 {task.payoutAvailability === "DEMO_SIMULATED"
-                  ? "Recorded as a simulated payout in practice mode."
+                  ? "Recorded as a test payment."
                   : task.payoutAvailability === "PAYOUT_UNAVAILABLE"
-                    ? "Automated specialist payouts are currently unavailable for this merchant account."
-                    : "Sent via PayPal test mode."}
+                    ? "Automated specialist payouts are currently unavailable for this account."
+                    : "Sent via PayPal test payment."}
               </p>
             </div>
 
@@ -916,10 +892,10 @@ function ActionCard({
             >
               <Wallet className="size-3.5" />
               {task.payoutAvailability === "PAYOUT_UNAVAILABLE"
-                ? "Payout unavailable right now"
+                ? "Payment unavailable right now"
                 : task.payoutAvailability === "DEMO_SIMULATED"
-                  ? "Record Simulated Payout"
-                  : "Release Specialist Payout"}
+                  ? "Record Test Payment"
+                  : "Release Specialist Payment"}
             </Button>
 
             {!task.reviewerPayout?.consent || !task.reviewerPayout.email ? (
@@ -936,14 +912,14 @@ function ActionCard({
             onClick={() => onReconcile(processingPayout.id)}
             loading={reconciling}
           >
-            <RefreshCw className="size-3.5" /> Refresh payout status
+            <RefreshCw className="size-3.5" /> Refresh payment status
           </Button>
         ) : null}
 
         {task.status === "PAYMENT_PAID" ? (
-          <div className="rounded-xl bg-[#12A875]/[0.08] p-3.5 text-xs">
-            <p className="font-semibold text-[#0B7D56]">Specialist paid</p>
-            <p className="mt-0.5 text-[#4E596E]">The verified result is ready to return to your agent.</p>
+          <div className="rounded-xl bg-[#438866]/[0.09] p-3.5 text-xs">
+            <p className="font-semibold text-[#2E6248]">Payment complete</p>
+            <p className="mt-0.5 text-[#444D47]">The completed work is ready to review.</p>
           </div>
         ) : null}
 
@@ -955,13 +931,13 @@ function ActionCard({
             onClick={onFetchHandback}
             loading={fetchingHandback}
           >
-            <ShieldCheck className="size-3.5 text-[#12A875]" /> Preview signed agent result
+            <ShieldCheck className="size-3.5 text-[#438866]" /> View completed summary
           </Button>
         ) : null}
 
         {resumeAllowed && task.session ? (
           <Button size="sm" className="w-full" onClick={onResume}>
-            <CheckCircle2 className="size-3.5" /> Resume AI session
+            <CheckCircle2 className="size-3.5" /> Return to task conversation
           </Button>
         ) : null}
 
@@ -1015,37 +991,30 @@ function PaymentsCard({
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2 text-sm">
-          <Banknote className="size-4 text-[#4263EB]" /> Payment history
+        <CardTitle className="flex items-center gap-2 text-sm text-[#202722]">
+          <Banknote className="size-4 text-[#365FEA]" /> Payment history
         </CardTitle>
       </CardHeader>
-      <CardContent className="divide-y divide-[#E4E9F2] pt-1">
+      <CardContent className="divide-y divide-[#E5E1D7] pt-1">
         {visible.length === 0 ? (
-          <p className="py-2 text-xs text-[#68738A]">No payment transactions yet.</p>
+          <p className="py-2 text-xs text-[#69736D]">No payments recorded yet.</p>
         ) : (
           visible.map((payment) => (
             <div key={payment.id} className="py-3 first:pt-1 last:pb-1">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="text-xs font-semibold text-[#141B2D]">
-                    {payment.type === "FUNDING" ? "Task funding" : "Specialist payout"}
+                  <span className="text-xs font-semibold text-[#202722]">
+                    {payment.type === "FUNDING" ? "Task payment" : "Specialist payment"}
                   </span>
                   <PaymentStatusBadge status={payment.status} />
-                  <ModeBadge mode={payment.mode} />
                 </div>
-                <span className="text-sm font-bold text-[#141B2D] tabular-nums">
+                <span className="text-sm font-bold text-[#202722] tabular-nums">
                   {payment.amountDisplay}
                 </span>
               </div>
-              <p className="mt-1 text-xs text-[#68738A] tabular-nums">
+              <p className="mt-1 text-xs text-[#69736D] tabular-nums">
                 {payment.provider} · {formatDate(payment.createdAt)}
               </p>
-              {payment.orderId ? (
-                <p className="mt-0.5 truncate font-mono text-[11px] text-[#68738A]">Order: {payment.orderId}</p>
-              ) : null}
-              {payment.payoutBatchId ? (
-                <p className="mt-0.5 truncate font-mono text-[11px] text-[#68738A]">Batch: {payment.payoutBatchId}</p>
-              ) : null}
               {payment.failureMessage ? (
                 <p className="mt-1 text-xs font-medium text-[#E5484D]">{payment.failureMessage}</p>
               ) : null}
@@ -1091,11 +1060,11 @@ function VerificationCard({
   const [decision, setDecision] = useState<"PASS" | "REJECT">("PASS");
 
   return (
-    <Card className={verification.status === "PASSED" ? "border-[#12A875]/35" : undefined}>
-      <CardHeader className="border-b border-[#E4E9F2] pb-3.5">
+    <Card className={verification.status === "PASSED" ? "border-[#438866]/35" : undefined}>
+      <CardHeader className="border-b border-[#E5E1D7] pb-3.5">
         <div className="flex flex-wrap items-start justify-between gap-2">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Award className="size-4 text-[#12A875]" /> Work verification report
+          <CardTitle className="flex items-center gap-2 text-base text-[#202722]">
+            <Award className="size-4 text-[#438866]" /> Safety &amp; quality report
           </CardTitle>
           <div className="flex flex-wrap items-center gap-1.5">
             <VerificationBadge status={verification.status} />
@@ -1109,27 +1078,20 @@ function VerificationCard({
         </div>
       </CardHeader>
       <CardContent className="space-y-4 pt-4">
-        <p className="text-sm leading-6 text-[#141B2D]">{verification.decisionReason}</p>
-
-        {verification.artifactSha256 ? (
-          <div className="rounded-xl bg-[#F5F7FC] p-3.5 text-xs">
-            <span className="font-semibold text-[#68738A]">File integrity check (SHA-256): </span>
-            <span className="break-all font-mono text-[11px] text-[#141B2D]">{verification.artifactSha256}</span>
-          </div>
-        ) : null}
+        <p className="text-sm leading-6 text-[#202722]">{verification.decisionReason}</p>
 
         {verification.securityReview ? (
-          <div className="space-y-2 rounded-xl bg-[#F5F7FC] p-3.5 text-xs">
+          <div className="space-y-2 rounded-xl bg-[#F0EEE7] p-3.5 text-xs">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="flex items-center gap-1.5 font-semibold text-[#141B2D]">
-                <ShieldCheck className="size-4 text-[#4263EB]" /> Security checks
+              <p className="flex items-center gap-1.5 font-semibold text-[#202722]">
+                <ShieldCheck className="size-4 text-[#365FEA]" /> Safety checks
               </p>
               <SecurityVerdictBadge verdict={verification.securityReview.verdict} />
             </div>
-            <p className="leading-5 text-[#4E596E]">{verification.securityReview.summary}</p>
+            <p className="leading-5 text-[#444D47]">{verification.securityReview.summary}</p>
             {verification.securityReview.gemini ? (
-              <p className="text-xs text-[#68738A] tabular-nums">
-                AI review ({verification.securityReview.gemini.model}) · Confidence:{" "}
+              <p className="text-xs text-[#69736D] tabular-nums">
+                AI safety review · Confidence:{" "}
                 {Math.round(verification.securityReview.gemini.confidence * 100)}%
               </p>
             ) : null}
@@ -1137,42 +1099,34 @@ function VerificationCard({
         ) : null}
 
         {verification.executionSummary ? (
-          <div className="space-y-2 rounded-xl bg-[#F5F7FC] p-3.5 text-xs">
+          <div className="space-y-2 rounded-xl bg-[#F0EEE7] p-3.5 text-xs">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="flex items-center gap-1.5 font-semibold text-[#141B2D]">
-                <Terminal className="size-4 text-[#4263EB]" /> Work execution summary
+              <p className="flex items-center gap-1.5 font-semibold text-[#202722]">
+                <Terminal className="size-4 text-[#365FEA]" /> Quality evaluation summary
               </p>
-              <div className="flex items-center gap-1.5">
-                <Badge tone={verification.executionSummary.passed ? "success" : "danger"} dot>
-                  {verification.executionSummary.verdict}
-                </Badge>
-                <Badge tone="neutral">{verification.executionSummary.mode}</Badge>
-              </div>
+              <Badge tone={verification.executionSummary.passed ? "success" : "danger"} dot>
+                {verification.executionSummary.verdict}
+              </Badge>
             </div>
-            <p className="leading-5 text-[#4E596E]">{verification.executionSummary.summary}</p>
-            {verification.executionSummary.stdout ? (
-              <pre className="max-h-36 overflow-auto rounded-lg bg-[#10172A] p-3 font-mono text-[11px] text-[#E2E8F0]">
-                {verification.executionSummary.stdout}
-              </pre>
-            ) : null}
+            <p className="leading-5 text-[#444D47]">{verification.executionSummary.summary}</p>
           </div>
         ) : null}
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <p className="mb-2 text-xs font-semibold text-[#68738A]">
+            <p className="mb-2 text-xs font-semibold text-[#69736D]">
               Passed checks ({verification.checksPassed.length})
             </p>
             <div className="space-y-2">
               {verification.checksPassed.map((check) => (
                 <div
                   key={check.id}
-                  className="flex gap-2 rounded-lg bg-[#12A875]/[0.07] p-3"
+                  className="flex gap-2 rounded-lg bg-[#438866]/[0.08] p-3"
                 >
-                  <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#12A875]" />
+                  <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#438866]" />
                   <div>
-                    <p className="text-xs font-semibold text-[#141B2D]">{check.label}</p>
-                    <p className="mt-0.5 text-xs leading-4 text-[#4E596E]">{check.detail}</p>
+                    <p className="text-xs font-semibold text-[#202722]">{check.label}</p>
+                    <p className="mt-0.5 text-xs leading-4 text-[#444D47]">{check.detail}</p>
                   </div>
                 </div>
               ))}
@@ -1180,11 +1134,11 @@ function VerificationCard({
           </div>
 
           <div>
-            <p className="mb-2 text-xs font-semibold text-[#68738A]">
+            <p className="mb-2 text-xs font-semibold text-[#69736D]">
               Failed checks ({verification.checksFailed.length})
             </p>
             {verification.checksFailed.length === 0 ? (
-              <p className="rounded-lg bg-[#F5F7FC] p-3 text-xs text-[#68738A]">
+              <p className="rounded-lg bg-[#F0EEE7] p-3 text-xs text-[#69736D]">
                 No failed checks.
               </p>
             ) : (
@@ -1195,19 +1149,19 @@ function VerificationCard({
                     className={cn(
                       "flex gap-2 rounded-lg p-3",
                       check.severity === "HARD"
-                        ? "bg-[#E5484D]/[0.07]"
-                        : "bg-[#F5A623]/[0.1]",
+                        ? "bg-[#C8372D]/[0.07]"
+                        : "bg-[#C97A2E]/[0.1]",
                     )}
                   >
                     <ShieldAlert
                       className={cn(
                         "mt-0.5 size-4 shrink-0",
-                        check.severity === "HARD" ? "text-[#E5484D]" : "text-[#D48806]",
+                        check.severity === "HARD" ? "text-[#C8372D]" : "text-[#C97A2E]",
                       )}
                     />
                     <div>
-                      <p className="text-xs font-semibold text-[#141B2D]">{check.label}</p>
-                      <p className="mt-0.5 text-xs leading-4 text-[#4E596E]">{check.detail}</p>
+                      <p className="text-xs font-semibold text-[#202722]">{check.label}</p>
+                      <p className="mt-0.5 text-xs leading-4 text-[#444D47]">{check.detail}</p>
                     </div>
                   </div>
                 ))}
@@ -1217,26 +1171,26 @@ function VerificationCard({
         </div>
 
         {verification.evidenceReferences.length > 0 ? (
-          <div className="border-t border-[#E4E9F2] pt-3">
-            <p className="mb-2 text-xs font-semibold text-[#68738A]">
+          <div className="border-t border-[#E5E1D7] pt-3">
+            <p className="mb-2 text-xs font-semibold text-[#69736D]">
               Evidence references
             </p>
-            <div className="divide-y divide-[#E4E9F2]">
+            <div className="divide-y divide-[#E5E1D7]">
               {verification.evidenceReferences.map((reference, index) => (
                 <div key={`${reference.label}-${index}`} className="py-2.5 text-xs first:pt-0 last:pb-0">
-                  <p className="font-semibold text-[#141B2D]">{reference.label}</p>
+                  <p className="font-semibold text-[#202722]">{reference.label}</p>
                   {reference.url ? (
                     <a
                       href={reference.url}
                       target="_blank"
                       rel="noreferrer"
-                      className="mt-0.5 inline-flex items-center gap-1 text-xs font-medium text-[#4263EB] underline underline-offset-2"
+                      className="mt-0.5 inline-flex items-center gap-1 text-xs font-medium text-[#365FEA] underline underline-offset-2"
                     >
                       {reference.url} <ExternalLink className="size-3" />
                     </a>
                   ) : null}
                   {reference.quote ? (
-                    <p className="mt-1 text-xs italic text-[#4E596E]">“{reference.quote}”</p>
+                    <p className="mt-1 text-xs italic text-[#444D47]">“{reference.quote}”</p>
                   ) : null}
                 </div>
               ))}
@@ -1245,8 +1199,8 @@ function VerificationCard({
         ) : null}
 
         {isAdmin && taskStatus === "NEEDS_MANUAL_REVIEW" ? (
-          <div className="rounded-xl border border-[#F5A623]/40 bg-[#F5A623]/[0.08] p-4">
-            <p className="text-xs font-bold text-[#9A6100]">Manual verification decision</p>
+          <div className="rounded-xl border border-[#C97A2E]/40 bg-[#C97A2E]/[0.08] p-4">
+            <p className="text-xs font-bold text-[#94581F]">Manual review decision</p>
             <div className="mt-2 space-y-2">
               <Field label="Decision note" htmlFor="admin-verification-note">
                 <Textarea
@@ -1268,10 +1222,10 @@ function VerificationCard({
                 <select
                   value={decision}
                   onChange={(event) => setDecision(event.target.value as "PASS" | "REJECT")}
-                  className="h-8 rounded-md border border-[#E4E9F2] bg-[#FFFFFF] px-2 text-xs text-[#141B2D]"
+                  className="h-8 rounded-md border border-[#E5E1D7] bg-[#FFFEFA] px-2 text-xs text-[#202722]"
                 >
-                  <option value="PASS">PASS</option>
-                  <option value="REJECT">REJECT</option>
+                  <option value="PASS">Approve</option>
+                  <option value="REJECT">Reject</option>
                 </select>
               </div>
             </div>
@@ -1302,45 +1256,42 @@ function SubmissionCard({
   return (
     <div className="space-y-5">
       <Card>
-        <CardHeader className="border-b border-[#E4E9F2] pb-3.5">
+        <CardHeader className="border-b border-[#E5E1D7] pb-3.5">
           <div className="flex flex-wrap items-start justify-between gap-2">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <FileCode2 className="size-4 text-[#4263EB]" /> Specialist deliverable{" "}
+            <CardTitle className="flex items-center gap-2 text-base text-[#202722]">
+              <FileCode2 className="size-4 text-[#365FEA]" /> Completed work{" "}
               {submission.version ? `v${submission.version}` : ""}
             </CardTitle>
             <div className="flex flex-wrap items-center gap-1.5">
               {verification ? <VerificationBadge status={verification.status} /> : null}
-              {artifact ? <Badge tone="cobalt">Artifact v{artifact.version}</Badge> : null}
+              {artifact ? <Badge tone="cobalt">Version {artifact.version}</Badge> : null}
               <Badge tone="neutral">{submission.confidenceScore}% confidence</Badge>
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4 pt-4">
           {artifact ? (
-            <div className="space-y-2.5 rounded-xl bg-[#F5F7FC] p-4 text-xs">
+            <div className="space-y-2.5 rounded-xl bg-[#F0EEE7] p-4 text-xs">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="flex items-center gap-1.5 font-semibold text-[#141B2D]">
-                  <Database className="size-3.5 text-[#4263EB]" /> Submitted files (v{artifact.version})
+                <p className="flex items-center gap-1.5 font-semibold text-[#202722]">
+                  <Database className="size-3.5 text-[#365FEA]" /> Attached files (v{artifact.version})
                 </p>
-                <span className="text-xs text-[#68738A] tabular-nums">
+                <span className="text-xs text-[#69736D] tabular-nums">
                   {artifact.fileCount} file{artifact.fileCount === 1 ? "" : "s"} · {artifact.totalSizeBytes} bytes
                 </span>
               </div>
-              <p className="break-all font-mono text-[11px] text-[#4E596E]">
-                Integrity check (SHA-256): {artifact.sha256Digest}
-              </p>
 
               {artifact.files && artifact.files.length > 0 ? (
-                <div className="divide-y divide-[#E4E9F2] pt-1">
+                <div className="divide-y divide-[#E5E1D7] pt-1">
                   {artifact.files.map((file) => (
                     <details key={file.path} className="py-2 first:pt-1 last:pb-0">
-                      <summary className="flex cursor-pointer items-center justify-between gap-2 font-mono text-xs font-semibold text-[#141B2D]">
+                      <summary className="flex cursor-pointer items-center justify-between gap-2 text-xs font-semibold text-[#202722]">
                         <span>{file.path}</span>
-                        <span className="font-sans text-[11px] font-normal text-[#68738A] tabular-nums">
+                        <span className="text-[11px] font-normal text-[#69736D] tabular-nums">
                           {file.sizeBytes} B
                         </span>
                       </summary>
-                      <pre className="mt-2 max-h-56 overflow-auto rounded-lg bg-[#10172A] p-3 font-mono text-[11px] text-[#E2E8F0]">
+                      <pre className="mt-2 max-h-56 overflow-auto rounded-lg border border-[#E5E1D7] bg-[#FFFEFA] p-3 font-mono text-[11px] text-[#202722]">
                         {file.content}
                       </pre>
                     </details>
@@ -1349,11 +1300,11 @@ function SubmissionCard({
               ) : null}
 
               {artifact.patchText ? (
-                <details className="border-t border-[#E4E9F2] pt-2">
-                  <summary className="cursor-pointer font-mono text-xs font-semibold text-[#141B2D]">
-                    Unified Git Diff Patch
+                <details className="border-t border-[#E5E1D7] pt-2">
+                  <summary className="cursor-pointer text-xs font-semibold text-[#202722]">
+                    Attached change summary
                   </summary>
-                  <pre className="mt-2 max-h-56 overflow-auto rounded-lg bg-[#10172A] p-3 font-mono text-[11px] text-[#E2E8F0]">
+                  <pre className="mt-2 max-h-56 overflow-auto rounded-lg border border-[#E5E1D7] bg-[#FFFEFA] p-3 font-mono text-[11px] text-[#202722]">
                     {artifact.patchText}
                   </pre>
                 </details>
@@ -1362,13 +1313,13 @@ function SubmissionCard({
           ) : null}
 
           <div>
-            <p className="text-xs font-semibold text-[#68738A]">Submitted answer</p>
-            <p className="mt-1 whitespace-pre-line text-sm leading-6 text-[#141B2D]">{submission.answer}</p>
+            <p className="text-xs font-semibold text-[#69736D]">Submitted answer</p>
+            <p className="mt-1 whitespace-pre-line text-sm leading-6 text-[#202722]">{submission.answer}</p>
           </div>
 
           <div>
-            <p className="text-xs font-semibold text-[#68738A]">Explanation</p>
-            <p className="mt-1 whitespace-pre-line text-xs leading-6 text-[#4E596E]">{submission.explanation}</p>
+            <p className="text-xs font-semibold text-[#69736D]">Explanation</p>
+            <p className="mt-1 whitespace-pre-line text-xs leading-6 text-[#444D47]">{submission.explanation}</p>
           </div>
 
           {submission.sourceUrl ? (
@@ -1376,16 +1327,16 @@ function SubmissionCard({
               href={submission.sourceUrl}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1 text-xs font-medium text-[#4263EB] underline underline-offset-2"
+              className="inline-flex items-center gap-1 text-xs font-medium text-[#365FEA] underline underline-offset-2"
             >
               {submission.sourceUrl} <ExternalLink className="size-3" />
             </a>
           ) : null}
 
           {submission.evidenceNotes ? (
-            <div className="rounded-xl bg-[#F5F7FC] p-3.5">
-              <p className="text-xs font-semibold text-[#68738A]">Evidence notes</p>
-              <p className="mt-1 whitespace-pre-line text-xs leading-5 text-[#141B2D]">{submission.evidenceNotes}</p>
+            <div className="rounded-xl bg-[#F0EEE7] p-3.5">
+              <p className="text-xs font-semibold text-[#69736D]">Notes &amp; supporting details</p>
+              <p className="mt-1 whitespace-pre-line text-xs leading-5 text-[#202722]">{submission.evidenceNotes}</p>
             </div>
           ) : null}
         </CardContent>
@@ -1396,7 +1347,7 @@ function SubmissionCard({
           task={task}
           onSubmit={onSubmit}
           submitting={submitting}
-          title="Submit revised deliverable (new artifact version)"
+          title="Submit updated work"
           initial={submission}
         />
       ) : null}
@@ -1475,12 +1426,12 @@ function SubmissionForm({
     const hasPatch = Boolean(patchText.trim());
     if (!hasCodeFile && !hasPatch && answer.trim().length < 20) {
       setLocalError(
-        "The answer must be at least 20 characters when no code files or unified diff patch are attached.",
+        "The summary must be at least 20 characters when no files or change notes are attached.",
       );
       return;
     }
     if (explanation.trim().length < 20) {
-      setLocalError("The technical explanation must be at least 20 characters.");
+      setLocalError("The explanation must be at least 20 characters.");
       return;
     }
     onSubmit({
@@ -1496,10 +1447,10 @@ function SubmissionForm({
 
   return (
     <Card>
-      <CardHeader className="border-b border-[#E4E9F2] pb-3.5">
+      <CardHeader className="border-b border-[#E5E1D7] pb-3.5">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Upload className="size-4 text-[#4263EB]" /> {title}
+          <CardTitle className="flex items-center gap-2 text-base text-[#202722]">
+            <Upload className="size-4 text-[#365FEA]" /> {title}
           </CardTitle>
           <Button
             type="button"
@@ -1517,7 +1468,7 @@ function SubmissionForm({
               setLocalError(null);
             }}
           >
-            <Sparkles className="size-3.5 text-[#4263EB]" /> Load demo artifact
+            <Sparkles className="size-3.5 text-[#365FEA]" /> Load sample submission
           </Button>
         </div>
       </CardHeader>
@@ -1529,7 +1480,7 @@ function SubmissionForm({
             label="Resolution summary"
             htmlFor="submission-answer"
             required
-            hint="Direct resolution answering all acceptance criteria."
+            hint="Direct answer addressing all task requirements."
           >
             <Textarea
               id="submission-answer"
@@ -1541,10 +1492,10 @@ function SubmissionForm({
           </Field>
 
           <Field
-            label="Technical explanation"
+            label="Explanation & notes"
             htmlFor="submission-explanation"
             required
-            hint="Document trade-offs, version constraints, and verification steps."
+            hint="Describe how you completed the work and any checks you ran."
           >
             <Textarea
               id="submission-explanation"
@@ -1585,17 +1536,16 @@ function SubmissionForm({
             />
           </Field>
 
-          <div className="space-y-3 rounded-xl bg-[#F5F7FC] p-4">
-            <p className="text-xs font-semibold text-[#141B2D]">
-              Optional file or code patch
+          <div className="space-y-3 rounded-xl bg-[#F0EEE7] p-4">
+            <p className="text-xs font-semibold text-[#202722]">
+              Optional attached file or changes
             </p>
-            <Field label="Target file path" htmlFor="submission-file-path">
+            <Field label="File name or path" htmlFor="submission-file-path">
               <Input
                 id="submission-file-path"
                 value={filePath}
                 onChange={(event) => setFilePath(event.target.value)}
-                placeholder="src/worker-pool.ts"
-                className="font-mono text-xs"
+                placeholder="notes/summary.md"
               />
             </Field>
             <Field label="File contents" htmlFor="submission-file-content">
@@ -1604,22 +1554,20 @@ function SubmissionForm({
                 value={fileContent}
                 onChange={(event) => setFileContent(event.target.value)}
                 rows={4}
-                className="font-mono text-xs"
               />
             </Field>
-            <Field label="Unified git diff patch" htmlFor="submission-patch">
+            <Field label="Change summary (optional)" htmlFor="submission-patch">
               <Textarea
                 id="submission-patch"
                 value={patchText}
                 onChange={(event) => setPatchText(event.target.value)}
                 rows={3}
-                className="font-mono text-xs"
               />
             </Field>
           </div>
 
           <Button type="submit" size="lg" className="w-full" loading={submitting}>
-            <Send className="size-4" /> Submit deliverable for verification
+            <Send className="size-4" /> Submit completed work
           </Button>
         </form>
       </CardContent>
@@ -1687,9 +1635,9 @@ function RewardDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Adjust task reward</DialogTitle>
+          <DialogTitle>Update task budget</DialogTitle>
           <DialogDescription>
-            Rewards can be adjusted before funding is captured. Amount is validated server-side.
+            Budgets can be updated before payment is completed.
           </DialogDescription>
         </DialogHeader>
         {error ? <Alert tone="danger">{error}</Alert> : null}

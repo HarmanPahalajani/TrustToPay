@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { PageHeader, StatCard, SectionHeading } from "@/components/common";
-import { ModeBadge, PaymentStatusBadge, StatusBadge } from "@/components/status-badges";
+import { PaymentStatusBadge, StatusBadge } from "@/components/status-badges";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -50,8 +50,8 @@ export default function EarningsPage() {
   return (
     <div className="space-y-5">
       <PageHeader
-        title="Rewards and payout history"
-        description="Track completed payouts and authorized rewards once submitted work passes security and quality checks."
+        title="Earnings & payouts"
+        description="Track completed payouts and pending payments once submitted work passes safety checks."
         actions={
           <>
             <Button asChild variant="outline">
@@ -61,7 +61,7 @@ export default function EarningsPage() {
             </Button>
             <Button asChild variant="outline">
               <Link to="/app/payments">
-                Full ledger <ArrowRight className="size-4" />
+                All payments <ArrowRight className="size-4" />
               </Link>
             </Button>
           </>
@@ -70,8 +70,7 @@ export default function EarningsPage() {
 
       {!profileReady ? (
         <Alert tone="warning" icon={<Wallet className="size-4" />} title="Payout details are incomplete">
-          Add a PayPal email and confirm payout consent on your profile so verified rewards can be released when
-          payouts are enabled.
+          Add a PayPal email and confirm payout consent on your profile so payments can be sent when tasks complete.
         </Alert>
       ) : null}
 
@@ -79,27 +78,27 @@ export default function EarningsPage() {
         <StatCard
           label="Completed earnings"
           value={data.earnings.display}
-          hint={`${data.completedPayoutCount} completed payout${data.completedPayoutCount === 1 ? "" : "s"}`}
+          hint={`${data.completedPayoutCount} completed payment${data.completedPayoutCount === 1 ? "" : "s"}`}
           icon={<CircleDollarSign className="size-4" />}
           tone="success"
         />
         <StatCard
-          label="Pending rewards"
+          label="Pending payments"
           value={data.pendingRewards.display}
-          hint={`${data.pendingRewardCount} authorized or processing`}
+          hint={`${data.pendingRewardCount} payment${data.pendingRewardCount === 1 ? "" : "s"} in progress`}
           icon={<Clock className="size-4" />}
           tone={data.pendingRewardCount > 0 ? "warning" : "neutral"}
         />
         <StatCard
-          label="Active assignments"
+          label="Active tasks"
           value={data.assignments.active}
           hint={`${data.assignments.completed} completed · ${data.assignments.total} total`}
           icon={<BadgeCheck className="size-4" />}
         />
         <StatCard
-          label="Submissions"
+          label="Submitted work"
           value={data.submissionCount}
-          hint="Answers submitted for independent verification"
+          hint="Tasks submitted for safety review"
           icon={<ShieldCheck className="size-4" />}
         />
       </div>
@@ -107,12 +106,12 @@ export default function EarningsPage() {
       <div className="grid gap-5 lg:grid-cols-[1.5fr_1fr]">
         <div>
           <SectionHeading
-            title="Recent reward activity"
-            description="Each task shows the current task state and its latest payout state."
+            title="Recent task earnings"
+            description="Each task shows its current progress and latest payment status."
             actions={
               <Button asChild variant="ghost" size="sm">
                 <Link to="/app/reviews">
-                  My reviews <ArrowRight className="size-3.5" />
+                  My Active Work <ArrowRight className="size-3.5" />
                 </Link>
               </Button>
             }
@@ -120,42 +119,41 @@ export default function EarningsPage() {
           {data.recentPayouts.length === 0 ? (
             <EmptyState
               icon={<Banknote className="size-5" />}
-              title="No reward activity yet"
-              description="Accept a funded review, submit an evidenced answer, and the reward appears here after verification."
+              title="No earnings yet"
+              description="Accept an available task and submit completed work to earn payouts once checks pass."
               action={
                 <Button asChild size="sm">
-                  <Link to="/app/marketplace">Browse marketplace</Link>
+                  <Link to="/app/marketplace">Browse available tasks</Link>
                 </Button>
               }
             />
           ) : (
-            <Card className="divide-y divide-border">
+            <Card className="divide-y divide-[#E5E1D7]">
               {data.recentPayouts.map((row) => {
                 const payout = row.payouts[0] ?? null;
                 return (
                   <Link
                     key={row.taskId}
                     to={`/app/tasks/${row.taskId}`}
-                    className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-muted/40"
+                    className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-[#F0EEE7]/60"
                   >
                     <div className="min-w-0">
-                      <p className="line-clamp-1 text-sm font-medium">{row.title}</p>
+                      <p className="line-clamp-1 text-sm font-medium text-[#202722]">{row.title}</p>
                       <div className="mt-1 flex flex-wrap items-center gap-1.5">
                         <StatusBadge status={row.status} dot={false} />
-                        {payout ? <ModeBadge mode={payout.mode as "SIMULATED" | "SANDBOX"} /> : null}
                         {payout ? <PaymentStatusBadge status={payout.status} /> : null}
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-semibold text-[#141B2D] tabular-nums">
+                      <p className="text-sm font-semibold text-[#202722] tabular-nums">
                         {row.reward ? formatMoney(row.reward.amountMinor, row.reward.currency) : "-"}
                       </p>
-                      <p className="text-xs text-[#68738A]">
+                      <p className="text-xs text-[#69736D]">
                         {payout?.paidAt
                           ? `Paid ${formatDate(payout.paidAt)}`
                           : payout
                             ? paymentStatusLabel(payout.status)
-                            : "No payout yet"}
+                            : "Payment pending"}
                       </p>
                     </div>
                   </Link>
@@ -166,12 +164,12 @@ export default function EarningsPage() {
 
           <SectionHeading
             className="mt-6"
-            title="Payout transactions"
-            description="Your specialist payout ledger across completed tasks."
+            title="Payout history"
+            description="Your payouts across completed tasks."
             actions={
               <Button asChild variant="ghost" size="sm">
                 <Link to="/app/payments">
-                  Filter and export <ArrowRight className="size-3.5" />
+                  Filter &amp; export <ArrowRight className="size-3.5" />
                 </Link>
               </Button>
             }
@@ -183,35 +181,31 @@ export default function EarningsPage() {
           ) : payoutRows.length === 0 ? (
             <EmptyState
               icon={<Wallet className="size-5" />}
-              title="No payout transactions"
-              description="Once a verified reward is released, the payout entry appears here with its payment reference."
+              title="No payouts yet"
+              description="Once completed work passes review, your payout record will appear here."
             />
           ) : (
-            <Card className="divide-y divide-[#E4E9F2]">
+            <Card className="divide-y divide-[#E5E1D7]">
               {payoutRows.map((payment) => (
                 <div key={payment.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3.5">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-1.5">
                       <PaymentStatusBadge status={payment.status} />
-                      <ModeBadge mode={payment.mode} />
-                      <span className="text-xs text-[#68738A]">{payment.provider}</span>
+                      <span className="text-xs text-[#69736D]">{payment.provider}</span>
                     </div>
-                    <p className="mt-1 truncate text-xs text-[#68738A]">
+                    <p className="mt-1 truncate text-xs text-[#69736D]">
                       {payment.task ? (
-                        <Link to={`/app/tasks/${payment.task.id}`} className="font-medium text-[#141B2D] hover:text-[#4263EB]">
+                        <Link to={`/app/tasks/${payment.task.id}`} className="font-medium text-[#202722] hover:text-[#365FEA]">
                           {payment.task.title}
                         </Link>
                       ) : (
-                        payment.taskId
+                        "Task payout"
                       )}
-                    </p>
-                    <p className="mt-0.5 truncate font-mono text-xs text-[#68738A]">
-                      {payment.payoutBatchId ?? payment.id}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-semibold text-[#141B2D] tabular-nums">{payment.amountDisplay}</p>
-                    <p className="text-xs text-[#68738A] tabular-nums">
+                    <p className="text-sm font-semibold text-[#202722] tabular-nums">{payment.amountDisplay}</p>
+                    <p className="text-xs text-[#69736D] tabular-nums">
                       {payment.paidAt ? `Paid ${formatDate(payment.paidAt)}` : formatDate(payment.createdAt)}
                     </p>
                   </div>
@@ -222,28 +216,28 @@ export default function EarningsPage() {
         </div>
 
         <aside className="min-w-0 space-y-4">
-          <Card className={profileReady ? "border-[#12A875]/35" : "border-[#F5A623]/40"}>
+          <Card className={profileReady ? "border-[#438866]/35" : "border-[#C97A2E]/40"}>
             <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-sm">
-                <BadgeCheck className="size-4 text-[#4263EB]" /> Payout profile
+              <CardTitle className="flex items-center gap-2 text-sm text-[#202722]">
+                <BadgeCheck className="size-4 text-[#365FEA]" /> Payout profile
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-xs">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-[#68738A]">Status</span>
+                <span className="text-[#69736D]">Status</span>
                 <Badge tone={profileReady ? "success" : "warning"} dot>
                   {profileReady ? "Ready" : "Incomplete"}
                 </Badge>
               </div>
               <div className="flex items-center justify-between gap-2">
-                <span className="text-[#68738A]">PayPal email</span>
-                <span className="max-w-[180px] truncate font-medium text-[#141B2D]">
+                <span className="text-[#69736D]">PayPal email</span>
+                <span className="max-w-[180px] truncate font-medium text-[#202722]">
                   {data.payoutProfile?.email ?? "Not set"}
                 </span>
               </div>
               <div className="flex items-center justify-between gap-2">
-                <span className="text-[#68738A]">Consent</span>
-                <span className="font-medium text-[#141B2D]">{data.payoutProfile?.consent ? "Recorded" : "Not given"}</span>
+                <span className="text-[#69736D]">Consent</span>
+                <span className="font-medium text-[#202722]">{data.payoutProfile?.consent ? "Saved" : "Not given"}</span>
               </div>
               <Button asChild size="sm" variant="outline" className="mt-1 w-full">
                 <Link to="/app/profile">Update payout details</Link>
@@ -253,41 +247,37 @@ export default function EarningsPage() {
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-sm">
-                <FlaskConical className="size-4 text-[#9A6100]" /> Payment labels explained
+              <CardTitle className="flex items-center gap-2 text-sm text-[#202722]">
+                <FlaskConical className="size-4 text-[#C97A2E]" /> Payment labels explained
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 text-xs leading-5 text-[#68738A]">
+            <CardContent className="space-y-2 text-xs leading-5 text-[#69736D]">
               <p>
-                <span className="font-semibold text-[#141B2D]">Practice mode</span> rows run locally for testing and
-                never move real money.
+                <span className="font-semibold text-[#202722]">Test payment</span> entries simulate payouts during
+                testing and never move real money.
               </p>
               <p>
-                <span className="font-semibold text-[#141B2D]">PayPal test mode</span> rows use PayPal&apos;s test
-                environment—no real money is transferred.
+                <span className="font-semibold text-[#202722]">PayPal test payment</span> entries use PayPal&apos;s test
+                environment without charging real money.
               </p>
               <p>
-                If a payout fails or payouts are unavailable on the merchant account, your verified task and answer
-                stay safely recorded.
+                Your completed tasks and submissions remain safely recorded even if automated payouts are paused.
               </p>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="space-y-2 p-4 text-xs leading-5 text-[#68738A]">
-              <p className="flex items-center gap-1.5 text-xs font-semibold text-[#141B2D]">
-                <ExternalLink className="size-3.5 text-[#4263EB]" /> How rewards work
+            <CardContent className="space-y-2 p-4 text-xs leading-5 text-[#69736D]">
+              <p className="flex items-center gap-1.5 text-xs font-semibold text-[#202722]">
+                <ExternalLink className="size-3.5 text-[#365FEA]" /> How payments work
               </p>
               <p>
-                Task funding is reserved before any specialist accepts the task. Verification and payout run as separate
-                steps after submission.
+                Task budgets are confirmed before any specialist accepts the work. Review checks and payouts run after
+                completed work is submitted.
               </p>
-              <p className="text-xs font-medium text-[#141B2D] tabular-nums">
-                {data.availableCount} available · {data.assignments.total} assigned · {data.submissionCount} submitted
+              <p className="text-xs font-medium text-[#202722] tabular-nums">
+                {data.availableCount} available · {data.assignments.total} accepted · {data.submissionCount} submitted
               </p>
-              <Button asChild size="sm" variant="ghost" className="w-full">
-                <Link to="/app/docs#paypal">How payments work</Link>
-              </Button>
             </CardContent>
           </Card>
         </aside>

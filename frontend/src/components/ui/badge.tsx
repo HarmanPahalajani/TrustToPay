@@ -13,27 +13,27 @@ export type BadgeTone =
   | "cyan";
 
 const TONE_CLASSES: Record<BadgeTone, string> = {
-  neutral: "border-[#E4E9F2] bg-[#EDF0F6] text-[#4E596E]",
-  info: "border-[#4263EB]/25 bg-[#4263EB]/10 text-[#2E4CCB]",
-  cobalt: "border-[#4263EB]/25 bg-[#4263EB]/10 text-[#2E4CCB]",
-  success: "border-[#12A875]/30 bg-[#12A875]/10 text-[#0B7D56]",
-  warning: "border-[#F5A623]/35 bg-[#F5A623]/12 text-[#9A6100]",
+  neutral: "border-[#E5E1D7] bg-[#F0EEE7] text-[#69736D]",
+  info: "border-[#365FEA]/25 bg-[#365FEA]/10 text-[#2B4FC7]",
+  cobalt: "border-[#365FEA]/25 bg-[#365FEA]/10 text-[#2B4FC7]",
+  success: "border-[#438866]/30 bg-[#438866]/10 text-[#2F684C]",
+  warning: "border-[#C97A2E]/35 bg-[#C97A2E]/12 text-[#8E5219]",
   danger: "border-[#E5484D]/30 bg-[#E5484D]/10 text-[#C1282D]",
-  accent: "border-[#7057F5]/25 bg-[#7057F5]/10 text-[#553DD6]",
-  indigo: "border-[#7057F5]/25 bg-[#7057F5]/10 text-[#553DD6]",
-  cyan: "border-[#20BCE5]/35 bg-[#20BCE5]/10 text-[#0B728E]",
+  accent: "border-[#365FEA]/25 bg-[#365FEA]/10 text-[#2B4FC7]",
+  indigo: "border-[#365FEA]/25 bg-[#365FEA]/10 text-[#2B4FC7]",
+  cyan: "border-[#365FEA]/25 bg-[#365FEA]/10 text-[#2B4FC7]",
 };
 
 const DOT_CLASSES: Record<BadgeTone, string> = {
-  neutral: "bg-[#68738A]",
-  info: "bg-[#4263EB]",
-  cobalt: "bg-[#4263EB]",
-  success: "bg-[#12A875]",
-  warning: "bg-[#F5A623]",
+  neutral: "bg-[#69736D]",
+  info: "bg-[#365FEA]",
+  cobalt: "bg-[#365FEA]",
+  success: "bg-[#438866]",
+  warning: "bg-[#C97A2E]",
   danger: "bg-[#E5484D]",
-  accent: "bg-[#7057F5]",
-  indigo: "bg-[#7057F5]",
-  cyan: "bg-[#20BCE5]",
+  accent: "bg-[#365FEA]",
+  indigo: "bg-[#365FEA]",
+  cyan: "bg-[#365FEA]",
 };
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {

@@ -33,25 +33,25 @@ const MODE_COPY: Record<
   { title: string; description: string; emptyTitle: string; emptyBody: string }
 > = {
   marketplace: {
-    title: "Available tasks matched to your skills",
+    title: "Available tasks",
     description:
-      "Tasks enter this pool once payment is ready. Accept priority offers sent directly to you or claim open matching tasks.",
+      "Browse paid tasks matched to your skills. Accept an invitation or claim an open task to begin.",
     emptyTitle: "No open tasks match your filters",
-    emptyBody: "Clear your filters or check back as new funded tasks arrive.",
+    emptyBody: "Clear your filters or check back soon as new tasks arrive.",
   },
   reviews: {
-    title: "My active tasks and verification updates",
+    title: "My active tasks",
     description:
-      "Manage the tasks you have claimed, submit files and explanations, and track automatic security checks.",
-    emptyTitle: "You have not claimed a task yet",
-    emptyBody: "Accept an offer or claim an available task to get started.",
+      "Manage the tasks you have accepted, submit your work and notes, and follow safety review progress.",
+    emptyTitle: "You have no active tasks yet",
+    emptyBody: "Accept an invitation or claim an available task to get started.",
   },
   requests: {
-    title: "My escalated tasks",
+    title: "My tasks",
     description:
-      "Track specialist matching, authorize test payments, monitor security checks, and retrieve verified answers.",
+      "Track specialist matching, complete payment, follow safety checks, and collect finished work.",
     emptyTitle: "You have not created a task yet",
-    emptyBody: "Submit a request in the AI Workspace to create your first specialist task.",
+    emptyBody: "Create a task to describe what you need help with and match with a specialist.",
   },
 };
 
@@ -97,22 +97,22 @@ export default function TaskBrowserPage({ mode }: { mode: Mode }) {
   const acceptOffer = useMutation({
     mutationFn: (taskId: string) => api.tasks.accept(taskId),
     onSuccess: async () => {
-      setOfferNotice("Offer claimed and assigned to your active workbench.");
+      setOfferNotice("Task accepted and added to your active tasks.");
       setOfferError(null);
       await queryClient.invalidateQueries({ queryKey: ["tasks"] });
       await queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     },
-    onError: (err) => setOfferError(err instanceof ApiError ? err.message : "Could not accept offer."),
+    onError: (err) => setOfferError(err instanceof ApiError ? err.message : "Could not accept task."),
   });
 
   const declineOffer = useMutation({
     mutationFn: (taskId: string) => api.tasks.declineOffer(taskId),
     onSuccess: async () => {
-      setOfferNotice("Offer declined.");
+      setOfferNotice("Invitation declined.");
       setOfferError(null);
       await queryClient.invalidateQueries({ queryKey: ["tasks"] });
     },
-    onError: (err) => setOfferError(err instanceof ApiError ? err.message : "Could not decline offer."),
+    onError: (err) => setOfferError(err instanceof ApiError ? err.message : "Could not decline invitation."),
   });
 
   const copy = MODE_COPY[mode];
@@ -139,17 +139,17 @@ export default function TaskBrowserPage({ mode }: { mode: Mode }) {
         actions={
           mode === "requests" ? (
             <Button asChild>
-              <Link to="/app/workspace">Open Agent Workspace</Link>
+              <Link to="/app/workspace">New Task</Link>
             </Button>
           ) : mode === "marketplace" ? (
             <Button asChild variant="outline">
               <Link to="/app/onboarding/skills">
-                <Award className="size-4" /> My Certified Skills
+                <Award className="size-4" /> Skill Verification
               </Link>
             </Button>
           ) : (
             <Button asChild variant="outline">
-              <Link to="/app/marketplace">Browse Marketplace</Link>
+              <Link to="/app/marketplace">Browse Available Tasks</Link>
             </Button>
           )
         }
@@ -158,45 +158,44 @@ export default function TaskBrowserPage({ mode }: { mode: Mode }) {
       {offerNotice ? <Alert tone="success">{offerNotice}</Alert> : null}
       {offerError ? <Alert tone="danger">{offerError}</Alert> : null}
 
-      {/* Direct Specialist Offers */}
       {mode === "marketplace" && pendingOffers.length > 0 ? (
         <div className="space-y-3">
           <SectionHeading
-            title={`Direct offers for you (${pendingOffers.length})`}
-            description="Matched to your verified skills and recent availability."
+            title={`Invitations for you (${pendingOffers.length})`}
+            description="Tasks matched to your verified skills and availability."
           />
           <div className="grid gap-3 md:grid-cols-2">
             {pendingOffers.map((task) => {
               const offer = task.myOffer!;
               return (
-                <Card key={offer.id} className="border-[#4263EB]/35 p-5">
+                <Card key={offer.id} className="border-[#365FEA]/35 p-5">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-1.5">
                       <Badge tone="cobalt" dot>
-                        Rank #{offer.rank}
+                        Invited
                       </Badge>
                       <Badge tone="indigo">
                         <Sparkles className="size-3" /> {Math.round(offer.score * 100)}% Match
                       </Badge>
                     </div>
-                    <span className="text-base font-bold text-[#141B2D] tabular-nums">
+                    <span className="text-base font-bold text-[#202722] tabular-nums">
                       {formatMoney(task.rewardMinor, task.currency)}
                     </span>
                   </div>
                   <Link
                     to={`/app/tasks/${task.id}`}
-                    className="mt-2.5 block font-heading text-base font-semibold text-[#141B2D] hover:text-[#4263EB]"
+                    className="mt-2.5 block font-heading text-base font-semibold text-[#202722] hover:text-[#365FEA]"
                   >
                     {task.title}
                   </Link>
-                  <p className="mt-1 line-clamp-2 text-xs leading-5 text-[#68738A]">{task.question}</p>
-                  <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-[#E4E9F2] pt-3">
+                  <p className="mt-1 line-clamp-2 text-xs leading-5 text-[#69736D]">{task.question}</p>
+                  <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-[#E5E1D7] pt-3">
                     <Button
                       size="sm"
                       onClick={() => acceptOffer.mutate(task.id)}
                       loading={acceptOffer.isPending}
                     >
-                      <CheckCircle2 className="size-3.5" /> Accept Offer
+                      <CheckCircle2 className="size-3.5" /> Accept task
                     </Button>
                     <Button
                       size="sm"
@@ -208,9 +207,9 @@ export default function TaskBrowserPage({ mode }: { mode: Mode }) {
                     </Button>
                     <Link
                       to={`/app/tasks/${task.id}`}
-                      className="ml-auto text-xs font-semibold text-[#4263EB] hover:underline"
+                      className="ml-auto text-xs font-semibold text-[#365FEA] hover:underline"
                     >
-                      Details →
+                      View details →
                     </Link>
                   </div>
                 </Card>
@@ -220,12 +219,11 @@ export default function TaskBrowserPage({ mode }: { mode: Mode }) {
         </div>
       ) : null}
 
-      {/* Search & Filters */}
       <Card>
         <CardContent className="space-y-3 p-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <div className="relative flex-1">
-              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#68738A]" />
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#69736D]" />
               <Input
                 type="search"
                 value={search}
@@ -233,7 +231,7 @@ export default function TaskBrowserPage({ mode }: { mode: Mode }) {
                   setSearch(event.target.value);
                   setPage(1);
                 }}
-                placeholder="Search title, criteria, or domain…"
+                placeholder="Search title, requirements, or category…"
                 className="pl-9"
               />
             </div>
@@ -246,8 +244,8 @@ export default function TaskBrowserPage({ mode }: { mode: Mode }) {
                 aria-label="Sort tasks"
               >
                 <option value="newest">Newest first</option>
-                <option value="reward_desc">Highest reward</option>
-                <option value="reward_asc">Lowest reward</option>
+                <option value="reward_desc">Highest budget</option>
+                <option value="reward_asc">Lowest budget</option>
               </Select>
               <Button variant="outline" size="default" onClick={() => setFiltersOpen((v) => !v)}>
                 <Filter className="size-4" /> Filters
@@ -261,7 +259,7 @@ export default function TaskBrowserPage({ mode }: { mode: Mode }) {
           </div>
 
           {filtersOpen ? (
-            <div className="grid gap-3 border-t border-[#E4E9F2] pt-3 sm:grid-cols-3">
+            <div className="grid gap-3 border-t border-[#E5E1D7] pt-3 sm:grid-cols-3">
               <Select
                 value={category}
                 onChange={(event) => {
@@ -294,7 +292,7 @@ export default function TaskBrowserPage({ mode }: { mode: Mode }) {
                 ))}
               </Select>
 
-              <label className="flex h-10 cursor-pointer items-center gap-2 rounded-lg border border-[#E4E9F2] bg-[#F5F7FC] px-3 text-xs font-medium text-[#141B2D]">
+              <label className="flex h-10 cursor-pointer items-center gap-2 rounded-lg border border-[#E5E1D7] bg-[#F7F5EF] px-3 text-xs font-medium text-[#202722]">
                 <input
                   type="checkbox"
                   checked={fundedOnly}
@@ -302,21 +300,20 @@ export default function TaskBrowserPage({ mode }: { mode: Mode }) {
                     setFundedOnly(event.target.checked);
                     setPage(1);
                   }}
-                  className="size-4 accent-[#4263EB]"
+                  className="size-4 accent-[#365FEA]"
                 />
-                <span>Funded only</span>
+                <span>Paid tasks only</span>
               </label>
             </div>
           ) : null}
         </CardContent>
       </Card>
 
-      {/* Task Results */}
       {query.isLoading ? (
         <LoadingBlock label="Loading tasks…" />
       ) : query.error ? (
         <ErrorState
-          message={(query.error as Error)?.message ?? "Could not fetch tasks."}
+          message={(query.error as Error)?.message ?? "We couldn't load tasks right now."}
           onRetry={() => query.refetch()}
         />
       ) : items.length === 0 ? (
@@ -331,7 +328,7 @@ export default function TaskBrowserPage({ mode }: { mode: Mode }) {
               </Button>
             ) : user?.role === "REQUESTER" ? (
               <Button asChild size="sm">
-                <Link to="/app/workspace">Open Agent Workspace</Link>
+                <Link to="/app/workspace">New Task</Link>
               </Button>
             ) : null
           }
@@ -344,9 +341,8 @@ export default function TaskBrowserPage({ mode }: { mode: Mode }) {
         </div>
       )}
 
-      {/* Pagination */}
       {pagination && pagination.totalPages > 1 ? (
-        <div className="flex items-center justify-between border-t border-[#E4E9F2] pt-4 text-xs text-[#68738A]">
+        <div className="flex items-center justify-between border-t border-[#E5E1D7] pt-4 text-xs text-[#69736D]">
           <span>
             Page {pagination.page} of {pagination.totalPages} ({pagination.total} tasks)
           </span>

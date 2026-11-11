@@ -5,11 +5,11 @@ import {
   ArrowLeft,
   Award,
   CheckCircle2,
+  ClipboardCheck,
   ExternalLink,
   FileSearch,
   RefreshCw,
   ShieldCheck,
-  Terminal,
   XCircle,
 } from "lucide-react";
 import { api, ApiError } from "@/lib/api";
@@ -44,11 +44,11 @@ export default function VerificationCenterPage() {
       await queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       setError(null);
     },
-    onError: (err) => setError(err instanceof ApiError ? err.message : "Verification action failed."),
+    onError: (err) => setError(err instanceof ApiError ? err.message : "Could not update safety check."),
   });
 
   const task = query.data?.task;
-  if (query.isLoading) return <LoadingBlock label="Loading verification record…" />;
+  if (query.isLoading) return <LoadingBlock label="Loading safety check report…" />;
   if (query.error || !task) {
     return (
       <ErrorState
@@ -68,10 +68,10 @@ export default function VerificationCenterPage() {
       <PageHeader
         breadcrumbs={[
           { label: "Task Detail", to: `/app/tasks/${task.id}` },
-          { label: "Verification" },
+          { label: "Safety & Quality Check" },
         ]}
-        title="Work verification report"
-        description="Automated quality and security checks run independently from payment settlement before verified results return to the requesting agent."
+        title="Safety & quality review"
+        description="Automatic quality and safety checks run before completed work is returned."
         actions={
           <>
             <Button asChild variant="outline">
@@ -81,7 +81,7 @@ export default function VerificationCenterPage() {
             </Button>
             {isAdmin ? (
               <Button variant="outline" onClick={() => verify.mutate({})} loading={verify.isPending}>
-                <RefreshCw className="size-4" /> Re-run checks
+                <RefreshCw className="size-4" /> Check submitted work
               </Button>
             ) : null}
           </>
@@ -94,11 +94,11 @@ export default function VerificationCenterPage() {
         <div className="min-w-0 space-y-5">
           {latest ? (
             <>
-              <Card className={latest.status === "PASSED" ? "border-[#12A875]/35" : undefined}>
-                <CardHeader className="border-b border-[#E4E9F2] pb-3.5">
+              <Card className={latest.status === "PASSED" ? "border-[#438866]/35" : undefined}>
+                <CardHeader className="border-b border-[#E5E1D7] pb-3.5">
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <CardTitle className="flex items-center gap-2 text-base">
-                      <Award className="size-4 text-[#12A875]" /> Latest verification check
+                      <Award className="size-4 text-[#438866]" /> Check submitted work
                     </CardTitle>
                     <div className="flex flex-wrap items-center gap-1.5">
                       <VerificationBadge status={latest.status} />
@@ -112,24 +112,16 @@ export default function VerificationCenterPage() {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4 pt-4">
-                  <p className="text-sm leading-6 text-[#141B2D]">{latest.decisionReason}</p>
-                  {latest.artifactSha256 ? (
-                    <div className="rounded-xl bg-[#F5F7FC] p-3.5 text-xs">
-                      <span className="font-semibold text-[#68738A]">File integrity check (SHA-256): </span>
-                      <span className="break-all font-mono text-[11px] text-[#141B2D]">
-                        {latest.artifactSha256}
-                      </span>
-                    </div>
-                  ) : null}
+                  <p className="text-sm leading-6 text-[#202722]">{latest.decisionReason}</p>
                   <div className="grid gap-3 sm:grid-cols-3">
-                    <Metric label="Checks passed" value={latest.checksPassed.length} tone="success" />
+                    <Metric label="Passed checks" value={latest.checksPassed.length} tone="success" />
                     <Metric
-                      label="Checks failed"
+                      label="Issues found"
                       value={latest.checksFailed.length}
                       tone={latest.checksFailed.length > 0 ? "danger" : "neutral"}
                     />
                     <Metric
-                      label="Critical blockers"
+                      label="Blocking issues"
                       value={latest.checksFailed.filter((check) => check.severity === "HARD").length}
                       tone={latest.checksFailed.some((check) => check.severity === "HARD") ? "danger" : "neutral"}
                     />
@@ -139,43 +131,41 @@ export default function VerificationCenterPage() {
 
               {latest.securityReview ? (
                 <Card>
-                  <CardHeader className="border-b border-[#E4E9F2] pb-3">
+                  <CardHeader className="border-b border-[#E5E1D7] pb-3">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <CardTitle className="flex items-center gap-2 text-sm">
-                        <ShieldCheck className="size-4 text-[#4263EB]" /> Security checks
+                        <ShieldCheck className="size-4 text-[#365FEA]" /> Automatic safety checks
                       </CardTitle>
                       <SecurityVerdictBadge verdict={latest.securityReview.verdict} />
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-3 pt-4 text-xs">
-                    <p className="leading-5 text-[#141B2D]">{latest.securityReview.summary}</p>
+                    <p className="leading-5 text-[#202722]">{latest.securityReview.summary}</p>
                     {latest.securityReview.gemini ? (
-                      <div className="rounded-xl bg-[#F5F7FC] p-3.5">
-                        <p className="font-semibold text-[#141B2D]">
-                          AI security inspection ({latest.securityReview.gemini.model}) ·{" "}
+                      <div className="rounded-xl bg-[#F0EEE7] p-3.5">
+                        <p className="font-semibold text-[#202722]">
+                          AI safety review ·{" "}
                           <span className="tabular-nums">
                             {Math.round(latest.securityReview.gemini.confidence * 100)}%
                           </span>{" "}
                           confidence
                         </p>
-                        <p className="mt-1 leading-5 text-[#4E596E]">{latest.securityReview.gemini.summary}</p>
+                        <p className="mt-1 leading-5 text-[#69736D]">{latest.securityReview.gemini.summary}</p>
                       </div>
                     ) : null}
                     {latest.securityReview.deterministic.findings.length > 0 ? (
-                      <div className="space-y-2 border-t border-[#E4E9F2] pt-3">
-                        <p className="text-xs font-semibold text-[#68738A]">
-                          Automated security findings ({latest.securityReview.deterministic.findings.length})
+                      <div className="space-y-2 border-t border-[#E5E1D7] pt-3">
+                        <p className="text-xs font-semibold text-[#69736D]">
+                          Safety review findings ({latest.securityReview.deterministic.findings.length})
                         </p>
                         {latest.securityReview.deterministic.findings.map((finding, idx) => (
                           <div
                             key={`${finding.ruleId}-${idx}`}
-                            className="rounded-lg bg-[#F5A623]/[0.1] p-3 text-[#141B2D]"
+                            className="rounded-lg bg-[#C97A2E]/[0.1] p-3 text-[#202722]"
                           >
-                            <p className="font-semibold text-[#9A6100]">
-                              [{finding.severity}] {finding.ruleId} — {finding.message}
-                            </p>
+                            <p className="font-semibold text-[#8E5219]">{finding.message}</p>
                             {finding.filePath ? (
-                              <p className="mt-1 font-mono text-[11px] text-[#68738A]">File: {finding.filePath}</p>
+                              <p className="mt-1 text-[11px] text-[#69736D]">File: {finding.filePath}</p>
                             ) : null}
                           </div>
                         ))}
@@ -187,37 +177,18 @@ export default function VerificationCenterPage() {
 
               {latest.executionSummary ? (
                 <Card>
-                  <CardHeader className="border-b border-[#E4E9F2] pb-3">
+                  <CardHeader className="border-b border-[#E5E1D7] pb-3">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <CardTitle className="flex items-center gap-2 text-sm">
-                        <Terminal className="size-4 text-[#4263EB]" /> Work verification summary
+                        <ClipboardCheck className="size-4 text-[#365FEA]" /> Quality summary
                       </CardTitle>
-                      <div className="flex items-center gap-1.5">
-                        <Badge tone={latest.executionSummary.passed ? "success" : "danger"} dot>
-                          {latest.executionSummary.verdict}
-                        </Badge>
-                        <Badge tone="neutral">{latest.executionSummary.mode}</Badge>
-                      </div>
+                      <Badge tone={latest.executionSummary.passed ? "success" : "danger"} dot>
+                        {latest.executionSummary.passed ? "Passed" : "Needs attention"}
+                      </Badge>
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-3 pt-4 text-xs">
-                    <p className="text-[#141B2D]">{latest.executionSummary.summary}</p>
-                    <p className="text-xs text-[#68738A] tabular-nums">
-                      Exit code: <span className="font-mono">{latest.executionSummary.exitCode ?? "—"}</span> · Duration:{" "}
-                      {latest.executionSummary.durationMs}ms · Network:{" "}
-                      {latest.executionSummary.limits.networkAccess} · Memory cap:{" "}
-                      {latest.executionSummary.limits.maxMemoryMb}MB
-                    </p>
-                    {latest.executionSummary.stdout ? (
-                      <pre className="max-h-48 overflow-auto rounded-lg bg-[#10172A] p-3 font-mono text-[11px] text-[#E2E8F0]">
-                        {latest.executionSummary.stdout}
-                      </pre>
-                    ) : null}
-                    {latest.executionSummary.stderr ? (
-                      <pre className="max-h-48 overflow-auto rounded-lg bg-[#E5484D]/[0.08] p-3 font-mono text-[11px] text-[#C1282D]">
-                        {latest.executionSummary.stderr}
-                      </pre>
-                    ) : null}
+                    <p className="leading-5 text-[#202722]">{latest.executionSummary.summary}</p>
                   </CardContent>
                 </Card>
               ) : null}
@@ -228,30 +199,27 @@ export default function VerificationCenterPage() {
                 <Card>
                   <CardHeader className="pb-2">
                     <CardTitle className="flex items-center gap-2 text-sm">
-                      <FileSearch className="size-4 text-[#4263EB]" /> Evidence references
+                      <FileSearch className="size-4 text-[#365FEA]" /> Supporting sources
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="divide-y divide-[#E4E9F2] pt-0">
+                  <CardContent className="divide-y divide-[#E5E1D7] pt-0">
                     {latest.evidenceReferences.map((reference, index) => (
-                      <div
-                        key={`${reference.label}-${index}`}
-                        className="py-3 first:pt-1 last:pb-1"
-                      >
+                      <div key={`${reference.label}-${index}`} className="py-3 first:pt-1 last:pb-1">
                         <div className="flex flex-wrap items-center justify-between gap-2">
-                          <p className="text-xs font-bold text-[#141B2D]">{reference.label}</p>
+                          <p className="text-xs font-bold text-[#202722]">{reference.label}</p>
                           {reference.url ? (
                             <a
                               href={reference.url}
                               target="_blank"
                               rel="noreferrer"
-                              className="inline-flex items-center gap-1 text-xs font-medium text-[#4263EB] underline"
+                              className="inline-flex items-center gap-1 text-xs font-medium text-[#365FEA] underline"
                             >
                               Open source <ExternalLink className="size-3" />
                             </a>
                           ) : null}
                         </div>
                         {reference.quote ? (
-                          <blockquote className="mt-2 rounded-lg bg-[#F5F7FC] p-2.5 text-xs italic text-[#4E596E]">
+                          <blockquote className="mt-2 rounded-lg bg-[#F0EEE7] p-2.5 text-xs italic text-[#69736D]">
                             “{reference.quote}”
                           </blockquote>
                         ) : null}
@@ -264,21 +232,13 @@ export default function VerificationCenterPage() {
               {runs.length > 1 ? (
                 <Card>
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm">Previous check runs</CardTitle>
+                    <CardTitle className="text-sm">Earlier review checks</CardTitle>
                   </CardHeader>
-                  <CardContent className="divide-y divide-[#E4E9F2] pt-0">
+                  <CardContent className="divide-y divide-[#E5E1D7] pt-0">
                     {runs.slice(1).map((run) => (
-                      <div
-                        key={run.id}
-                        className="flex flex-wrap items-center justify-between gap-2 py-2.5"
-                      >
-                        <div className="flex items-center gap-2">
-                          <VerificationBadge status={run.status} />
-                          <span className="text-xs text-[#68738A]">{run.engine}</span>
-                        </div>
-                        <span className="text-xs text-[#68738A] tabular-nums">
-                          {formatDate(run.createdAt)}
-                        </span>
+                      <div key={run.id} className="flex flex-wrap items-center justify-between gap-2 py-2.5">
+                        <VerificationBadge status={run.status} />
+                        <span className="text-xs text-[#69736D] tabular-nums">{formatDate(run.createdAt)}</span>
                       </div>
                     ))}
                   </CardContent>
@@ -287,7 +247,7 @@ export default function VerificationCenterPage() {
             </>
           ) : (
             <Alert tone="info">
-              No verification run exists for this task yet. The assigned specialist must submit an artifact.
+              No safety review has run yet. Checks begin automatically once the specialist submits their work.
             </Alert>
           )}
         </div>
@@ -295,18 +255,18 @@ export default function VerificationCenterPage() {
         <aside className="min-w-0 space-y-5">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm">Task under verification</CardTitle>
+              <CardTitle className="text-sm">Task summary</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <p className="font-heading text-sm font-semibold text-[#141B2D]">{task.title}</p>
+              <p className="font-heading text-sm font-semibold text-[#202722]">{task.title}</p>
               <dl>
-                <DataRow label="Task status">{taskStatusLabel(task.status)}</DataRow>
-                <DataRow label="Reward">{formatMoney(task.rewardMinor, task.currency)}</DataRow>
-                <DataRow label="Specialist">{task.assignment?.reviewer.name ?? "Unassigned"}</DataRow>
+                <DataRow label="Status">{taskStatusLabel(task.status)}</DataRow>
+                <DataRow label="Budget">{formatMoney(task.rewardMinor, task.currency)}</DataRow>
+                <DataRow label="Specialist">{task.assignment?.reviewer.name ?? "Not assigned yet"}</DataRow>
                 <DataRow label="Requester">{task.requester?.name ?? "Unknown"}</DataRow>
               </dl>
               <Button asChild variant="outline" size="sm" className="w-full">
-                <Link to={`/app/tasks/${task.id}`}>Open task workspace</Link>
+                <Link to={`/app/tasks/${task.id}`}>Open task details</Link>
               </Button>
             </CardContent>
           </Card>
@@ -314,20 +274,18 @@ export default function VerificationCenterPage() {
           {submission ? (
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm">Submitted answer</CardTitle>
+                <CardTitle className="text-sm">Submitted work</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2.5">
-                <p className="whitespace-pre-line text-xs leading-5 text-[#141B2D]">{submission.answer}</p>
-                <div className="border-t border-[#E4E9F2] pt-2.5">
-                  <p className="text-xs font-semibold text-[#68738A]">
-                    Evidence notes
-                  </p>
-                  <p className="mt-1 whitespace-pre-line text-xs leading-5 text-[#4E596E]">
-                    {submission.evidenceNotes ?? "None supplied."}
+                <p className="whitespace-pre-line text-xs leading-5 text-[#202722]">{submission.answer}</p>
+                <div className="border-t border-[#E5E1D7] pt-2.5">
+                  <p className="text-xs font-semibold text-[#69736D]">Supporting notes</p>
+                  <p className="mt-1 whitespace-pre-line text-xs leading-5 text-[#69736D]">
+                    {submission.evidenceNotes ?? "None provided."}
                   </p>
                 </div>
-                <p className="text-xs text-[#68738A] tabular-nums">
-                  Confidence {submission.confidenceScore}% · {formatDate(submission.createdAt)}
+                <p className="text-xs text-[#69736D] tabular-nums">
+                  {submission.confidenceScore}% confidence · {formatDate(submission.createdAt)}
                 </p>
               </CardContent>
             </Card>
@@ -344,14 +302,14 @@ function Metric({ label, value, tone }: { label: string; value: number; tone: "s
       className={cn(
         "rounded-xl p-4",
         tone === "success"
-          ? "bg-[#12A875]/[0.08]"
+          ? "bg-[#438866]/[0.09]"
           : tone === "danger"
             ? "bg-[#E5484D]/[0.08]"
-            : "bg-[#F5F7FC]",
+            : "bg-[#F0EEE7]",
       )}
     >
-      <p className="text-xs font-medium text-[#68738A]">{label}</p>
-      <p className="mt-1.5 text-2xl font-bold text-[#141B2D] tabular-nums">{value}</p>
+      <p className="text-xs font-medium text-[#69736D]">{label}</p>
+      <p className="mt-1.5 text-2xl font-bold text-[#202722] tabular-nums">{value}</p>
     </div>
   );
 }
@@ -359,25 +317,25 @@ function Metric({ label, value, tone }: { label: string; value: number; tone: "s
 function CheckList({ run }: { run: VerificationRun }) {
   return (
     <Card>
-      <CardHeader className="border-b border-[#E4E9F2] pb-3">
-        <CardTitle className="text-sm">Work verification checklist</CardTitle>
+      <CardHeader className="border-b border-[#E5E1D7] pb-3">
+        <CardTitle className="text-sm">Checklist details</CardTitle>
       </CardHeader>
       <CardContent className="space-y-5 pt-4">
         <div>
           <SectionHeading
             title={`Passed (${run.checksPassed.length})`}
-            description="Checks satisfied by the submitted work and notes."
+            description="Requirements confirmed in the submitted work."
           />
           <div className="mt-2.5 space-y-2">
             {run.checksPassed.map((check) => (
               <div
                 key={check.id}
-                className="flex items-start gap-2.5 rounded-lg bg-[#12A875]/[0.07] p-3 text-xs"
+                className="flex items-start gap-2.5 rounded-lg bg-[#438866]/[0.08] p-3 text-xs"
               >
-                <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#12A875]" />
+                <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#438866]" />
                 <div>
-                  <p className="font-bold text-[#141B2D]">{check.label}</p>
-                  <p className="mt-0.5 text-[#4E596E]">{check.detail}</p>
+                  <p className="font-bold text-[#202722]">{check.label}</p>
+                  <p className="mt-0.5 text-[#69736D]">{check.detail}</p>
                 </div>
               </div>
             ))}
@@ -386,12 +344,12 @@ function CheckList({ run }: { run: VerificationRun }) {
 
         <div>
           <SectionHeading
-            title={`Failed (${run.checksFailed.length})`}
-            description="Critical issues must be fixed before verification passes."
+            title={`Issues (${run.checksFailed.length})`}
+            description="Items that need attention before the task can finish."
           />
           {run.checksFailed.length === 0 ? (
-            <p className="mt-2 rounded-lg bg-[#F5F7FC] p-3 text-xs text-[#68738A]">
-              All verification checks passed.
+            <p className="mt-2 rounded-lg bg-[#F0EEE7] p-3 text-xs text-[#69736D]">
+              No issues found. All checks passed.
             </p>
           ) : (
             <div className="mt-2.5 space-y-2">
@@ -402,8 +360,8 @@ function CheckList({ run }: { run: VerificationRun }) {
                 >
                   <XCircle className="mt-0.5 size-4 shrink-0 text-[#E5484D]" />
                   <div>
-                    <p className="font-bold text-[#141B2D]">{check.label}</p>
-                    <p className="mt-0.5 text-[#4E596E]">{check.detail}</p>
+                    <p className="font-bold text-[#202722]">{check.label}</p>
+                    <p className="mt-0.5 text-[#69736D]">{check.detail}</p>
                   </div>
                 </div>
               ))}

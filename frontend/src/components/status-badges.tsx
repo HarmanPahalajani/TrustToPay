@@ -48,7 +48,7 @@ export function PaymentStatusBadge({ status }: { status: string }) {
 export function ModeBadge({ mode }: { mode: "SIMULATED" | "SANDBOX" }) {
   return (
     <Badge tone={mode === "SIMULATED" ? "warning" : "info"}>
-      {mode === "SIMULATED" ? "Practice Mode" : "PayPal Test Mode"}
+      {mode === "SIMULATED" ? "Test Payment" : "PayPal Test Payment"}
     </Badge>
   );
 }
@@ -63,10 +63,10 @@ export function PayoutAvailabilityBadge({
   const value = availability ?? "DEMO_SIMULATED";
   const label =
     value === "SANDBOX_ENABLED"
-      ? "Test Payouts Ready"
+      ? "Payouts ready"
       : value === "PAYOUT_UNAVAILABLE"
-        ? "Payout Unavailable"
-        : "Simulated Payouts";
+        ? "Payout unavailable"
+        : "Test payouts";
   const tone =
     value === "SANDBOX_ENABLED" ? "success" : value === "PAYOUT_UNAVAILABLE" ? "warning" : "info";
   return (

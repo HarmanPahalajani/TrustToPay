@@ -44,32 +44,32 @@ export default {
           border: "#1E293B",
         },
         cobalt: {
-          DEFAULT: "#4263EB",
-          hover: "#3451D1",
-          soft: "#EDF2FF",
+          DEFAULT: "#365FEA",
+          hover: "#2B4FC7",
+          soft: "#EEF2FE",
         },
         indigo: {
-          DEFAULT: "#7057F5",
+          DEFAULT: "#365FEA",
         },
         cyan: {
-          DEFAULT: "#20BCE5",
+          DEFAULT: "#365FEA",
         },
         emerald: {
-          DEFAULT: "#12A875",
+          DEFAULT: "#438866",
         },
         amber: {
-          DEFAULT: "#F5A623",
+          DEFAULT: "#C97A2E",
         },
         canvas: {
-          DEFAULT: "#F5F7FC",
-          alt: "#EDF0F6",
+          DEFAULT: "#F7F5EF",
+          alt: "#F0EEE7",
         },
         ink: {
-          DEFAULT: "#141B2D",
-          body: "#4E596E",
-          muted: "#68738A",
+          DEFAULT: "#202722",
+          body: "#444D47",
+          muted: "#69736D",
         },
-        hairline: "#E4E9F2",
+        hairline: "#E5E1D7",
       },
       fontFamily: {
         display: ["Manrope", "Inter", "ui-sans-serif", "system-ui", "sans-serif"],

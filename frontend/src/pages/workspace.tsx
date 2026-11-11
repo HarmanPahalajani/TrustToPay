@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowRight,
-  Cpu,
+  ClipboardList,
   FileText,
   Plus,
   Search,
@@ -82,7 +82,7 @@ export default function WorkspacePage() {
       await queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       navigate(`/app/sessions/${data.session.id}`);
     },
-    onError: (err) => setError(err instanceof ApiError ? err.message : "Could not create agent session."),
+    onError: (err) => setError(err instanceof ApiError ? err.message : "We couldn't submit your task right now."),
   });
 
   function loadExample(nextCategory: CategoryValue = category) {
@@ -119,7 +119,7 @@ export default function WorkspacePage() {
     event.preventDefault();
     setError(null);
     if (question.trim().length < 15) {
-      setError("Question must be at least 15 characters.");
+      setError("Please describe the task in at least 15 characters.");
       return;
     }
     const cleanedDocuments = documents
@@ -152,8 +152,8 @@ export default function WorkspacePage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Create a task when your AI gets stuck"
-        description="Submit the blocker and supporting notes. TrustToPay checks confidence, identifies matching specialists, and prepares a clear review task."
+        title="New task"
+        description="Describe what you need help with and include supporting notes or files. We will check clarity, suggest required skills, and help you match with a specialist."
         actions={
           showForm ? (
             <Button variant="outline" onClick={closeForm}>
@@ -161,7 +161,7 @@ export default function WorkspacePage() {
             </Button>
           ) : (
             <Button onClick={openForm}>
-              <Plus className="size-4" /> New Request
+              <Plus className="size-4" /> New Task
             </Button>
           )
         }
@@ -169,18 +169,18 @@ export default function WorkspacePage() {
 
       {showForm ? (
         <Card>
-          <CardHeader className="border-b border-[#E4E9F2] pb-4">
+          <CardHeader className="border-b border-[#E5E1D7] pb-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <CardTitle className="flex items-center gap-2 text-base">
-                  <Cpu className="size-4 text-[#4263EB]" /> Create escalation session
+                  <ClipboardList className="size-4 text-[#365FEA]" /> What do you need help with?
                 </CardTitle>
-                <p className="mt-1 text-xs text-[#68738A]">
-                  Select a domain template or supply custom specifications and evidence documents.
+                <p className="mt-1 text-xs text-[#69736D]">
+                  Choose a category, describe your goal, and attach any helpful notes or files.
                 </p>
               </div>
               <Button type="button" variant="outline" size="sm" onClick={() => loadExample(category)}>
-                <Sparkles className="size-3.5 text-[#4263EB]" /> Load {categoryLabel(category)} example
+                <Sparkles className="size-3.5 text-[#365FEA]" /> Use {categoryLabel(category)} sample
               </Button>
             </div>
           </CardHeader>
@@ -188,9 +188,8 @@ export default function WorkspacePage() {
             <form onSubmit={submit} className="space-y-5" noValidate>
               {error ? <Alert tone="danger">{error}</Alert> : null}
 
-              {/* Category selector pills */}
               <div className="space-y-2">
-                <span className="block text-xs font-semibold text-[#141B2D]">Task Category</span>
+                <span className="block text-xs font-semibold text-[#202722]">Category</span>
                 <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
                   {CATEGORY_VALUES.map((val) => {
                     const meta = CATEGORY_META[val];
@@ -203,12 +202,12 @@ export default function WorkspacePage() {
                         className={cn(
                           "rounded-xl border p-3 text-left transition-colors",
                           selected
-                            ? "border-[#4263EB] bg-[#4263EB]/[0.06] ring-1 ring-[#4263EB]/25"
-                            : "border-[#E4E9F2] bg-[#FFFFFF] hover:border-[#CBD5E1]",
+                            ? "border-[#365FEA] bg-[#365FEA]/[0.06] ring-1 ring-[#365FEA]/25"
+                            : "border-[#E5E1D7] bg-[#FFFEFA] hover:border-[#D4CFC3]",
                         )}
                       >
-                        <p className="font-display text-xs font-bold text-[#141B2D]">{meta.label}</p>
-                        <p className="mt-0.5 line-clamp-2 text-[11px] leading-4 text-[#68738A]">{meta.description}</p>
+                        <p className="font-display text-xs font-bold text-[#202722]">{meta.label}</p>
+                        <p className="mt-0.5 line-clamp-2 text-[11px] leading-4 text-[#69736D]">{meta.description}</p>
                       </button>
                     );
                   })}
@@ -225,22 +224,22 @@ export default function WorkspacePage() {
                     maxLength={140}
                   />
                 </Field>
-                <Field label="Target models / systems" htmlFor="session-models" hint="Comma-separated">
+                <Field label="Relevant tools or topics" htmlFor="session-models" hint="Optional, comma-separated">
                   <Input
                     id="session-models"
                     value={models}
                     onChange={(event) => setModels(event.target.value)}
-                    placeholder="e.g. Node 20, PostgreSQL 16, Redis 7"
+                    placeholder="e.g. TypeScript, Billing rules, Policy review"
                     maxLength={300}
                   />
                 </Field>
               </div>
 
               <Field
-                label="Question or agent blocker"
+                label="Describe the task."
                 htmlFor="session-question"
                 required
-                hint="Describe where the agent stopped, what conflict exists, and what must be confirmed."
+                hint="Explain what you need help with and where things got stuck."
               >
                 <Textarea
                   id="session-question"
@@ -253,9 +252,9 @@ export default function WorkspacePage() {
               </Field>
 
               <Field
-                label="Specifications & runtime constraints"
+                label="What should the completed work include?"
                 htmlFor="session-specs"
-                hint="One constraint or assertion per line"
+                hint="Optional, one detail or requirement per line"
               >
                 <Textarea
                   id="session-specs"
@@ -263,15 +262,14 @@ export default function WorkspacePage() {
                   onChange={(event) => setSpecs(event.target.value)}
                   rows={3}
                   maxLength={3000}
-                  placeholder="Optional runtime constraints, version pins, or policy rules..."
+                  placeholder="List key deliverables, constraints, or questions the specialist should answer..."
                 />
               </Field>
 
-              {/* Evidence Documents */}
-              <div className="space-y-3 border-t border-[#E4E9F2] pt-4">
+              <div className="space-y-3 border-t border-[#E5E1D7] pt-4">
                 <SectionHeading
-                  title={`Evidence documents (${documents.length})`}
-                  description="Attach official specifications, source files, or error excerpts."
+                  title={`Attach files or notes (${documents.length})`}
+                  description="Share helpful excerpts, guides, or links for your specialist."
                   actions={
                     <Button
                       type="button"
@@ -279,7 +277,7 @@ export default function WorkspacePage() {
                       size="sm"
                       onClick={() => setDocuments((prev) => [...prev, emptyDocument()])}
                     >
-                      <Plus className="size-3.5" /> Add evidence
+                      <Plus className="size-3.5" /> Add attachment
                     </Button>
                   }
                 />
@@ -288,11 +286,11 @@ export default function WorkspacePage() {
                   {documents.map((doc, idx) => (
                     <div
                       key={doc.key}
-                      className="space-y-3 rounded-xl border border-[#E4E9F2] bg-[#F5F7FC] p-4"
+                      className="space-y-3 rounded-xl border border-[#E5E1D7] bg-[#F7F5EF] p-4"
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <span className="font-mono text-[11px] font-semibold text-[#68738A]">
-                          Document #{idx + 1}
+                        <span className="text-xs font-semibold text-[#69736D]">
+                          Attachment #{idx + 1}
                         </span>
                         {documents.length > 1 ? (
                           <button
@@ -315,10 +313,10 @@ export default function WorkspacePage() {
                                 prev.map((d) => (d.key === doc.key ? { ...d, title: event.target.value } : d)),
                               )
                             }
-                            placeholder="Spec or log title"
+                            placeholder="Document or note title"
                           />
                         </Field>
-                        <Field label="Source type" htmlFor={`${doc.key}-type`}>
+                        <Field label="Type" htmlFor={`${doc.key}-type`}>
                           <Select
                             id={`${doc.key}-type`}
                             value={doc.sourceType}
@@ -335,14 +333,14 @@ export default function WorkspacePage() {
                               )
                             }
                           >
-                            <option value="OFFICIAL_MANUAL">Official Manual</option>
-                            <option value="SPECIFICATION">Specification</option>
-                            <option value="VENDOR_ADVISORY">Vendor Advisory</option>
-                            <option value="LOCAL_FILE">Source File / Diff</option>
+                            <option value="OFFICIAL_MANUAL">Official Guide</option>
+                            <option value="SPECIFICATION">Requirements</option>
+                            <option value="VENDOR_ADVISORY">Notice or Update</option>
+                            <option value="LOCAL_FILE">Code or Text File</option>
                             <option value="OTHER">Other</option>
                           </Select>
                         </Field>
-                        <Field label="Reference URL" htmlFor={`${doc.key}-url`}>
+                        <Field label="Link (optional)" htmlFor={`${doc.key}-url`}>
                           <Input
                             id={`${doc.key}-url`}
                             value={doc.url}
@@ -356,7 +354,7 @@ export default function WorkspacePage() {
                         </Field>
                       </div>
 
-                      <Field label="Document excerpt or log payload" htmlFor={`${doc.key}-content`}>
+                      <Field label="Notes or file contents" htmlFor={`${doc.key}-content`}>
                         <Textarea
                           id={`${doc.key}-content`}
                           value={doc.content}
@@ -366,7 +364,7 @@ export default function WorkspacePage() {
                             )
                           }
                           rows={3}
-                          placeholder="Paste relevant specification paragraphs, error traces, or file excerpts..."
+                          placeholder="Paste helpful text, notes, or excerpts here..."
                         />
                       </Field>
                     </div>
@@ -374,12 +372,12 @@ export default function WorkspacePage() {
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center justify-end gap-2 border-t border-[#E4E9F2] pt-4">
+              <div className="flex flex-wrap items-center justify-end gap-2 border-t border-[#E5E1D7] pt-4">
                 <Button type="button" variant="outline" onClick={closeForm}>
                   Cancel
                 </Button>
                 <Button type="submit" loading={create.isPending}>
-                  Create &amp; Analyze Session <ArrowRight className="size-4" />
+                  Submit task <ArrowRight className="size-4" />
                 </Button>
               </div>
             </form>
@@ -387,19 +385,18 @@ export default function WorkspacePage() {
         </Card>
       ) : null}
 
-      {/* Sessions list & filter */}
       <div className="space-y-4">
         <SectionHeading
-          title={`AI Requests (${sessions.length})`}
-          description="Select a request to inspect analysis results, create a specialist task, or collect verified answers."
+          title={`Your requests (${sessions.length})`}
+          description="Open a request to review details, confirm your budget, or collect completed work."
           actions={
             <div className="relative w-full sm:w-72">
-              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#68738A]" />
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#69736D]" />
               <Input
                 type="search"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search sessions…"
+                placeholder="Search tasks…"
                 className="pl-9"
               />
             </div>
@@ -407,20 +404,20 @@ export default function WorkspacePage() {
         />
 
         {query.isLoading ? (
-          <LoadingBlock label="Loading agent sessions…" />
+          <LoadingBlock label="Loading your requests…" />
         ) : query.error ? (
           <ErrorState
-            message={(query.error as Error)?.message ?? "Could not fetch sessions."}
+            message={(query.error as Error)?.message ?? "We couldn't load your requests."}
             onRetry={() => query.refetch()}
           />
         ) : sessions.length === 0 ? (
           <EmptyState
             icon={<FileText className="size-5" />}
-            title={search ? "No matching sessions" : "No agent sessions yet"}
-            description="Create a session to capture a technical blocker, attach specifications, and run confidence analysis."
+            title={search ? "No matching requests" : "No requests yet"}
+            description="Create a task to describe what you need help with and match with a qualified specialist."
             action={
               <Button size="sm" onClick={openForm}>
-                <Plus className="size-4" /> Create first session
+                <Plus className="size-4" /> New Task
               </Button>
             }
           />
@@ -441,7 +438,7 @@ function SessionRow({ session }: { session: AgentSession }) {
   return (
     <Link
       to={`/app/sessions/${session.id}`}
-      className="group block rounded-xl border border-[#E4E9F2] bg-[#FFFFFF] p-4 shadow-surface transition-all hover:border-[#4263EB]/45 hover:shadow-elevated"
+      className="group block rounded-xl border border-[#E5E1D7] bg-[#FFFEFA] p-4 shadow-surface transition-all hover:border-[#365FEA]/45 hover:shadow-elevated"
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 flex-1 space-y-1.5">
@@ -450,18 +447,18 @@ function SessionRow({ session }: { session: AgentSession }) {
             <Badge tone="neutral">{categoryLabel(session.category)}</Badge>
             {latest ? (
               <Badge tone="info">
-                Confidence {Math.round(latest.confidenceScore * 100)}%
+                Clarity {Math.round(latest.confidenceScore * 100)}%
               </Badge>
             ) : null}
           </div>
-          <h3 className="font-display text-[15px] font-bold text-[#141B2D] group-hover:text-[#4263EB]">
+          <h3 className="font-display text-[15px] font-bold text-[#202722] group-hover:text-[#365FEA]">
             {session.title}
           </h3>
-          <p className="text-xs leading-5 text-[#68738A]">{truncate(session.question, 180)}</p>
+          <p className="text-xs leading-5 text-[#69736D]">{truncate(session.question, 180)}</p>
         </div>
         <div className="flex shrink-0 items-center justify-between gap-3 sm:flex-col sm:items-end">
-          <span className="text-xs text-[#68738A] tabular-nums">{timeAgo(session.createdAt)}</span>
-          <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#4263EB]">
+          <span className="text-xs text-[#69736D] tabular-nums">{timeAgo(session.createdAt)}</span>
+          <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#365FEA]">
             Open <ArrowRight className="size-3.5" />
           </span>
         </div>

@@ -9,7 +9,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
       ref={ref}
       type={type}
       className={cn(
-        "flex h-10 w-full rounded-lg border border-[#E4E9F2] bg-[#FFFFFF] px-3 py-2 text-base text-[#141B2D] placeholder:text-[#68738A] shadow-surface transition-colors file:border-0 file:bg-transparent file:text-xs file:font-medium focus-visible:border-[#4263EB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4263EB]/20 disabled:cursor-not-allowed disabled:bg-[#EDF0F6] disabled:opacity-60 sm:text-sm",
+        "flex h-10 w-full rounded-lg border border-[#E5E1D7] bg-[#FFFEFA] px-3 py-2 text-base text-[#202722] placeholder:text-[#69736D] shadow-surface transition-colors file:border-0 file:bg-transparent file:text-xs file:font-medium focus-visible:border-[#365FEA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#365FEA]/20 disabled:cursor-not-allowed disabled:bg-[#F0EEE7] disabled:opacity-60 sm:text-sm",
         className,
       )}
       {...props}
@@ -25,7 +25,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     <textarea
       ref={ref}
       className={cn(
-        "flex min-h-[96px] w-full rounded-lg border border-[#E4E9F2] bg-[#FFFFFF] px-3 py-2.5 text-base leading-6 text-[#141B2D] placeholder:text-[#68738A] shadow-surface transition-colors focus-visible:border-[#4263EB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4263EB]/20 disabled:cursor-not-allowed disabled:bg-[#EDF0F6] disabled:opacity-60 sm:text-sm",
+        "flex min-h-[96px] w-full rounded-lg border border-[#E5E1D7] bg-[#FFFEFA] px-3 py-2.5 text-base leading-6 text-[#202722] placeholder:text-[#69736D] shadow-surface transition-colors focus-visible:border-[#365FEA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#365FEA]/20 disabled:cursor-not-allowed disabled:bg-[#F0EEE7] disabled:opacity-60 sm:text-sm",
         className,
       )}
       {...props}
@@ -41,7 +41,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     <select
       ref={ref}
       className={cn(
-        "flex h-10 w-full rounded-lg border border-[#E4E9F2] bg-[#FFFFFF] px-3 py-2 text-base text-[#141B2D] shadow-surface transition-colors focus-visible:border-[#4263EB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4263EB]/20 disabled:cursor-not-allowed disabled:bg-[#EDF0F6] disabled:opacity-60 sm:text-sm",
+        "flex h-10 w-full rounded-lg border border-[#E5E1D7] bg-[#FFFEFA] px-3 py-2 text-base text-[#202722] shadow-surface transition-colors focus-visible:border-[#365FEA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#365FEA]/20 disabled:cursor-not-allowed disabled:bg-[#F0EEE7] disabled:opacity-60 sm:text-sm",
         className,
       )}
       {...props}
@@ -67,11 +67,11 @@ export function FieldLabel({
 }) {
   return (
     <div className={cn("flex items-baseline justify-between gap-2", className)}>
-      <label htmlFor={htmlFor} className="text-xs font-semibold text-[#141B2D]">
+      <label htmlFor={htmlFor} className="text-xs font-semibold text-[#202722]">
         {children}
         {required ? <span className="ml-0.5 text-[#E5484D]">*</span> : null}
       </label>
-      {hint ? <span className="text-[11px] text-[#68738A]">{hint}</span> : null}
+      {hint ? <span className="text-[11px] text-[#69736D]">{hint}</span> : null}
     </div>
   );
 }
@@ -100,11 +100,11 @@ export function Field({
       </FieldLabel>
       {children}
       {error ? (
-        <p className="text-xs font-medium text-[#E5484D]" role="alert">
+        <p className="text-xs font-medium text-[#C8372D]" role="alert">
           {error}
         </p>
       ) : hint ? (
-        <p className="text-[11px] leading-4 text-[#68738A]">{hint}</p>
+        <p className="text-[11px] leading-4 text-[#69736D]">{hint}</p>
       ) : null}
     </div>
   );

@@ -15,7 +15,7 @@ import { api, ApiError } from "@/lib/api";
 import type { Payment } from "@/lib/types";
 import { useAuth } from "@/context/AuthContext";
 import { PageHeader, StatCard } from "@/components/common";
-import { ModeBadge, PaymentStatusBadge, PayoutAvailabilityBadge } from "@/components/status-badges";
+import { PaymentStatusBadge, PayoutAvailabilityBadge } from "@/components/status-badges";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -93,19 +93,19 @@ export default function PaymentsPage() {
       <PageHeader
         title={
           user?.role === "REVIEWER"
-            ? "Reward history"
+            ? "Payout history"
             : "Payment history"
         }
         description={
           user?.role === "REVIEWER"
-            ? "Track specialist payouts for verified tasks. Practice and PayPal test entries never move real money."
-            : "Track task funding and specialist payouts. Practice and PayPal test entries never move real money."
+            ? "Track specialist payments for completed tasks."
+            : "Track task payments and specialist payouts."
         }
         actions={
           <>
             <Button asChild variant="outline">
               <Link to={user?.role === "REVIEWER" ? "/app/earnings" : "/app/requests"}>
-                <ArrowLeft className="size-4" /> {user?.role === "REVIEWER" ? "Earnings" : "My requests"}
+                <ArrowLeft className="size-4" /> {user?.role === "REVIEWER" ? "Earnings" : "My Tasks"}
               </Link>
             </Button>
             <Button
@@ -169,9 +169,9 @@ export default function PaymentsPage() {
           tone={failed.length > 0 ? "danger" : "neutral"}
         />
         <StatCard
-          label="Total transactions"
+          label="Total payments"
           value={pagination?.total ?? 0}
-          hint={user?.role === "REVIEWER" ? "Payouts assigned to you" : "Your funding transactions"}
+          hint={user?.role === "REVIEWER" ? "Payouts assigned to you" : "Your task payments"}
           icon={<CreditCard className="size-4" />}
         />
       </div>
@@ -182,17 +182,17 @@ export default function PaymentsPage() {
             <select
               value={type}
               onChange={(event) => updateFilter("type", event.target.value)}
-              className="h-10 rounded-lg border border-[#E4E9F2] bg-[#FFFFFF] px-3 text-sm text-[#141B2D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4263EB]"
+              className="h-10 rounded-lg border border-[#E5E1D7] bg-[#FFFEFA] px-3 text-sm text-[#202722] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#365FEA]"
               aria-label="Filter payment type"
             >
               <option value="">All types</option>
-              <option value="FUNDING">Funding</option>
-              <option value="PAYOUT">Payout</option>
+              <option value="FUNDING">Task payment</option>
+              <option value="PAYOUT">Specialist payout</option>
             </select>
             <select
               value={status}
               onChange={(event) => updateFilter("status", event.target.value)}
-              className="h-10 rounded-lg border border-[#E4E9F2] bg-[#FFFFFF] px-3 text-sm text-[#141B2D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4263EB]"
+              className="h-10 rounded-lg border border-[#E5E1D7] bg-[#FFFEFA] px-3 text-sm text-[#202722] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#365FEA]"
               aria-label="Filter payment status"
             >
               <option value="">All statuses</option>
@@ -205,12 +205,12 @@ export default function PaymentsPage() {
             <select
               value={mode}
               onChange={(event) => updateFilter("mode", event.target.value)}
-              className="h-10 rounded-lg border border-[#E4E9F2] bg-[#FFFFFF] px-3 text-sm text-[#141B2D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4263EB]"
+              className="h-10 rounded-lg border border-[#E5E1D7] bg-[#FFFEFA] px-3 text-sm text-[#202722] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#365FEA]"
               aria-label="Filter payment mode"
             >
-              <option value="">All modes</option>
-              <option value="SIMULATED">Practice mode</option>
-              <option value="SANDBOX">PayPal test mode</option>
+              <option value="">All payment types</option>
+              <option value="SIMULATED">Test payment (local)</option>
+              <option value="SANDBOX">PayPal test payment</option>
             </select>
           </div>
           {type || status || mode ? (
@@ -228,8 +228,8 @@ export default function PaymentsPage() {
               Clear filters
             </Button>
           ) : null}
-          <p className="text-xs font-medium text-[#68738A]">
-            Test payment entries never move real money.
+          <p className="text-xs font-medium text-[#69736D]">
+            Test payments never charge real money.
           </p>
         </CardContent>
       </Card>
@@ -241,8 +241,8 @@ export default function PaymentsPage() {
       ) : items.length === 0 ? (
         <EmptyState
           icon={<Wallet className="size-5" />}
-          title="No payment transactions match"
-          description="Funding entries appear once a requester funds a task. Payout entries appear after verified work is released."
+          title="No payments match"
+          description="Task payments appear here once you pay for a task or receive a specialist payout."
           action={
             type || status || mode ? (
               <Button
@@ -263,15 +263,15 @@ export default function PaymentsPage() {
       ) : (
         <>
           <Card className="overflow-hidden">
-            <div className="hidden grid-cols-[1.4fr_0.8fr_0.9fr_0.7fr_0.9fr_0.8fr] gap-3 border-b border-[#E4E9F2] bg-[#F5F7FC] px-4 py-3 text-xs font-semibold text-[#68738A] lg:grid">
-              <span>Task &amp; reference</span>
+            <div className="hidden grid-cols-[1.4fr_0.8fr_0.9fr_0.7fr_0.9fr_0.8fr] gap-3 border-b border-[#E5E1D7] bg-[#F0EEE7] px-4 py-3 text-xs font-semibold text-[#69736D] lg:grid">
+              <span>Task</span>
               <span>Type</span>
-              <span>Mode</span>
+              <span>Method</span>
               <span className="text-right">Amount</span>
               <span>Status</span>
               <span className="text-right">Actions</span>
             </div>
-            <div className="divide-y divide-[#E4E9F2]">
+            <div className="divide-y divide-[#E5E1D7]">
               {items.map((payment) => (
                 <PaymentRow
                   key={payment.id}
@@ -291,7 +291,7 @@ export default function PaymentsPage() {
               <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((value) => value - 1)}>
                 <ArrowLeft className="size-3.5" /> Previous
               </Button>
-              <p className="text-xs text-[#68738A] tabular-nums">
+              <p className="text-xs text-[#69736D] tabular-nums">
                 Page {pagination.page} of {pagination.totalPages}
               </p>
               <Button
@@ -330,40 +330,40 @@ function PaymentRow({
     <div className="grid gap-3 px-4 py-3.5 lg:grid-cols-[1.4fr_0.8fr_0.9fr_0.7fr_0.9fr_0.8fr] lg:items-center">
       <div className="min-w-0">
         {payment.task ? (
-          <Link to={`/app/tasks/${payment.task.id}`} className="line-clamp-1 text-sm font-medium text-[#141B2D] hover:text-[#4263EB]">
+          <Link to={`/app/tasks/${payment.task.id}`} className="line-clamp-1 text-sm font-medium text-[#202722] hover:text-[#365FEA]">
             {payment.task.title}
           </Link>
         ) : (
-          <p className="text-sm font-medium text-[#141B2D]">{payment.taskId}</p>
+          <p className="text-sm font-medium text-[#202722]">Task payment</p>
         )}
-        <p className="mt-0.5 truncate font-mono text-xs text-[#68738A]">
-          {payment.orderId ?? payment.payoutBatchId ?? payment.id}
-        </p>
-        <p className="mt-0.5 text-xs text-[#68738A] tabular-nums">{formatDate(payment.createdAt)}</p>
+        <p className="mt-0.5 text-xs text-[#69736D] tabular-nums">{formatDate(payment.createdAt)}</p>
         {payment.failureMessage ? (
-          <p className="mt-1 line-clamp-2 text-xs leading-5 text-[#C1282D]">{payment.failureMessage}</p>
+          <p className="mt-1 line-clamp-2 text-xs leading-5 text-[#C8372D]">{payment.failureMessage}</p>
         ) : null}
       </div>
-      <div className="flex items-center gap-1.5 text-xs font-medium text-[#141B2D]">
-        {payment.type === "FUNDING" ? <CreditCard className="size-3.5 text-[#4263EB]" /> : <Wallet className="size-3.5 text-[#12A875]" />}
-        {payment.type === "FUNDING" ? "Task funding" : "Specialist payout"}
+      <div className="flex items-center gap-1.5 text-xs font-medium text-[#202722]">
+        {payment.type === "FUNDING" ? <CreditCard className="size-3.5 text-[#365FEA]" /> : <Wallet className="size-3.5 text-[#438866]" />}
+        {payment.type === "FUNDING" ? "Task payment" : "Specialist payout"}
       </div>
       <div className="space-y-1">
         <div className="flex flex-wrap items-center gap-1.5">
-          <ModeBadge mode={payment.mode} />
           {payment.type === "PAYOUT" ? (
             <PayoutAvailabilityBadge
               availability={payment.payoutAvailability ?? (payment.mode === "SIMULATED" ? "DEMO_SIMULATED" : undefined)}
             />
-          ) : null}
+          ) : (
+            <span className="text-xs font-medium text-[#202722]">
+              {payment.mode === "SIMULATED" ? "Test payment" : payment.provider}
+            </span>
+          )}
         </div>
-        <p className="text-xs text-[#68738A]">{payment.provider}</p>
+        <p className="text-xs text-[#69736D]">{payment.provider}</p>
       </div>
-      <div className="text-left text-sm font-semibold text-[#141B2D] tabular-nums lg:text-right">{payment.amountDisplay}</div>
+      <div className="text-left text-sm font-semibold text-[#202722] tabular-nums lg:text-right">{payment.amountDisplay}</div>
       <div>
         <PaymentStatusBadge status={payment.status} />
         {payment.recipientEmail ? (
-          <p className="mt-1 truncate text-xs text-[#68738A]">{payment.recipientEmail}</p>
+          <p className="mt-1 truncate text-xs text-[#69736D]">{payment.recipientEmail}</p>
         ) : null}
       </div>
       <div className="flex flex-wrap gap-1.5 lg:justify-end">
@@ -378,8 +378,8 @@ function PaymentRow({
           </Button>
         ) : null}
         {!canReconcile && !(isAdmin && payment.status === "FAILED") ? (
-          <span className="text-xs text-[#68738A]">
-            {payment.status === "COMPLETED" ? (payment.mode === "SIMULATED" ? "Practice mode" : "Confirmed") : "—"}
+          <span className="text-xs text-[#69736D]">
+            {payment.status === "COMPLETED" ? (payment.mode === "SIMULATED" ? "Test payment" : "Completed") : "—"}
           </span>
         ) : null}
       </div>

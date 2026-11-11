@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "./button";
 
 export function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("animate-pulse rounded-lg bg-[#E4E9F2]", className)} {...props} />;
+  return <div className={cn("animate-pulse rounded-lg bg-[#E5E1D7]", className)} {...props} />;
 }
 
 export function LoadingState({
@@ -18,12 +18,12 @@ export function LoadingState({
 }) {
   return (
     <div
-      className={cn("rounded-xl border border-[#E4E9F2] bg-[#FFFFFF] p-5 shadow-surface", className)}
+      className={cn("rounded-xl border border-[#E5E1D7] bg-[#FFFEFA] p-5 shadow-surface", className)}
       role="status"
       aria-live="polite"
     >
-      <div className="mb-4 flex items-center gap-2 text-xs font-medium text-[#68738A]">
-        <Loader2 className="size-4 animate-spin text-[#4263EB]" />
+      <div className="mb-4 flex items-center gap-2 text-xs font-medium text-[#69736D]">
+        <Loader2 className="size-4 animate-spin text-[#365FEA]" />
         <span>{label}</span>
       </div>
       <div className="space-y-2.5">
@@ -53,22 +53,22 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center rounded-xl border border-dashed border-[#CBD5E1] bg-[#FFFFFF] px-6 py-12 text-center shadow-surface",
+        "flex flex-col items-center justify-center rounded-xl border border-dashed border-[#D4CFC3] bg-[#FFFEFA] px-6 py-12 text-center shadow-surface",
         className,
       )}
     >
-      <div className="mb-3 flex size-11 items-center justify-center rounded-xl border border-[#E4E9F2] bg-[#F5F7FC] text-[#4263EB]">
+      <div className="mb-3 flex size-11 items-center justify-center rounded-xl border border-[#E5E1D7] bg-[#F7F5EF] text-[#365FEA]">
         {icon ?? <Inbox className="size-5" />}
       </div>
-      <h3 className="font-display text-sm font-bold text-[#141B2D]">{title}</h3>
-      {description ? <p className="mt-1.5 max-w-md text-xs leading-5 text-[#68738A]">{description}</p> : null}
+      <h3 className="font-display text-sm font-bold text-[#202722]">{title}</h3>
+      {description ? <p className="mt-1.5 max-w-md text-xs leading-5 text-[#69736D]">{description}</p> : null}
       {action ? <div className="mt-4 flex flex-wrap justify-center gap-2">{action}</div> : null}
     </div>
   );
 }
 
 export function ErrorState({
-  title = "Unable to load resource",
+  title = "Unable to load this page",
   message,
   onRetry,
   className,
@@ -82,7 +82,7 @@ export function ErrorState({
     <div
       role="alert"
       className={cn(
-        "flex flex-col items-start gap-3 rounded-xl border border-[#E5484D]/30 bg-[#FFFFFF] p-5 shadow-surface sm:flex-row sm:items-center sm:justify-between",
+        "flex flex-col items-start gap-3 rounded-xl border border-[#E5484D]/30 bg-[#FFFEFA] p-5 shadow-surface sm:flex-row sm:items-center sm:justify-between",
         className,
       )}
     >
@@ -91,9 +91,9 @@ export function ErrorState({
           <AlertCircle className="size-4" />
         </div>
         <div>
-          <h3 className="font-display text-sm font-bold text-[#141B2D]">{title}</h3>
-          <p className="mt-0.5 text-xs leading-5 text-[#68738A]">
-            {message ?? "The server could not complete this request. Check connectivity and try again."}
+          <h3 className="font-display text-sm font-bold text-[#202722]">{title}</h3>
+          <p className="mt-0.5 text-xs leading-5 text-[#69736D]">
+            {message ?? "We couldn't load this right now. Please try again."}
           </p>
         </div>
       </div>

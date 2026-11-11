@@ -4,7 +4,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Award,
   Bell,
-  BookOpen,
   BriefcaseBusiness,
   Check,
   CheckCheck,
@@ -13,7 +12,7 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
-  Sparkles,
+  PlusCircle,
   UserRound,
   Wallet,
   X,
@@ -43,24 +42,18 @@ function navFor(role: string | undefined): { primary: NavItem[]; secondary: NavI
         { to: "/app/earnings", label: "Earnings", icon: Wallet },
         { to: "/app/payments", label: "Payment History", icon: CreditCard },
       ],
-      secondary: [
-        { to: "/app/profile", label: "Profile & Settings", icon: UserRound },
-        { to: "/app/docs", label: "API & MCP Docs", icon: BookOpen },
-      ],
+      secondary: [{ to: "/app/profile", label: "Profile & Settings", icon: UserRound }],
     };
   }
 
   return {
     primary: [
       { to: "/app", label: "Overview", icon: LayoutDashboard, end: true },
-      { to: "/app/workspace", label: "AI Workspace", icon: Sparkles },
+      { to: "/app/workspace", label: "New Task", icon: PlusCircle },
       { to: "/app/requests", label: "My Tasks", icon: Inbox },
       { to: "/app/payments", label: "Payments", icon: CreditCard },
     ],
-    secondary: [
-      { to: "/app/docs", label: "API & MCP Docs", icon: BookOpen },
-      { to: "/app/profile", label: "Profile & Settings", icon: UserRound },
-    ],
+    secondary: [{ to: "/app/profile", label: "Profile & Settings", icon: UserRound }],
   };
 }
 
@@ -98,11 +91,11 @@ function NotificationsBell() {
         aria-label="Notifications"
         aria-expanded={open}
         onClick={() => setOpen((prev) => !prev)}
-        className="relative inline-flex size-10 items-center justify-center rounded-lg border border-[#E4E9F2] bg-[#FFFFFF] text-[#141B2D] shadow-surface transition-colors hover:bg-[#EDF0F6]"
+        className="relative inline-flex size-10 items-center justify-center rounded-lg border border-[#E5E1D7] bg-[#FFFEFA] text-[#202722] shadow-surface transition-colors hover:bg-[#F0EEE7]"
       >
         <Bell className="size-4" />
         {unread > 0 ? (
-          <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#4263EB] px-1 text-[10px] font-bold text-white tabular-nums">
+          <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#365FEA] px-1 text-[10px] font-bold text-white tabular-nums">
             {unread > 9 ? "9+" : unread}
           </span>
         ) : null}
@@ -116,22 +109,22 @@ function NotificationsBell() {
             className="fixed inset-0 z-40 cursor-default"
             onClick={() => setOpen(false)}
           />
-          <div className="absolute right-0 z-50 mt-2 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-[#E4E9F2] bg-[#FFFFFF] shadow-elevated sm:w-96">
-            <div className="flex items-center justify-between border-b border-[#E4E9F2] px-4 py-3">
-              <span className="font-display text-xs font-bold text-[#141B2D]">Notifications</span>
+          <div className="absolute right-0 z-50 mt-2 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-[#E5E1D7] bg-[#FFFEFA] shadow-elevated sm:w-96">
+            <div className="flex items-center justify-between border-b border-[#E5E1D7] px-4 py-3">
+              <span className="font-display text-xs font-bold text-[#202722]">Notifications</span>
               {unread > 0 ? (
                 <button
                   type="button"
                   onClick={() => markAll.mutate()}
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-[#4263EB] hover:text-[#3451D1]"
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-[#365FEA] hover:text-[#2B4FC7]"
                 >
                   <CheckCheck className="size-3.5" /> Mark all read
                 </button>
               ) : null}
             </div>
-            <div className="max-h-80 divide-y divide-[#E4E9F2] overflow-y-auto">
+            <div className="max-h-80 divide-y divide-[#E5E1D7] overflow-y-auto">
               {(data?.items.length ?? 0) === 0 ? (
-                <p className="px-4 py-8 text-center text-xs text-[#68738A]">
+                <p className="px-4 py-8 text-center text-xs text-[#69736D]">
                   No notifications yet. Activity updates appear here.
                 </p>
               ) : (
@@ -142,7 +135,7 @@ function NotificationsBell() {
                       key={item.id}
                       className={cn(
                         "flex items-start justify-between gap-3 px-4 py-3 text-xs",
-                        isUnread && "bg-[#4263EB]/[0.04]",
+                        isUnread && "bg-[#365FEA]/[0.05]",
                       )}
                     >
                       <div className="min-w-0 flex-1 space-y-1">
@@ -153,22 +146,22 @@ function NotificationsBell() {
                               setOpen(false);
                               if (isUnread) markOne.mutate(item.id);
                             }}
-                            className="block font-semibold text-[#141B2D] hover:text-[#4263EB]"
+                            className="block font-semibold text-[#202722] hover:text-[#365FEA]"
                           >
                             {item.title}
                           </Link>
                         ) : (
-                          <p className="font-semibold text-[#141B2D]">{item.title}</p>
+                          <p className="font-semibold text-[#202722]">{item.title}</p>
                         )}
-                        <p className="leading-5 text-[#4E596E]">{item.body}</p>
-                        <p className="text-[11px] text-[#68738A] tabular-nums">{timeAgo(item.createdAt)}</p>
+                        <p className="leading-5 text-[#69736D]">{item.body}</p>
+                        <p className="text-[11px] text-[#69736D] tabular-nums">{timeAgo(item.createdAt)}</p>
                       </div>
                       {isUnread ? (
                         <button
                           type="button"
                           aria-label="Mark notification read"
                           onClick={() => markOne.mutate(item.id)}
-                          className="mt-0.5 inline-flex size-7 shrink-0 items-center justify-center rounded-md border border-[#E4E9F2] bg-[#FFFFFF] text-[#4E596E] hover:border-[#4263EB] hover:text-[#4263EB]"
+                          className="mt-0.5 inline-flex size-7 shrink-0 items-center justify-center rounded-md border border-[#E5E1D7] bg-[#FFFEFA] text-[#69736D] hover:border-[#365FEA] hover:text-[#365FEA]"
                         >
                           <Check className="size-3.5" />
                         </button>
@@ -199,22 +192,22 @@ export function AppShell() {
   }
 
   const railContent = (
-    <div className="flex h-full flex-col justify-between bg-[#10172A] px-3 py-5 text-[#CBD5E1]">
+    <div className="flex h-full flex-col justify-between bg-[#FFFEFA] px-3 py-5 text-[#202722]">
       <div className="space-y-6">
         <div className="flex items-center justify-between px-2">
-          <Brand tone="inverse" to="/app" />
+          <Brand tone="default" to="/app" />
           <button
             type="button"
             aria-label="Close navigation menu"
             onClick={() => setSidebarOpen(false)}
-            className="inline-flex size-9 items-center justify-center rounded-lg text-[#94A3B8] hover:bg-[#1E293B] hover:text-white lg:hidden"
+            className="inline-flex size-9 items-center justify-center rounded-lg text-[#69736D] hover:bg-[#F0EEE7] hover:text-[#202722] lg:hidden"
           >
             <X className="size-4" />
           </button>
         </div>
 
         <nav aria-label="Workspace primary" className="space-y-1">
-          <p className="px-3 pb-1.5 text-xs font-medium text-[#94A3B8]">
+          <p className="px-3 pb-1.5 text-xs font-medium text-[#69736D]">
             {user?.role === "REVIEWER" ? "Specialist Workspace" : "Requester Workspace"}
           </p>
           {nav.primary.map((item) => {
@@ -229,8 +222,8 @@ export function AppShell() {
                   cn(
                     "flex min-h-11 items-center gap-2.5 rounded-lg px-3 py-2 text-[14px] font-medium transition-colors",
                     isActive
-                      ? "bg-[#4263EB] font-semibold text-white"
-                      : "text-[#CBD5E1] hover:bg-[#1B2541] hover:text-white",
+                      ? "bg-[#EEF2FE] font-semibold text-[#365FEA]"
+                      : "text-[#202722] hover:bg-[#F0EEE7]",
                   )
                 }
               >
@@ -241,8 +234,8 @@ export function AppShell() {
           })}
         </nav>
 
-        <nav aria-label="Workspace secondary" className="space-y-1 border-t border-[#1E293B] pt-4">
-          <p className="px-3 pb-1.5 text-xs font-medium text-[#94A3B8]">Account &amp; Reference</p>
+        <nav aria-label="Workspace secondary" className="space-y-1 border-t border-[#E5E1D7] pt-4">
+          <p className="px-3 pb-1.5 text-xs font-medium text-[#69736D]">Account</p>
           {nav.secondary.map((item) => {
             const Icon = item.icon;
             return (
@@ -254,8 +247,8 @@ export function AppShell() {
                   cn(
                     "flex min-h-11 items-center gap-2.5 rounded-lg px-3 py-2 text-[14px] font-medium transition-colors",
                     isActive
-                      ? "bg-[#1B2541] font-semibold text-white"
-                      : "text-[#94A3B8] hover:bg-[#1B2541] hover:text-white",
+                      ? "bg-[#EEF2FE] font-semibold text-[#365FEA]"
+                      : "text-[#69736D] hover:bg-[#F0EEE7] hover:text-[#202722]",
                   )
                 }
               >
@@ -267,16 +260,16 @@ export function AppShell() {
         </nav>
       </div>
 
-      <div className="space-y-3 border-t border-[#1E293B] pt-4">
+      <div className="space-y-3 border-t border-[#E5E1D7] pt-4">
         {user ? (
-          <div className="flex items-center gap-2.5 rounded-lg bg-[#162038] p-2.5">
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#4263EB] font-display text-xs font-bold text-white">
+          <div className="flex items-center gap-2.5 rounded-lg border border-[#E5E1D7] bg-[#F7F5EF] p-2.5">
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#365FEA] font-display text-xs font-bold text-white">
               {initials(user.name)}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-semibold text-white">{user.name}</p>
-              <p className="truncate text-[11px] text-[#94A3B8]">
-                {user.role === "REVIEWER" ? "Human Specialist" : "AI Requester"}
+              <p className="truncate text-xs font-semibold text-[#202722]">{user.name}</p>
+              <p className="truncate text-[11px] text-[#69736D]">
+                {user.role === "REVIEWER" ? "Specialist" : "Requester"}
               </p>
             </div>
           </div>
@@ -285,7 +278,7 @@ export function AppShell() {
         <button
           type="button"
           onClick={handleLogout}
-          className="flex min-h-11 w-full items-center gap-2.5 rounded-lg px-3 py-2 text-[14px] font-medium text-[#CBD5E1] transition-colors hover:bg-[#1B2541] hover:text-white"
+          className="flex min-h-11 w-full items-center gap-2.5 rounded-lg px-3 py-2 text-[14px] font-medium text-[#69736D] transition-colors hover:bg-[#F0EEE7] hover:text-[#202722]"
         >
           <LogOut className="size-4 shrink-0" />
           <span>Sign out</span>
@@ -295,15 +288,15 @@ export function AppShell() {
   );
 
   return (
-    <div className="flex min-h-dvh bg-[#F5F7FC] text-[#141B2D]">
-      <aside className="hidden w-64 shrink-0 border-r border-[#1E293B] lg:block">{railContent}</aside>
+    <div className="flex min-h-dvh bg-[#F7F5EF] text-[#202722]">
+      <aside className="hidden w-64 shrink-0 border-r border-[#E5E1D7] lg:block">{railContent}</aside>
 
       {sidebarOpen ? (
         <div className="fixed inset-0 z-50 flex lg:hidden">
           <button
             type="button"
             aria-label="Close sidebar overlay"
-            className="fixed inset-0 bg-[#10172A]/60"
+            className="fixed inset-0 bg-[#202722]/50"
             onClick={() => setSidebarOpen(false)}
           />
           <aside className="relative z-10 w-72 max-w-[85vw] shrink-0 shadow-elevated">{railContent}</aside>
@@ -311,23 +304,23 @@ export function AppShell() {
       ) : null}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-[#E4E9F2] bg-[#FFFFFF] px-4 sm:px-6 lg:px-8">
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-[#E5E1D7] bg-[#FFFEFA] px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
             <button
               type="button"
               aria-label="Open workspace navigation"
               onClick={() => setSidebarOpen(true)}
-              className="inline-flex size-11 items-center justify-center rounded-lg border border-[#E4E9F2] bg-[#FFFFFF] text-[#141B2D] hover:bg-[#EDF0F6] lg:hidden"
+              className="inline-flex size-11 items-center justify-center rounded-lg border border-[#E5E1D7] bg-[#FFFEFA] text-[#202722] hover:bg-[#F0EEE7] lg:hidden"
             >
               <Menu className="size-5" />
             </button>
-            <span className="text-sm font-semibold text-[#141B2D] lg:hidden">TrustToPay</span>
+            <span className="text-sm font-semibold text-[#202722] lg:hidden">TrustToPay</span>
           </div>
 
           <div className="flex items-center gap-2.5">
             {user?.role === "REQUESTER" ? (
               <Button asChild size="default">
-                <Link to="/app/workspace">New Task Request</Link>
+                <Link to="/app/workspace">New Task</Link>
               </Button>
             ) : (
               <Button asChild size="default" variant="outline">

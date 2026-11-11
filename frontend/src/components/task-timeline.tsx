@@ -22,53 +22,53 @@ function eventStyle(type: string): { icon: React.ReactNode; ring: string } {
   }
   if (type.includes("DISPUTE")) {
     return {
-      icon: <Gavel className="size-3.5 text-[#9A6100]" />,
-      ring: "border-[#F5A623]/40 bg-[#F5A623]/12",
+      icon: <Gavel className="size-3.5 text-[#8E5219]" />,
+      ring: "border-[#C97A2E]/40 bg-[#C97A2E]/12",
     };
   }
   if (type.includes("PAYOUT")) {
     return {
-      icon: <Wallet className="size-3.5 text-[#12A875]" />,
-      ring: "border-[#12A875]/35 bg-[#12A875]/10",
+      icon: <Wallet className="size-3.5 text-[#438866]" />,
+      ring: "border-[#438866]/35 bg-[#438866]/10",
     };
   }
   if (type.includes("FUNDING") || type.includes("ORDER")) {
     return {
-      icon: <CreditCard className="size-3.5 text-[#4263EB]" />,
-      ring: "border-[#4263EB]/30 bg-[#4263EB]/10",
+      icon: <CreditCard className="size-3.5 text-[#365FEA]" />,
+      ring: "border-[#365FEA]/30 bg-[#365FEA]/10",
     };
   }
   if (type.includes("VERIFICATION") || type.includes("RESUMED")) {
     return {
-      icon: <CheckCircle2 className="size-3.5 text-[#12A875]" />,
-      ring: "border-[#12A875]/35 bg-[#12A875]/10",
+      icon: <CheckCircle2 className="size-3.5 text-[#438866]" />,
+      ring: "border-[#438866]/35 bg-[#438866]/10",
     };
   }
   if (type.includes("ASSIGN") || type.includes("CLAIM") || type.includes("OFFER")) {
     return {
-      icon: <UserCheck className="size-3.5 text-[#7057F5]" />,
-      ring: "border-[#7057F5]/30 bg-[#7057F5]/10",
+      icon: <UserCheck className="size-3.5 text-[#365FEA]" />,
+      ring: "border-[#365FEA]/30 bg-[#365FEA]/10",
     };
   }
   if (type.includes("RECONCILE")) {
     return {
-      icon: <RefreshCw className="size-3.5 text-[#20BCE5]" />,
-      ring: "border-[#20BCE5]/35 bg-[#20BCE5]/10",
+      icon: <RefreshCw className="size-3.5 text-[#365FEA]" />,
+      ring: "border-[#365FEA]/35 bg-[#365FEA]/10",
     };
   }
   return {
-    icon: <CircleDot className="size-3.5 text-[#68738A]" />,
-    ring: "border-[#E4E9F2] bg-[#F5F7FC]",
+    icon: <CircleDot className="size-3.5 text-[#69736D]" />,
+    ring: "border-[#E5E1D7] bg-[#F7F5EF]",
   };
 }
 
 export function TaskTimeline({ events, dense = false }: { events: TaskEvent[]; dense?: boolean }) {
   if (!events || events.length === 0) {
-    return <p className="text-sm text-[#68738A]">No activity updates recorded yet.</p>;
+    return <p className="text-sm text-[#69736D]">No activity updates recorded yet.</p>;
   }
 
   return (
-    <ol className="relative space-y-3 before:absolute before:bottom-3 before:left-[15px] before:top-3 before:w-px before:bg-[#E4E9F2]">
+    <ol className="relative space-y-3 before:absolute before:bottom-3 before:left-[15px] before:top-3 before:w-px before:bg-[#E5E1D7]">
       {events.map((event) => {
         const style = eventStyle(event.type);
         return (
@@ -82,12 +82,12 @@ export function TaskTimeline({ events, dense = false }: { events: TaskEvent[]; d
             >
               {style.icon}
             </span>
-            <div className="min-w-0 border-b border-[#E4E9F2] pb-3 last:border-b-0">
+            <div className="min-w-0 border-b border-[#E5E1D7] pb-3 last:border-b-0">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="font-semibold text-[#141B2D]">{taskEventLabel(event.type)}</span>
-                <span className="text-xs text-[#68738A] tabular-nums">{formatDate(event.createdAt)}</span>
+                <span className="font-semibold text-[#202722]">{taskEventLabel(event.type)}</span>
+                <span className="text-xs text-[#69736D] tabular-nums">{formatDate(event.createdAt)}</span>
               </div>
-              <p className="mt-1 leading-5 text-[#4E596E]">{event.message}</p>
+              <p className="mt-1 leading-5 text-[#69736D]">{event.message}</p>
             </div>
           </li>
         );

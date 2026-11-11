@@ -8,13 +8,13 @@ describe("Badge", () => {
     render(<Badge tone="success">Verified</Badge>);
 
     const badge = screen.getByText("Verified");
-    expect(badge).toHaveClass("bg-[#12A875]/10", "text-[#0B7D56]");
+    expect(badge).toHaveClass("bg-[#438866]/10", "text-[#2F684C]");
   });
 
   it("uses the neutral tone by default", () => {
     render(<Badge>Draft</Badge>);
 
-    expect(screen.getByText("Draft")).toHaveClass("bg-[#EDF0F6]", "text-[#4E596E]");
+    expect(screen.getByText("Draft")).toHaveClass("bg-[#F0EEE7]", "text-[#69736D]");
   });
 
   it("renders a decorative dot when requested", () => {
@@ -45,8 +45,8 @@ describe("Badge", () => {
       </div>,
     );
 
-    expect(screen.getByText("Simulated Payouts")).toHaveAttribute("data-availability", "DEMO_SIMULATED");
-    expect(screen.getByText("Payout Unavailable")).toHaveAttribute("data-availability", "PAYOUT_UNAVAILABLE");
+    expect(screen.getByText("Test payouts")).toHaveAttribute("data-availability", "DEMO_SIMULATED");
+    expect(screen.getByText("Payout unavailable")).toHaveAttribute("data-availability", "PAYOUT_UNAVAILABLE");
     expect(screen.getByText("Passed")).toHaveAttribute("data-verdict", "PASS");
     expect(screen.getByText("Blocked")).toHaveAttribute("data-verdict", "BLOCK");
   });

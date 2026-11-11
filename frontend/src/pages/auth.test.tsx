@@ -56,8 +56,9 @@ describe("AuthPage UI & session security acceptance", () => {
 
     renderAuthApp("/login");
 
-    expect(screen.getByRole("heading", { name: /Sign in to TrustToPay/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /Welcome back/i })).toBeInTheDocument();
     expect(screen.queryByText(/Demo1234!/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Supabase/i)).not.toBeInTheDocument();
     expect(window.localStorage.getItem("ttp_session_token")).toBeNull();
   });
 
@@ -92,13 +93,13 @@ describe("AuthPage UI & session security acceptance", () => {
 
     renderAuthApp("/login");
 
-    fireEvent.change(screen.getByLabelText(/Work or personal email/i), {
+    fireEvent.change(screen.getByLabelText(/Email address/i), {
       target: { value: "agent@demo.trusttopay.dev" },
     });
     fireEvent.change(screen.getByLabelText(/^Password$/i), {
       target: { value: "Demo1234!" },
     });
-    fireEvent.click(screen.getByRole("button", { name: /Sign in to workspace/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^Sign in$/i }));
 
     await waitFor(() => {
       expect(screen.getByTestId("app-dashboard")).toBeInTheDocument();
@@ -143,14 +144,16 @@ describe("AuthPage UI & session security acceptance", () => {
 
     renderAuthApp("/register");
 
-    expect(screen.getByRole("heading", { name: /Create your TrustToPay account/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /Create your account/i })).toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText(/Full name/i), { target: { value: "Ada Lovelace" } });
     fireEvent.change(screen.getByLabelText(/Email address/i), { target: { value: "ada@engineering.org" } });
     fireEvent.change(screen.getByLabelText(/^Password$/i), { target: { value: "SecurePass123" } });
+    fireEvent.change(screen.getByLabelText(/^Confirm password$/i), { target: { value: "SecurePass123" } });
 
-    // Select Specialist role card
-    fireEvent.click(screen.getByRole("button", { name: /Specialist/i }));
+    // Select Specialist role card and accept terms
+    fireEvent.click(screen.getByRole("button", { name: /I want to offer my expertise/i }));
+    fireEvent.click(screen.getByRole("checkbox"));
     fireEvent.click(screen.getByRole("button", { name: /Create account/i }));
 
     await waitFor(() => {
@@ -184,16 +187,16 @@ describe("AuthPage UI & session security acceptance", () => {
 
     renderAuthApp("/login");
 
-    fireEvent.change(screen.getByLabelText(/Work or personal email/i), {
+    fireEvent.change(screen.getByLabelText(/Email address/i), {
       target: { value: "wrong@example.com" },
     });
     fireEvent.change(screen.getByLabelText(/^Password$/i), {
       target: { value: "WrongPass1" },
     });
-    fireEvent.click(screen.getByRole("button", { name: /Sign in to workspace/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^Sign in$/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/Email or password is incorrect\./i)).toBeInTheDocument();
+      expect(screen.getByText(/Your email or password is incorrect\./i)).toBeInTheDocument();
     });
   });
 });

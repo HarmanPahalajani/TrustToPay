@@ -10,12 +10,14 @@ import {
 
 describe("human-friendly status labels", () => {
   it("maps task statuses cleanly without exposing raw enum jargon", () => {
-    expect(taskStatusLabel("PAYMENT_READY")).toBe("Payment ready");
+    expect(taskStatusLabel("PAYMENT_READY")).toBe("Finding a specialist");
+    expect(taskStatusLabel("AWAITING_FUNDING")).toBe("Payment pending");
+    expect(taskStatusLabel("IN_PROGRESS")).toBe("Work in progress");
     expect(taskStatusLabel("NEEDS_HUMAN_REVIEW")).toBe("Waiting for further review");
     expect(taskStatusLabel("SAFETY_REJECTED")).toBe("Submission rejected");
-    expect(taskStatusLabel("VERIFICATION_PENDING")).toBe("Checking submission");
+    expect(taskStatusLabel("VERIFICATION_PENDING")).toBe("Safety review in progress");
     expect(taskStatusLabel("REVIEWER_ASSIGNED")).toBe("Specialist assigned");
-    expect(taskStatusLabel("VERIFIED")).toBe("Verified");
+    expect(taskStatusLabel("VERIFIED")).toBe("Completed");
   });
 
   it("maps security verdicts and verification runs to clear plain language", () => {
@@ -27,8 +29,8 @@ describe("human-friendly status labels", () => {
   });
 
   it("maps payment, event, and priority labels cleanly", () => {
-    expect(paymentStatusLabel("COMPLETED")).toBe("Paid");
-    expect(taskEventLabel("VERIFICATION_PASSED")).toBe("Work verification passed");
+    expect(paymentStatusLabel("COMPLETED")).toBe("Payment complete");
+    expect(taskEventLabel("VERIFICATION_PASSED")).toBe("Safety checks passed");
     expect(riskLevelLabel("HIGH")).toBe("High priority");
   });
 });

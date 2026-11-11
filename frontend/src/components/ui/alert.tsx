@@ -6,19 +6,19 @@ export type AlertTone = "info" | "success" | "warning" | "danger";
 
 const TONE_MAP: Record<AlertTone, { wrapper: string; icon: React.ReactNode }> = {
   info: {
-    wrapper: "border-[#4263EB]/25 bg-[#4263EB]/[0.06] text-[#141B2D]",
-    icon: <Info className="size-4 shrink-0 text-[#4263EB]" />,
+    wrapper: "border-[#365FEA]/25 bg-[#365FEA]/[0.06] text-[#202722]",
+    icon: <Info className="size-4 shrink-0 text-[#365FEA]" />,
   },
   success: {
-    wrapper: "border-[#12A875]/30 bg-[#12A875]/[0.07] text-[#141B2D]",
-    icon: <CheckCircle2 className="size-4 shrink-0 text-[#12A875]" />,
+    wrapper: "border-[#438866]/30 bg-[#438866]/[0.08] text-[#202722]",
+    icon: <CheckCircle2 className="size-4 shrink-0 text-[#438866]" />,
   },
   warning: {
-    wrapper: "border-[#F5A623]/40 bg-[#F5A623]/[0.09] text-[#141B2D]",
-    icon: <AlertCircle className="size-4 shrink-0 text-[#D48806]" />,
+    wrapper: "border-[#C97A2E]/35 bg-[#C97A2E]/[0.08] text-[#202722]",
+    icon: <AlertCircle className="size-4 shrink-0 text-[#C97A2E]" />,
   },
   danger: {
-    wrapper: "border-[#E5484D]/35 bg-[#E5484D]/[0.07] text-[#141B2D]",
+    wrapper: "border-[#E5484D]/35 bg-[#E5484D]/[0.07] text-[#202722]",
     icon: <ShieldAlert className="size-4 shrink-0 text-[#E5484D]" />,
   },
 };
@@ -48,8 +48,8 @@ export function AlertBanner({
     >
       <span className="mt-0.5 shrink-0">{icon ?? DefaultIcon}</span>
       <div className="min-w-0 flex-1 space-y-0.5">
-        {title ? <p className="font-semibold text-[#141B2D]">{title}</p> : null}
-        <div className="text-[#4E596E]">{children}</div>
+        {title ? <p className="font-semibold text-[#202722]">{title}</p> : null}
+        <div className="text-[#69736D]">{children}</div>
       </div>
       {actions ? <div className="shrink-0">{actions}</div> : null}
     </div>

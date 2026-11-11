@@ -91,4 +91,25 @@ describe("LandingPage SaaS redesign, partner strip, and workflow", () => {
     expect(resultTab).toHaveAttribute("aria-selected", "true");
     expect(screen.getByText(/Step 06/i)).toBeInTheDocument();
   });
+
+  it("replaces the right-side hero flow card with the Originkit Hero 22 visual while preserving left hero content and Venom CTA", () => {
+    render(
+      <MemoryRouter>
+        <LandingPage />
+      </MemoryRouter>,
+    );
+
+    expect(screen.queryByText(/End-to-End Task Flow/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/6 verified stages/i)).not.toBeInTheDocument();
+
+    expect(screen.getByLabelText(/Interactive human and AI neural coordination diagram/i)).toBeInTheDocument();
+    expect(screen.getByText("Decision Engine")).toBeInTheDocument();
+    expect(screen.getByText("Neural Processing")).toBeInTheDocument();
+    expect(screen.getByText("Agent Coordination")).toBeInTheDocument();
+
+    expect(screen.getAllByRole("link", { name: /Start as a Requester/i })[0]).toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: /Become a Specialist/i })[0]).toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: /Developer Docs/i })[0]).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Get Started" })).toBeInTheDocument();
+  });
 });

@@ -55,8 +55,7 @@ function ScrollToHash() {
 function ProtectedOrPublicDocsShell() {
   const { user, isLoading } = useAuth();
   const location = useLocation();
-  const isPublicFriendlyRoute =
-    location.pathname === "/app/docs" || location.pathname === "/app/integrations";
+  const isPublicFriendlyRoute = location.pathname === "/app/docs";
 
   if (isLoading) {
     return (
@@ -68,7 +67,7 @@ function ProtectedOrPublicDocsShell() {
   if (!user) {
     if (isPublicFriendlyRoute) {
       return (
-        <div className="flex min-h-dvh flex-col bg-[#F5F7FC] text-[#141B2D]">
+        <div className="flex min-h-dvh flex-col bg-[#F7F5EF] text-[#202722]">
           <PublicHeader />
           <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 lg:px-8">
             <Outlet />
@@ -113,7 +112,10 @@ export default function App() {
               <Route path="onboarding/skills" element={<SkillOnboardingPage />} />
               <Route path="assessment/:skillSlug/:level" element={<SkillAssessmentPage />} />
               <Route path="assessment/:skillSlug" element={<SkillAssessmentPage />} />
-              <Route path="integrations" element={<IntegrationsPage />} />
+              <Route
+                path="integrations"
+                element={import.meta.env.DEV ? <IntegrationsPage /> : <Navigate to="/app" replace />}
+              />
               <Route path="docs" element={<DocsPage />} />
             </Route>
 

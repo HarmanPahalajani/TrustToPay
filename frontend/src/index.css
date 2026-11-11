@@ -4,33 +4,33 @@
 
 @layer base {
   :root {
-    --background: 223 54% 97%;
-    --foreground: 223 38% 13%;
-    --card: 0 0% 100%;
-    --card-foreground: 223 38% 13%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 223 38% 13%;
-    --primary: 228 81% 59%;
+    --background: 45 33% 95%;
+    --foreground: 137 10% 14%;
+    --card: 48 100% 99%;
+    --card-foreground: 137 10% 14%;
+    --popover: 48 100% 99%;
+    --popover-foreground: 137 10% 14%;
+    --primary: 226 81% 56%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 33% 95%;
-    --secondary-foreground: 223 38% 13%;
-    --muted: 220 33% 95%;
-    --muted-foreground: 220 14% 47%;
-    --accent: 250 89% 65%;
+    --secondary: 47 22% 92%;
+    --secondary-foreground: 137 10% 14%;
+    --muted: 47 22% 92%;
+    --muted-foreground: 144 5% 43%;
+    --accent: 226 81% 56%;
     --accent-foreground: 0 0% 100%;
     --destructive: 358 75% 59%;
     --destructive-foreground: 0 0% 100%;
-    --border: 219 37% 92%;
-    --input: 219 37% 92%;
-    --ring: 228 81% 59%;
+    --border: 43 22% 87%;
+    --input: 43 22% 87%;
+    --ring: 226 81% 56%;
     --radius: 0.75rem;
 
     --ttp-navy: #10172A;
-    --ttp-cobalt: #4263EB;
-    --ttp-indigo: #7057F5;
-    --ttp-cyan: #20BCE5;
-    --ttp-emerald: #12A875;
-    --ttp-amber: #F5A623;
+    --ttp-cobalt: #365FEA;
+    --ttp-indigo: #365FEA;
+    --ttp-cyan: #365FEA;
+    --ttp-emerald: #438866;
+    --ttp-amber: #C97A2E;
     --ttp-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   }
 
@@ -41,12 +41,12 @@
   html {
     scroll-behavior: smooth;
     color-scheme: light;
-    caret-color: #4263EB;
+    caret-color: #365FEA;
   }
 
   body {
-    background-color: #F5F7FC;
-    color: #141B2D;
+    background-color: #F7F5EF;
+    color: #202722;
     font-family: "Inter", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: 15px;
     line-height: 1.6;
@@ -66,7 +66,7 @@
   select,
   textarea {
     &:focus-visible {
-      outline: 2px solid #4263EB;
+      outline: 2px solid #365FEA;
       outline-offset: 2px;
     }
   }
@@ -121,14 +121,14 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #EDF0F6;
+  background: #F0EEE7;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
+  background: #D4CFC3;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94A3B8;
+  background: #AEB5AF;
 }

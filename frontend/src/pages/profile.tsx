@@ -244,17 +244,17 @@ export default function ProfilePage() {
               {reviewer ? (
                 <div className="space-y-3 pt-1">
                   <SectionHeading
-                    title="Verified reviewer skills"
-                    description="Skills cannot be self-reported. Badges are granted only by passing sequential L1 → L2 → L3 technical assessments."
+                    title="Verified skills"
+                    description="Pass quick skill checks to unlock verified levels and receive matching tasks."
                     actions={
                       <Button asChild size="sm" variant="outline" className="text-xs">
-                        <Link to="/app/onboarding/skills">Full Skill Catalogue & Proctoring</Link>
+                        <Link to="/app/onboarding/skills">Browse All Skills &amp; Checks</Link>
                       </Button>
                     }
                   />
                   {verifiedSkills.length === 0 ? (
-                    <p className="rounded-md border border-dashed border-border p-3 text-xs text-muted-foreground">
-                      No verified skills yet. Pass a Level 1 (Foundation) assessment below to earn your first verified skill badge.
+                    <p className="rounded-md border border-dashed border-[#E5E1D7] p-3 text-xs text-[#69736D]">
+                      No verified skills yet. Complete a Level 1 check below to earn your first verified skill badge.
                     </p>
                   ) : (
                     <div className="flex flex-wrap gap-2">
@@ -269,13 +269,13 @@ export default function ProfilePage() {
                     <Alert tone={assessmentResult.passed ? "success" : "warning"}>
                       <div className="space-y-1">
                         <p className="font-semibold">
-                          {assessmentResult.skillName} · L{assessmentResult.level} ({assessmentResult.levelName}) —{" "}
-                          {assessmentResult.passed ? "PASSED" : "FAILED"} ({assessmentResult.score}% /{" "}
+                          {assessmentResult.skillName} · Level {assessmentResult.level} ({assessmentResult.levelName}) —{" "}
+                          {assessmentResult.passed ? "PASSED" : "NOT PASSED"} ({assessmentResult.score}% /{" "}
                           {assessmentResult.passingScore}% required)
                         </p>
                         {assessmentResult.cooldownUntil ? (
                           <p className="text-xs">
-                            Retake cooldown active until {formatDate(assessmentResult.cooldownUntil)}. Previously passed levels remain active.
+                            You can retry after {formatDate(assessmentResult.cooldownUntil)}. Previously passed levels remain active.
                           </p>
                         ) : null}
                       </div>
@@ -283,13 +283,13 @@ export default function ProfilePage() {
                   ) : null}
 
                   {activeAttempt ? (
-                    <div className="space-y-3 rounded-lg border border-[#4263EB]/30 bg-[#F5F7FC] p-3.5">
+                    <div className="space-y-3 rounded-lg border border-[#365FEA]/30 bg-[#F0EEE7] p-3.5">
                       <div className="flex items-center justify-between gap-2">
                         <div>
-                          <p className="text-xs font-semibold text-foreground">
+                          <p className="text-xs font-semibold text-[#202722]">
                             {activeAttempt.skillName} — Level {activeAttempt.level} ({activeAttempt.levelName})
                           </p>
-                          <p className="text-[11px] text-muted-foreground">
+                          <p className="text-[11px] text-[#69736D]">
                             Passing score: {activeAttempt.passingScore}%
                           </p>
                         </div>
@@ -304,8 +304,8 @@ export default function ProfilePage() {
                       </div>
 
                       {activeAttempt.questions.map((q, idx) => (
-                        <div key={q.id} className="space-y-2 rounded-md border border-border bg-background p-3">
-                          <p className="text-xs font-medium text-foreground">
+                        <div key={q.id} className="space-y-2 rounded-md border border-[#E5E1D7] bg-[#FFFEFA] p-3">
+                          <p className="text-xs font-medium text-[#202722]">
                             {idx + 1}. {q.prompt}
                           </p>
                           {q.type === "MULTIPLE_CHOICE" && q.options ? (
@@ -313,7 +313,7 @@ export default function ProfilePage() {
                               {q.options.map((opt) => (
                                 <label
                                   key={opt.id}
-                                  className="flex cursor-pointer items-start gap-2 rounded border border-border/70 p-2 text-xs hover:bg-muted/40"
+                                  className="flex cursor-pointer items-start gap-2 rounded border border-[#E5E1D7] p-2 text-xs text-[#202722] hover:bg-[#F0EEE7]/70"
                                 >
                                   <input
                                     type="radio"
@@ -326,7 +326,7 @@ export default function ProfilePage() {
                                         [q.id]: opt.id,
                                       }))
                                     }
-                                    className="mt-0.5 accent-primary"
+                                    className="mt-0.5 accent-[#365FEA]"
                                   />
                                   <span>{opt.text}</span>
                                 </label>
@@ -335,7 +335,7 @@ export default function ProfilePage() {
                           ) : (
                             <Textarea
                               rows={4}
-                              className="font-mono text-xs"
+                              className="text-xs"
                               value={answers[q.id] ?? ""}
                               onChange={(e) =>
                                 setAnswers((prev) => ({
@@ -355,7 +355,7 @@ export default function ProfilePage() {
                           loading={submitAssessment.isPending}
                           onClick={() => submitAssessment.mutate()}
                         >
-                          Submit assessment
+                          Submit answers
                         </Button>
                       </div>
                     </div>
@@ -363,25 +363,25 @@ export default function ProfilePage() {
 
                   {skillsCatalog.data?.skills ? (
                     <div className="space-y-2 pt-1">
-                      <p className="text-xs font-semibold text-foreground">
-                        Sequential Skill Verification Tracks (L1 → L2 → L3)
+                      <p className="text-xs font-semibold text-[#202722]">
+                        Skill levels (Level 1 to Level 3)
                       </p>
                       <div className="grid gap-2.5 sm:grid-cols-2">
                         {skillsCatalog.data.skills.map((skill) => (
                           <div
                             key={skill.id}
-                            className="flex flex-col justify-between gap-2 rounded-md border border-border p-3 text-xs"
+                            className="flex flex-col justify-between gap-2 rounded-md border border-[#E5E1D7] bg-[#FFFEFA] p-3 text-xs"
                           >
                             <div className="space-y-1">
                               <div className="flex items-center justify-between gap-2">
-                                <span className="font-semibold text-foreground">{skill.name}</span>
+                                <span className="font-semibold text-[#202722]">{skill.name}</span>
                                 {skill.verifiedLevel > 0 ? (
                                   <SkillLevelBadge level={skill.verifiedLevel} />
                                 ) : (
-                                  <Badge tone="neutral">Unverified</Badge>
+                                  <Badge tone="neutral">Not verified</Badge>
                                 )}
                               </div>
-                              <p className="text-[11px] text-muted-foreground">{skill.description}</p>
+                              <p className="text-[11px] text-[#69736D]">{skill.description}</p>
                             </div>
                             <div className="flex flex-wrap gap-1.5 pt-1">
                               {skill.stages.map((stage) => {
@@ -399,11 +399,11 @@ export default function ProfilePage() {
                                     className="h-7 px-2 text-[11px]"
                                   >
                                     {stage.passed ? (
-                                      <CheckCircle2 className="size-3 text-[#12A875]" />
+                                      <CheckCircle2 className="size-3 text-[#438866]" />
                                     ) : canStart ? (
-                                      <Play className="size-3 text-primary" />
+                                      <Play className="size-3 text-[#365FEA]" />
                                     ) : (
-                                      <Lock className="size-3 text-muted-foreground" />
+                                      <Lock className="size-3 text-[#69736D]" />
                                     )}
                                     L{stage.level} {stage.levelName}
                                   </Button>
@@ -423,39 +423,37 @@ export default function ProfilePage() {
           {reviewer ? (
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="flex items-center gap-2 text-sm">
-                  <Wallet className="size-4 text-[#4263EB]" /> PayPal payout details
+                <CardTitle className="flex items-center gap-2 text-sm text-[#202722]">
+                  <Wallet className="size-4 text-[#365FEA]" /> PayPal payout details
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <Alert tone="info">
-                  In practice mode, payouts are simulated and clearly labelled. In PayPal test mode, payouts run only
-                  after submitted work passes verification.
+                  Payments are released after submitted work passes safety and quality checks.
                 </Alert>
                 <Field
                   label="PayPal email"
                   htmlFor="profile-payout-email"
-                  hint="Enter the PayPal email where test payouts should be sent."
+                  hint="Enter the PayPal email where specialist payouts should be sent."
                 >
                   <Input
                     id="profile-payout-email"
                     type="email"
                     value={payoutEmail}
                     onChange={(event) => setPayoutEmail(event.target.value)}
-                    placeholder="reviewer@example.com"
+                    placeholder="specialist@example.com"
                     maxLength={200}
                   />
                 </Field>
-                <label className="flex items-start gap-2.5 rounded-xl bg-[#F5F7FC] p-3.5 text-xs leading-5 text-[#141B2D]">
+                <label className="flex items-start gap-2.5 rounded-xl bg-[#F0EEE7] p-3.5 text-xs leading-5 text-[#202722]">
                   <input
                     type="checkbox"
                     checked={consent}
                     onChange={(event) => setConsent(event.target.checked)}
-                    className="mt-0.5 size-4 accent-[#4263EB]"
+                    className="mt-0.5 size-4 accent-[#365FEA]"
                   />
                   <span>
-                    I consent to receive specialist rewards at this PayPal email after submitted work passes checks.
-                    Failed or disputed tasks are not paid.
+                    I consent to receive specialist payments at this PayPal email after submitted work passes checks.
                   </span>
                 </label>
                 <div className="flex flex-wrap items-center justify-between gap-2">
@@ -463,8 +461,8 @@ export default function ProfilePage() {
                     {ready ? "Payout profile ready" : "Payout profile incomplete"}
                   </Badge>
                   {stats ? (
-                    <span className="text-xs text-[#68738A] tabular-nums">
-                      {stats.completedPayoutCount} completed payout{stats.completedPayoutCount === 1 ? "" : "s"}
+                    <span className="text-xs text-[#69736D] tabular-nums">
+                      {stats.completedPayoutCount} completed payment{stats.completedPayoutCount === 1 ? "" : "s"}
                     </span>
                   ) : null}
                 </div>
@@ -473,8 +471,8 @@ export default function ProfilePage() {
           ) : null}
 
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="max-w-md text-xs leading-5 text-[#68738A]">
-              Consent is saved with your profile and verified before releasing any payout.
+            <p className="max-w-md text-xs leading-5 text-[#69736D]">
+              Your payout preferences are saved securely with your account.
             </p>
             <Button type="submit" loading={save.isPending}>
               <Save className="size-4" /> Save profile
@@ -485,16 +483,16 @@ export default function ProfilePage() {
         <aside className="min-w-0 space-y-4">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm">Account</CardTitle>
+              <CardTitle className="text-sm text-[#202722]">Account</CardTitle>
             </CardHeader>
             <CardContent>
               <dl>
                 <DataRow label="Role">
                   <Badge tone={user.role === "REVIEWER" ? "info" : "neutral"}>
-                    {humanize(user.role)}
+                    {user.role === "REVIEWER" ? "Specialist" : "Requester"}
                   </Badge>
                 </DataRow>
-                <DataRow label="Reviewer approval">
+                <DataRow label="Specialist status">
                   {user.role === "REVIEWER" ? (
                     <Badge tone={user.isReviewerApproved ? "success" : "warning"} dot>
                       {user.isReviewerApproved ? "Approved" : "Pending"}
@@ -505,37 +503,36 @@ export default function ProfilePage() {
                 </DataRow>
                 <DataRow label="Member since">{formatDate(user.createdAt)}</DataRow>
                 <DataRow label="Payout method">{user.profile?.payoutProvider ?? "PayPal"}</DataRow>
-                <DataRow label="Consent">{consent ? "Recorded" : "Not given"}</DataRow>
+                <DataRow label="Consent">{consent ? "Saved" : "Not set"}</DataRow>
               </dl>
             </CardContent>
           </Card>
 
           {reviewer ? (
-            <Card className={ready ? "border-[#12A875]/35" : "border-[#F5A623]/40"}>
+            <Card className={ready ? "border-[#438866]/35" : "border-[#C97A2E]/40"}>
               <CardHeader className="pb-2">
-                <CardTitle className="flex items-center gap-2 text-sm">
+                <CardTitle className="flex items-center gap-2 text-sm text-[#202722]">
                   {ready ? (
-                    <BadgeCheck className="size-4 text-[#12A875]" />
+                    <BadgeCheck className="size-4 text-[#438866]" />
                   ) : (
-                    <Mail className="size-4 text-[#F5A623]" />
+                    <Mail className="size-4 text-[#C97A2E]" />
                   )}
                   Payout readiness
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2.5 text-xs leading-5 text-[#68738A]">
+              <CardContent className="space-y-2.5 text-xs leading-5 text-[#69736D]">
                 {ready ? (
                   <p>
-                    Your payout profile is complete. Eligible rewards appear clearly in your payment history.
+                    Your payout profile is ready. Completed payments appear in your payment history.
                   </p>
                 ) : (
                   <p>
-                    Add a PayPal email and confirm consent so verified rewards can be released when payouts are
-                    available.
+                    Add a PayPal email and confirm consent so completed task payments can be sent to you.
                   </p>
                 )}
                 <Button asChild size="sm" variant="outline" className="w-full">
                   <Link to="/app/earnings">
-                    <BriefcaseBusiness className="size-3.5" /> View earnings
+                    <BriefcaseBusiness className="size-3.5" /> View payments
                   </Link>
                 </Button>
               </CardContent>
@@ -543,13 +540,13 @@ export default function ProfilePage() {
           ) : null}
 
           <Card>
-            <CardContent className="space-y-2 p-4 text-xs leading-5 text-[#68738A]">
-              <p className="flex items-center gap-1.5 text-xs font-semibold text-[#141B2D]">
-                <ShieldCheck className="size-3.5 text-[#4263EB]" /> Security note
+            <CardContent className="space-y-2 p-4 text-xs leading-5 text-[#69736D]">
+              <p className="flex items-center gap-1.5 text-xs font-semibold text-[#202722]">
+                <ShieldCheck className="size-3.5 text-[#365FEA]" /> Payment protection
               </p>
               <p>
-                Payment credentials are handled securely on the server, and payouts are only created after independent
-                verification passes.
+                Payout details are kept private and payments are released only after completed work passes safety and
+                quality checks.
               </p>
             </CardContent>
           </Card>

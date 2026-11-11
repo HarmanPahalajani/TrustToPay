@@ -1,37 +1,43 @@
 import { defineConfig } from "vitest/config";
+import { loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "node:path";
 
-export default defineConfig({
-  envDir: path.resolve(__dirname, ".."),
-  plugins: [react()],
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
-  },
-  test: {
-    environment: "jsdom",
-    globals: true,
-    setupFiles: ["./src/test/setup.ts"],
-    restoreMocks: true,
-    css: false,
-  },
-  server: {
-    host: "0.0.0.0",
-    port: 5173,
-    proxy: {
-      "/api": {
-        target: "http://localhost:3000",
-        changeOrigin: false,
-      },
-      "/health": {
-        target: "http://localhost:3000",
-        changeOrigin: false,
+export default defineConfig(({ mode }) => {
+  const envDir = path.resolve(__dirname, "..");
+  const env = loadEnv(mode, envDir, "");
+  const apiTarget = env.VITE_API_PROXY_TARGET || `http://localhost:${env.PORT || "3000"}`;
+
+  return {
+    envDir,
+    plugins: [react()],
+    resolve: {
+      alias: {
+        "@": path.resolve(__dirname, "./src"),
       },
     },
-  },
-  build: {
+    test: {
+      environment: "jsdom",
+      globals: true,
+      setupFiles: ["./src/test/setup.ts"],
+      restoreMocks: true,
+      css: false,
+    },
+    server: {
+      host: "0.0.0.0",
+      port: 5173,
+      proxy: {
+        "/api": {
+          target: apiTarget,
+          changeOrigin: false,
+        },
+        "/health": {
+          target: apiTarget,
+          changeOrigin: false,
+        },
+      },
+    },
+    build: {
     outDir: "dist",
     sourcemap: false,
     rollupOptions: {
@@ -59,4 +65,5 @@ export default defineConfig({
       },
     },
   },
+  };
 });
