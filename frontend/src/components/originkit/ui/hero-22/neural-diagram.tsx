@@ -158,6 +158,62 @@ export const NeuralDiagram = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const outer = outerRef.current;
+    if (!outer || reducedMotion) return;
+    let hovering = false;
+
+    const getCanvas = () => outer.querySelector("canvas");
+
+    const triggerAssemble = (e: PointerEvent) => {
+      const canvas = getCanvas();
+      if (!canvas) return;
+      const box = canvas.getBoundingClientRect();
+      const clientX =
+        e.clientX >= box.left && e.clientX <= box.right ? e.clientX : box.left + box.width / 2;
+      const clientY =
+        e.clientY >= box.top && e.clientY <= box.bottom ? e.clientY : box.top + box.height / 2;
+      canvas.dispatchEvent(
+        new MouseEvent("mousemove", {
+          bubbles: true,
+          clientX,
+          clientY,
+        }),
+      );
+    };
+
+    const onEnter = (e: PointerEvent) => {
+      hovering = true;
+      triggerAssemble(e);
+    };
+
+    const onMove = (e: PointerEvent) => {
+      if (!hovering) hovering = true;
+      triggerAssemble(e);
+    };
+
+    const onLeave = () => {
+      hovering = false;
+      const canvas = getCanvas();
+      if (!canvas) return;
+      canvas.dispatchEvent(
+        new MouseEvent("mouseout", {
+          bubbles: true,
+          relatedTarget: document.body,
+        }),
+      );
+    };
+
+    outer.addEventListener("pointerenter", onEnter);
+    outer.addEventListener("pointermove", onMove, { passive: true });
+    outer.addEventListener("pointerleave", onLeave);
+    return () => {
+      outer.removeEventListener("pointerenter", onEnter);
+      outer.removeEventListener("pointermove", onMove);
+      outer.removeEventListener("pointerleave", onLeave);
+    };
+  }, [reducedMotion]);
+
   const isMobile = stageWidth < 420;
   const logicalWidth = isMobile ? 402 : 864;
   const logicalHeight = isMobile ? 423 : 456;
@@ -227,13 +283,14 @@ export const NeuralDiagram = () => {
             particleShape="circle"
             particleColor="single"
             singleColor="#d9d9d9"
-            hoverEnabled={false}
-            repulsionEnabled={!reducedMotion && !isMobile}
-            repulsionConfig={{
-              repulsionMode: "outside",
-              repulsionForce: 7,
-              repulsionRadius: 48,
+            hoverEnabled={!reducedMotion}
+            hoverConfig={{
+              hoverType: "roam",
+              roamShape: "oval",
+              roamOpacity: 0.55,
+              transition: { duration: 0.75, ease: "easeInOut" },
             }}
+            repulsionEnabled={false}
             imageConfig={{
               image: asset("Vector.png"),
               mode: "fit",

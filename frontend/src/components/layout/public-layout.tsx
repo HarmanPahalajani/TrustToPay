@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ArrowRight, Menu, ShieldCheck, X } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import VenomButton from "@/components/originkit/venom-button";
 import { Button } from "@/components/ui/button";
 import { PayPalLogo, ElasticLogo, RenderLogo } from "@/components/partner-logos";
 import { cn } from "@/lib/utils";
@@ -82,6 +83,7 @@ const NAV_LINKS = [
 export function PublicHeader() {
   const { user } = useAuth();
   const { pathname, hash } = useLocation();
+  const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
@@ -120,11 +122,24 @@ export function PublicHeader() {
               <Button asChild variant="ghost" size="default">
                 <Link to="/login">Log In</Link>
               </Button>
-              <Button asChild variant="default" size="default">
-                <Link to="/register">
-                  Get Started <ArrowRight className="size-4" />
-                </Link>
-              </Button>
+              <VenomButton
+                label="Get Started"
+                rightIcon={<ArrowRight className="size-4" />}
+                size={38}
+                gutter={64}
+                reach={90}
+                cursor="native"
+                autoplay={false}
+                onClick={() => navigate("/register")}
+                font={{
+                  fontSize: 14,
+                  fontWeight: 600,
+                }}
+                advanced={{
+                  sense: 140,
+                  release: 120,
+                }}
+              />
             </>
           )}
         </div>

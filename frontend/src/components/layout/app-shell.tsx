@@ -12,6 +12,8 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  PanelLeftClose,
+  PanelLeftOpen,
   PlusCircle,
   UserRound,
   Wallet,
@@ -182,6 +184,7 @@ export function AppShell() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [desktopSidebarOpen, setDesktopSidebarOpen] = useState(true);
 
   const nav = useMemo(() => navFor(user?.role), [user?.role]);
 
@@ -288,8 +291,17 @@ export function AppShell() {
   );
 
   return (
-    <div className="flex min-h-dvh bg-[#F7F5EF] text-[#202722]">
-      <aside className="hidden w-64 shrink-0 border-r border-[#E5E1D7] lg:block">{railContent}</aside>
+    <div className="flex min-h-dvh bg-[#F7F5EF] text-[#202722] lg:h-dvh lg:overflow-hidden">
+      <aside
+        aria-label="Workspace sidebar"
+        aria-hidden={!desktopSidebarOpen}
+        className={cn(
+          "hidden shrink-0 border-[#E5E1D7] bg-[#FFFEFA] transition-[width] duration-200 lg:block lg:h-dvh lg:overflow-y-auto",
+          desktopSidebarOpen ? "lg:w-64 lg:border-r" : "lg:w-0 lg:overflow-hidden lg:border-r-0",
+        )}
+      >
+        <div className="h-full w-64">{railContent}</div>
+      </aside>
 
       {sidebarOpen ? (
         <div className="fixed inset-0 z-50 flex lg:hidden">
@@ -303,8 +315,8 @@ export function AppShell() {
         </div>
       ) : null}
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-[#E5E1D7] bg-[#FFFEFA] px-4 sm:px-6 lg:px-8">
+      <div className="flex min-w-0 flex-1 flex-col lg:h-dvh lg:overflow-hidden">
+        <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between gap-3 border-b border-[#E5E1D7] bg-[#FFFEFA] px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
             <button
               type="button"
@@ -313,6 +325,25 @@ export function AppShell() {
               className="inline-flex size-11 items-center justify-center rounded-lg border border-[#E5E1D7] bg-[#FFFEFA] text-[#202722] hover:bg-[#F0EEE7] lg:hidden"
             >
               <Menu className="size-5" />
+            </button>
+            <button
+              type="button"
+              aria-label={desktopSidebarOpen ? "Hide sidebar" : "Show sidebar"}
+              aria-expanded={desktopSidebarOpen}
+              onClick={() => setDesktopSidebarOpen((prev) => !prev)}
+              className="hidden h-9 items-center gap-2 rounded-lg border border-[#E5E1D7] bg-[#FFFEFA] px-2.5 text-xs font-medium text-[#4E596E] shadow-surface transition-colors hover:bg-[#F0EEE7] hover:text-[#202722] lg:inline-flex"
+            >
+              {desktopSidebarOpen ? (
+                <>
+                  <PanelLeftClose className="size-4" />
+                  <span>Hide sidebar</span>
+                </>
+              ) : (
+                <>
+                  <PanelLeftOpen className="size-4" />
+                  <span>Show sidebar</span>
+                </>
+              )}
             </button>
             <span className="text-sm font-semibold text-[#202722] lg:hidden">TrustToPay</span>
           </div>
@@ -331,8 +362,10 @@ export function AppShell() {
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-[1240px] flex-1 px-4 py-6 sm:px-6 lg:px-8">
-          <Outlet />
+        <main className="min-h-0 flex-1 lg:overflow-y-auto">
+          <div className="mx-auto w-full max-w-[1240px] px-4 py-6 sm:px-6 lg:px-8">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

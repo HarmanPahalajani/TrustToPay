@@ -21,6 +21,7 @@ import { NeuralDiagram } from "@/components/originkit/ui/hero-22/neural-diagram"
 import VenomButton from "@/components/originkit/venom-button";
 import { useAuth } from "@/context/AuthContext";
 import { PublicHeader, MarketingFooter } from "@/components/layout/public-layout";
+import { LiquidGlassPoweredBy } from "@/components/ui/liquid-glass-card";
 import {
   PayPalLogo,
   ElasticLogo,
@@ -232,28 +233,15 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="min-h-dvh bg-[#F5F7FC] text-[#141B2D]">
+    <div className="min-h-dvh overflow-x-clip bg-[#F5F7FC] text-[#141B2D]">
       <PublicHeader />
 
-      {/* Top Partner Strip — directly below navbar and directly above hero */}
-      <section
-        aria-label="Powered by technology partners"
-        className="border-b border-[#E4E9F2] bg-[#FFFFFF]"
-      >
-        <div className="mx-auto flex max-w-[1320px] flex-col items-center justify-center gap-3 px-4 py-3.5 sm:flex-row sm:justify-between sm:px-6 lg:px-8">
-          <span className="text-xs font-semibold tracking-[0.16em] text-[#68738A]">POWERED BY</span>
-          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 sm:gap-x-12">
-            <PayPalLogo className="h-6 sm:h-7" />
-            <ElasticLogo className="h-6 sm:h-7" />
-            <RenderLogo className="h-6 sm:h-7" />
-          </div>
-        </div>
-      </section>
-
       <main>
-        {/* Solid Deep Navy Hero (zero gradients, zero blobs) */}
+        {/* Solid Deep Navy Hero with frosted-white Liquid Glass Powered By bar at top + Hero 22 */}
         <section id="product" className="border-b border-[#1E293B] bg-[#10172A] text-white">
-          <div className="mx-auto max-w-[1320px] px-4 py-14 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+          <div className="mx-auto max-w-[1320px] px-4 pb-14 pt-6 sm:px-6 sm:pb-20 sm:pt-8 lg:px-8 lg:pb-24">
+            <LiquidGlassPoweredBy className="mb-7 sm:mb-8" />
+
             <div className="grid items-center gap-10 lg:grid-cols-[1.08fr_0.92fr] lg:gap-12">
               <div className="min-w-0 space-y-6">
                 <h1 className="font-display text-3xl font-bold leading-[1.08] tracking-[-0.025em] text-white sm:text-[46px] lg:text-[52px]">
@@ -733,29 +721,27 @@ export default function LandingPage() {
                   Open a Requester workspace to escalate tasks, or sign up as a Specialist to verify your skills.
                 </p>
               </div>
-              <div className="flex w-full flex-col items-stretch gap-3 sm:w-auto sm:flex-row sm:items-center">
-                <div className="h-[156px] w-full sm:w-[270px]">
-                  <VenomButton
-                    background="transparent"
-                    label="Get Started"
-                    size={48}
-                    reach={110}
-                    cursor="glove"
-                    autoplay={true}
-                    onClick={() => navigate("/register")}
-                    font={{
-                      fontSize: 15,
-                      fontWeight: 600,
-                      fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif",
-                    }}
-                    advanced={{
-                      sense: 195,
-                      release: 160,
-                      gloveScale: 128,
-                    }}
-                  />
-                </div>
-                <Button asChild size="lg" variant="outline" className="self-center sm:self-auto">
+              <div className="flex w-full flex-col items-start gap-3 sm:w-auto sm:flex-row sm:items-center">
+                <VenomButton
+                  label="Get Started"
+                  rightIcon={<ArrowRight className="size-4" />}
+                  size={44}
+                  gutter={72}
+                  reach={110}
+                  cursor="native"
+                  autoplay={false}
+                  onClick={() => navigate("/register")}
+                  font={{
+                    fontSize: 15,
+                    fontWeight: 600,
+                    fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif",
+                  }}
+                  advanced={{
+                    sense: 165,
+                    release: 145,
+                  }}
+                />
+                <Button asChild size="lg" variant="outline">
                   <Link to="/app/docs">API &amp; MCP Docs</Link>
                 </Button>
               </div>

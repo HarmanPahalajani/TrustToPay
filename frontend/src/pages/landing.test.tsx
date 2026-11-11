@@ -29,6 +29,7 @@ describe("LandingPage SaaS redesign, partner strip, and workflow", () => {
     expect(screen.getByText("POWERED BY")).toBeInTheDocument();
     const strip = screen.getByLabelText(/Powered by technology partners/i);
     expect(strip).toBeInTheDocument();
+    expect(strip.closest("#product")).not.toBeNull();
     expect(strip).toHaveTextContent(/PayPal/i);
     expect(strip).toHaveTextContent(/Elastic/i);
     expect(strip).toHaveTextContent(/Render/i);
@@ -110,6 +111,6 @@ describe("LandingPage SaaS redesign, partner strip, and workflow", () => {
     expect(screen.getAllByRole("link", { name: /Start as a Requester/i })[0]).toBeInTheDocument();
     expect(screen.getAllByRole("link", { name: /Become a Specialist/i })[0]).toBeInTheDocument();
     expect(screen.getAllByRole("link", { name: /Developer Docs/i })[0]).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Get Started" })).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: /Get Started/i })).toHaveLength(2);
   });
 });

@@ -1,6 +1,6 @@
 /* eslint-disable */
 // Venom Button — Originkit · adapted for React + Vite responsive CTA containers
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 
 const RenderTarget = {
   current: () => "preview",
@@ -362,7 +362,10 @@ export type VenomButtonProps = {
   textColor?: string;
   font?: CSSProperties;
   label?: string;
+  rightIcon?: ReactNode;
+  className?: string;
   size?: number;
+  gutter?: number;
   strands?: number;
   reach?: number;
   cursor?: "glove" | "arrow" | "native";
@@ -375,20 +378,24 @@ export type VenomButtonProps = {
 function __OriginkitBase_VenomButton(props: VenomButtonProps) {
   props = withMovedControls(props);
   const {
-    background = "#F0F0F0",
-    gooColor = "#020203",
+    background = "transparent",
+    gooColor = "#2447D6",
     textColor = "#FFFFFF",
     font,
-    label = "We are Venom",
-    size = 100,
+    label = "Get Started",
+    rightIcon,
+    className,
+    size = 44,
+    gutter = 72,
     strands = 7,
-    reach = 140,
-    cursor = "glove",
-    autoplay = true,
+    reach = 115,
+    cursor = "native",
+    autoplay = false,
     onClick,
     style,
   } = props;
   const adv: Advanced = { ...ADVANCED_DEFAULTS, ...(props.advanced ?? {}) };
+  const safeGutter = Math.round(num(gutter, 72, 24, 240));
 
   const stageRef = useRef<HTMLDivElement>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
@@ -396,8 +403,8 @@ function __OriginkitBase_VenomButton(props: VenomButtonProps) {
   const handRef = useRef<HTMLCanvasElement>(null);
   const [fallback, setFallback] = useState(false);
 
-  const live = useRef({ background, strands, reach, cursor, autoplay, gooColor, adv });
-  live.current = { background, strands, reach, cursor, autoplay, gooColor, adv };
+  const live = useRef({ background, strands, reach, cursor, autoplay, gooColor, gutter: safeGutter, adv });
+  live.current = { background, strands, reach, cursor, autoplay, gooColor, gutter: safeGutter, adv };
 
   useEffect(() => {
     const stage = stageRef.current,
@@ -565,10 +572,11 @@ function __OriginkitBase_VenomButton(props: VenomButtonProps) {
     const measure = () => {
       const bw = btn.offsetWidth,
         bh = btn.offsetHeight;
+      const g = live.current.gutter;
       pill.w = bw * press;
       pill.h = bh * press;
-      pill.x = btn.offsetLeft + (bw - pill.w) / 2;
-      pill.y = btn.offsetTop + (bh - pill.h) / 2;
+      pill.x = g + btn.offsetLeft + (bw - pill.w) / 2;
+      pill.y = g + btn.offsetTop + (bh - pill.h) / 2;
       pill.r = pill.h / 2;
       pill.ls = Math.max(0, pill.w - pill.h);
       pill.P = 2 * pill.ls + 2 * Math.PI * pill.r || 1;
@@ -627,23 +635,17 @@ function __OriginkitBase_VenomButton(props: VenomButtonProps) {
     const ptr = { x: -999, y: -999, inside: false, last: 0, touch: false, down: false, upAt: 0 };
     let touched = false;
     const place = (e: PointerEvent) => {
-      let x: number, y: number;
-      if (e.target === btn) {
-        const k = pill.w / (btn.offsetWidth || 1);
-        x = pill.x + e.offsetX * k;
-        y = pill.y + e.offsetY * k;
-      } else if (e.target === stage) {
-        x = e.offsetX;
-        y = e.offsetY;
-      } else return;
-      ptr.x = x;
-      ptr.y = y;
+      const r = stage.getBoundingClientRect();
+      ptr.x = e.clientX - r.left;
+      ptr.y = e.clientY - r.top;
       ptr.inside = ptr.x >= 0 && ptr.y >= 0 && ptr.x <= w && ptr.y <= h;
       if (ptr.inside) {
         touched = true;
         ptr.last = performance.now();
       }
     };
+    const isBtnHit = (target: EventTarget | null) =>
+      target === btn || (target instanceof Node && btn.contains(target));
     const onMove = (e: PointerEvent) => {
       if (e.pointerType === "touch") {
         if (!ptr.down || !e.isPrimary) return;
@@ -652,8 +654,9 @@ function __OriginkitBase_VenomButton(props: VenomButtonProps) {
       place(e);
     };
     const onDown = (e: PointerEvent) => {
-      if (e.target === btn && !reduced) pressed = true;
-      if (e.pointerType !== "touch" || !e.isPrimary) return;
+      const hitBtn = isBtnHit(e.target);
+      if (hitBtn && !reduced) pressed = true;
+      if (e.pointerType !== "touch" || !e.isPrimary || !hitBtn) return;
       ptr.touch = true;
       ptr.down = true;
       place(e);
@@ -677,9 +680,10 @@ function __OriginkitBase_VenomButton(props: VenomButtonProps) {
     const onKeyUp = () => {
       pressed = false;
     };
-    stage.addEventListener("pointermove", onMove, { passive: true });
-    stage.addEventListener("pointerdown", onDown, { passive: true });
-    stage.addEventListener("pointerleave", onLeave);
+    window.addEventListener("pointermove", onMove, { passive: true });
+    window.addEventListener("pointerdown", onDown, { passive: true });
+    document.addEventListener("mouseleave", onLeave);
+    window.addEventListener("blur", onLeave);
     window.addEventListener("pointerup", onUp, { passive: true });
     window.addEventListener("pointercancel", onUp, { passive: true });
     btn.addEventListener("keydown", onKeyDown);
@@ -1341,9 +1345,10 @@ function __OriginkitBase_VenomButton(props: VenomButtonProps) {
     return () => {
       cancelAnimationFrame(raf);
       ro.disconnect();
-      stage.removeEventListener("pointermove", onMove);
-      stage.removeEventListener("pointerdown", onDown);
-      stage.removeEventListener("pointerleave", onLeave);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerdown", onDown);
+      document.removeEventListener("mouseleave", onLeave);
+      window.removeEventListener("blur", onLeave);
       window.removeEventListener("pointerup", onUp);
       window.removeEventListener("pointercancel", onUp);
       btn.removeEventListener("keydown", onKeyDown);
@@ -1358,39 +1363,82 @@ function __OriginkitBase_VenomButton(props: VenomButtonProps) {
   }, []);
 
   const goo = toRgb(gooColor, GOO_FALLBACK);
-  const pad = Math.round(num(size, 64, 24, 240) * 0.5625);
+  const pad = Math.round(num(size, 44, 24, 240) * 0.45);
   const grain = num(adv.grain, 0, 0, 100) / 100;
   const vignette = num(adv.vignette, 0, 0, 100) / 100;
 
   return (
     <div
-      ref={stageRef}
+      className={className}
       style={{
         position: "relative",
-        display: "flex",
+        display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
-        width: "100%",
-        height: "100%",
-        minWidth: 0,
-        minHeight: 0,
-        overflow: "hidden",
-        touchAction: "pan-y",
-        background,
+        flexShrink: 0,
+        background: "transparent",
         ...style,
       }}
     >
-      <style>{`.venom-pill{outline:none}.venom-pill:focus-visible{outline:3px solid rgba(66,99,235,.45);outline-offset:5px}`}</style>
-      <canvas
-        ref={handRef}
-        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 30 }}
+      <style>{`.venom-pill{outline:none}.venom-pill:focus-visible{outline:3px solid rgba(66,99,235,.45);outline-offset:4px}`}</style>
+      <div
+        ref={stageRef}
         aria-hidden="true"
-      />
-      <canvas
-        ref={glRef}
-        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 10 }}
-        aria-hidden="true"
-      />
+        style={{
+          position: "absolute",
+          inset: -safeGutter,
+          pointerEvents: "none",
+          zIndex: 0,
+          overflow: "hidden",
+          touchAction: "pan-y",
+          background,
+        }}
+      >
+        <canvas
+          ref={glRef}
+          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 10 }}
+          aria-hidden="true"
+        />
+        <canvas
+          ref={handRef}
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            pointerEvents: "none",
+            zIndex: 30,
+            display: cursor === "native" ? "none" : "block",
+          }}
+          aria-hidden="true"
+        />
+        {vignette > 0 && (
+          <div
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              inset: 0,
+              pointerEvents: "none",
+              zIndex: 35,
+              background: `radial-gradient(ellipse at center, rgba(0,0,0,0) 40%, rgba(0,0,0,${0.85 * vignette}) 100%)`,
+            }}
+          />
+        )}
+        {grain > 0 && (
+          <div
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              inset: 0,
+              pointerEvents: "none",
+              zIndex: 40,
+              opacity: 0.45 * grain,
+              backgroundImage: GRAIN_URL,
+              backgroundSize: "180px 180px",
+            }}
+          />
+        )}
+      </div>
       <button
         ref={btnRef}
         type="button"
@@ -1399,65 +1447,47 @@ function __OriginkitBase_VenomButton(props: VenomButtonProps) {
         style={{
           position: "relative",
           zIndex: 20,
-          height: num(size, 64, 24, 240),
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 8,
+          height: num(size, 44, 24, 240),
           padding: `0 ${pad}px`,
           borderRadius: 9999,
           border: 0,
           margin: 0,
           color: textColor,
-          fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Inter, system-ui, sans-serif",
-          fontSize: 20,
-          fontWeight: 700,
-          letterSpacing: "-0.02em",
+          fontFamily: "Inter, ui-sans-serif, system-ui, -apple-system, sans-serif",
+          fontSize: 14,
+          fontWeight: 600,
+          letterSpacing: "-0.01em",
           lineHeight: 1,
           whiteSpace: "nowrap",
           ...font,
           transformOrigin: "50% 50%",
           WebkitTapHighlightColor: "transparent",
           background: fallback
-            ? `linear-gradient(180deg,${cssRgb(mixRgb(goo, [1, 1, 1], 0.1))} 0%,${cssRgb(goo)} 42%,${cssRgb(mixRgb(goo, [0, 0, 0], 0.7))} 100%)`
+            ? `linear-gradient(180deg,${cssRgb(mixRgb(goo, [1, 1, 1], 0.14))} 0%,${cssRgb(goo)} 55%,${cssRgb(mixRgb(goo, [0, 0, 0], 0.45))} 100%)`
             : "transparent",
           boxShadow: fallback
-            ? "inset 0 1px 0 rgba(255,255,255,.14), inset 0 -1.5px 0 rgba(255,255,255,.22), 0 18px 28px -14px rgba(0,0,0,.55)"
+            ? "inset 0 1px 0 rgba(255,255,255,.22), 0 8px 18px -6px rgba(36,71,214,.45)"
             : "none",
-          textShadow: "0 1px 0 rgba(0,0,0,.75), 0 -0.5px 0 rgba(255,255,255,.25)",
+          textShadow: "0 1px 1px rgba(0,0,0,.35)",
         }}
       >
-        {label}
+        <span>{label}</span>
+        {rightIcon}
       </button>
-      {vignette > 0 && (
-        <div
-          aria-hidden="true"
-          style={{
-            position: "absolute",
-            inset: 0,
-            pointerEvents: "none",
-            zIndex: 35,
-            background: `radial-gradient(ellipse at center, rgba(0,0,0,0) 40%, rgba(0,0,0,${0.85 * vignette}) 100%)`,
-          }}
-        />
-      )}
-      {grain > 0 && (
-        <div
-          aria-hidden="true"
-          style={{
-            position: "absolute",
-            inset: 0,
-            pointerEvents: "none",
-            zIndex: 40,
-            opacity: 0.45 * grain,
-            backgroundImage: GRAIN_URL,
-            backgroundSize: "180px 180px",
-          }}
-        />
-      )}
     </div>
   );
 }
 
 const __originkitPresetProps: Partial<VenomButtonProps> & Record<string, unknown> = {
-  gooColor: "#1E1EFF2E",
+  background: "transparent",
+  gooColor: "#2447D6",
   label: "Get Started",
+  cursor: "native",
+  autoplay: false,
   hover: 64,
   advanced: {
     rim: 100,
@@ -1471,15 +1501,15 @@ const __originkitPresetProps: Partial<VenomButtonProps> & Record<string, unknown
     hairs: true,
     mound: 100,
     pulse: 24,
-    sense: 290,
-    shine: "#EDF0F7",
+    sense: 165,
+    shine: "#EEF2FF",
     recoil: 90,
-    shadow: 20,
+    shadow: 16,
     spikes: 100,
     damping: 92,
     gravity: 260,
     lungeMs: 300,
-    release: 215,
+    release: 145,
     lingerMs: 1700,
     skinInMs: 2000,
     vignette: 0,
