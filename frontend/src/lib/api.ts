@@ -378,6 +378,10 @@ export const api = {
         payoutProfile: { email: string | null; consent: boolean; provider: string } | null;
         skills: string[];
       }>("/dashboard/reviewer"),
+    commandCenter: () =>
+      request<import("./types").CommandCenterData>("/dashboards/command-center"),
+    taskMatching: (taskId: string) =>
+      request<import("./types").TaskMatchingDetail>(`/dashboards/command-center/matching/${taskId}`),
   },
 
   users: {

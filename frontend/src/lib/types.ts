@@ -553,3 +553,209 @@ export type SkillAssessmentAttemptResult = {
   }[];
 };
 
+export type CommandTaskRow = {
+  id: string;
+  aiAgent: string;
+  requesterEmail: string;
+  title: string;
+  question: string;
+  category: string;
+  status: string;
+  priority: string;
+  difficulty: string;
+  requiredSkills: string[];
+  requiredProficiency: string;
+  minimumSkillLevel: number;
+  estimatedReward: string;
+  rewardMinor: number;
+  currency: string;
+  deadline: string;
+  matchingStatus: string;
+  matchedCandidatesCount: number;
+  assignedHuman: string;
+  assignedHumanId: string | null;
+  submissionsCount: number;
+  createdAt: string;
+  fundedAt: string | null;
+};
+
+export type CommandWorkforceRow = {
+  humanId: string;
+  name: string;
+  email: string;
+  profileStatus: "Active" | "Pending" | "Inactive";
+  verifiedSkills: string[];
+  verifiedSkillsList: Array<{
+    slug: string;
+    name: string;
+    level: number;
+    levelName: string;
+    score: number;
+    certifiedAt: string;
+  }>;
+  highestVerifiedLevel: number;
+  highestLevelName: string;
+  totalCompletedTasks: number;
+  successfulVerifications: number;
+  totalSubmissions: number;
+  successRate: number;
+  revisionCount: number;
+  avgCompletionTime: string;
+  availability: "Available" | "At Workload Limit" | "Offline";
+  currentActiveTasks: number;
+  earnings: string;
+  earningsMinor: number;
+  lastActive: string;
+  payoutEmail: string;
+  payoutConsent: boolean;
+};
+
+export type CommandAssessmentRow = {
+  id: string;
+  candidate: string;
+  candidateEmail: string;
+  skill: string;
+  skillSlug: string;
+  category: string;
+  level: number;
+  levelName: string;
+  roundStatus: string;
+  score: string;
+  scoreRaw: number;
+  practicalTestResult: "Passed" | "Failed" | "In Progress";
+  hiddenTestResult: "Passed" | "Failed" | "N/A";
+  attemptCount: number;
+  certificationStatus: "CERTIFIED" | "IN_PROGRESS" | "COOLDOWN";
+  assessmentDate: string;
+};
+
+export type CommandVerificationRow = {
+  id: string;
+  submissionId: string;
+  taskId: string;
+  taskTitle: string;
+  human: string;
+  humanEmail: string;
+  aiAgent: string;
+  submissionTime: string;
+  verificationType: string;
+  score: string;
+  scoreRaw: number;
+  testCasesPassed: number;
+  testCasesFailed: number;
+  verificationStatus: string;
+  revisionCount: number;
+  reviewRequired: "Yes" | "No";
+  finalDecision: "APPROVED" | "REJECTED" | "NEEDS_MANUAL_REVIEW";
+  deterministicCheck: string;
+  decisionReason: string;
+};
+
+export type CommandPaymentRow = {
+  transactionId: string;
+  taskId: string;
+  taskTitle: string;
+  human: string;
+  reward: string;
+  rewardMinor: number;
+  currency: string;
+  paymentMethod: string;
+  paymentStatus: string;
+  verificationStatus: string;
+  paypalReference: string;
+  mode: string;
+  createdAt: string;
+  completedAt: string | null;
+};
+
+export type CommandCenterKpis = {
+  totalRegisteredHumans: number;
+  availableSpecialists: number;
+  activeAiTasks: number;
+  tasksAwaitingAssignment: number;
+  successfulVerifications: number;
+  paymentsCompleted: number;
+};
+
+export type CommandCenterData = {
+  kpis: CommandCenterKpis;
+  tasks: CommandTaskRow[];
+  workforce: CommandWorkforceRow[];
+  assessments: CommandAssessmentRow[];
+  verifications: CommandVerificationRow[];
+  payments: CommandPaymentRow[];
+};
+
+export type RankedSpecialistCandidate = {
+  specialistId: string;
+  name: string;
+  email: string;
+  matchedSkillId: string | null;
+  matchedSkillName: string;
+  verifiedSkillLevel: number;
+  verifiedSkillLevelName: string;
+  minimumSkillLevelRequired: number;
+  score: number;
+  elasticHybridScore?: number | null;
+  breakdown: {
+    skillSignal: number;
+    verificationSignal: number;
+    speedSignal: number;
+    weightedSkill: number;
+    weightedVerification: number;
+    weightedSpeed: number;
+  };
+  stats: {
+    activeWorkload: number;
+    maxWorkload: number;
+    acceptedSubmissions: number;
+    rejectedSubmissions: number;
+    avgTurnaroundMinutes: number | null;
+  };
+  reasons: string[];
+};
+
+export type ExcludedSpecialistCandidate = {
+  specialistId: string;
+  email: string;
+  reasonCode: string;
+  detail: string;
+};
+
+export type TaskMatchingDetail = {
+  task: {
+    id: string;
+    title: string;
+    question: string;
+    category: string;
+    requiredSkills: string[];
+    minimumSkillLevel: number;
+    rewardMinor: number;
+    currency: string;
+    rewardDisplay: string;
+  };
+  offers: Array<{
+    id: string;
+    specialistId: string;
+    status: string;
+    specialist?: { id: string; name: string; email: string };
+  }>;
+  ranking: {
+    taskId: string;
+    requiredSkills: string[];
+    minimumSkillLevel: number;
+    eligible: RankedSpecialistCandidate[];
+    excluded: ExcludedSpecialistCandidate[];
+    discovery: {
+      mode: string;
+      usedElastic: boolean;
+      fallbackReason: string | null;
+      embeddingModel: string | null;
+      candidateCount: number;
+      durationMs: number;
+    };
+    evaluatedAt: string;
+  };
+};
+
+

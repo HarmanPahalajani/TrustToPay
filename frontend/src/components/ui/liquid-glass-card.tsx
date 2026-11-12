@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { ElasticLogo, PayPalLogo, RenderLogo } from "@/components/partner-logos";
+import { AgGridLogo, ElasticLogo, PayPalLogo, RenderLogo } from "@/components/partner-logos";
 import { cn } from "@/lib/utils";
 
 type PointerSpot = {
@@ -15,6 +15,13 @@ const PARTNERS = [
     heightClass: "h-[21px]",
     pillClass:
       "border-[#93C5FD]/30 bg-gradient-to-b from-[#93C5FD]/[0.20] via-[#60A5FA]/[0.10] to-[#3B82F6]/[0.12] hover:border-[#93C5FD]/45 hover:from-[#93C5FD]/[0.26]",
+  },
+  {
+    name: "AG Grid",
+    Logo: AgGridLogo,
+    heightClass: "h-[21px]",
+    pillClass:
+      "border-[#FDA4AF]/30 bg-gradient-to-b from-[#FDA4AF]/[0.20] via-[#FB7185]/[0.10] to-[#E11D48]/[0.12] hover:border-[#FDA4AF]/45 hover:from-[#FDA4AF]/[0.26]",
   },
   {
     name: "Elastic",

@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   ClipboardList,
   CreditCard,
+  Gauge,
   Inbox,
   Plus,
   ShieldCheck,
@@ -83,6 +84,11 @@ function RequesterDashboard() {
         description="Submit tasks when you need human expertise, follow specialist progress, and collect checked results."
         actions={
           <>
+            <Button asChild variant="outline">
+              <Link to="/app/command-center">
+                <Gauge className="size-4" /> Command Center
+              </Link>
+            </Button>
             <Button asChild variant="outline">
               <Link to="/app/requests">
                 <Inbox className="size-4" /> My Tasks
@@ -300,6 +306,11 @@ function ReviewerDashboard() {
         description="Browse tasks matched to your verified skills, submit clear work, and track safety reviews and earnings."
         actions={
           <>
+            <Button asChild variant="outline">
+              <Link to="/app/command-center">
+                <Gauge className="size-4" /> Command Center
+              </Link>
+            </Button>
             <Button asChild variant="outline">
               <Link to="/app/onboarding/skills">
                 <Award className="size-4" /> Skill Verification

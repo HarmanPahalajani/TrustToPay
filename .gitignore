@@ -40,7 +40,13 @@ test-results/
 npm-debug.log*
 
 # OS / editor
+.agents/
 .antigravity/
+.gemini/
+.codex/
+scratch/
+devpost-media/audit/
+devpost-media/command-center/debug-grid-closeup.png
 .DS_Store
 Thumbs.db
 .idea/

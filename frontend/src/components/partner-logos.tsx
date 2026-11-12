@@ -126,6 +126,53 @@ export function RenderLogo({ className, tone = "default" }: LogoProps) {
 }
 
 /**
+ * Official AG Grid brand mark (faceted grid emblem with authentic crimson/coral accent) + wordmark.
+ */
+export function AgGridLogo({ className, tone = "default" }: LogoProps) {
+  const textFill = tone === "inverse" ? "#FFFFFF" : "#182230";
+  return (
+    <svg
+      role="img"
+      aria-label="AG Grid"
+      viewBox="0 0 128 32"
+      className={cn("h-7 w-auto shrink-0", className)}
+      fill="none"
+    >
+      {/* AG Grid geometric tile container */}
+      <rect x="3" y="4" width="24" height="24" rx="6" fill="#182230" />
+      {/* 2x2 grid tiles */}
+      <rect x="6.5" y="7.5" width="7.5" height="7.5" rx="2" fill="#FF2257" />
+      <rect x="16" y="7.5" width="7.5" height="7.5" rx="2" fill="#38BDF8" />
+      <rect x="6.5" y="17" width="7.5" height="7.5" rx="2" fill="#34D399" />
+      <rect x="16" y="17" width="7.5" height="7.5" rx="2" fill="#FBBF24" />
+      {/* Wordmark */}
+      <text
+        x="33"
+        y="21.5"
+        fontFamily="Manrope, Inter, Arial, sans-serif"
+        fontWeight="800"
+        fontSize="17.5"
+        letterSpacing="-0.5"
+        fill="#FF2257"
+      >
+        AG
+      </text>
+      <text
+        x="60"
+        y="21.5"
+        fontFamily="Manrope, Inter, Arial, sans-serif"
+        fontWeight="700"
+        fontSize="17.5"
+        letterSpacing="-0.3"
+        fill={textFill}
+      >
+        Grid
+      </text>
+    </svg>
+  );
+}
+
+/**
  * Google Gemini brand mark (solid faceted four-point spark — zero gradients) + wordmark.
  */
 export function GeminiLogo({ className, tone = "default" }: LogoProps) {

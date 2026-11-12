@@ -12,6 +12,7 @@ Every human deliverable must pass deterministic quality and citation rules, auto
 | :--- | :--- |
 | **Live Web App (Frontend)** | [https://trusttopay-frontend.onrender.com](https://trusttopay-frontend.onrender.com) |
 | **Sign-In Page** | [https://trusttopay-frontend.onrender.com/login](https://trusttopay-frontend.onrender.com/login) |
+| **Operations Command Center** | [https://trusttopay-frontend.onrender.com/app/command-center](https://trusttopay-frontend.onrender.com/app/command-center) *(after sign-in)* |
 | **Live Backend API** | [https://trusttopay-backend.onrender.com](https://trusttopay-backend.onrender.com) |
 | **OpenAPI / Swagger Docs** | [https://trusttopay-backend.onrender.com/api-docs](https://trusttopay-backend.onrender.com/api-docs) |
 | **In-App API & MCP Docs** | [https://trusttopay-frontend.onrender.com/app/docs](https://trusttopay-frontend.onrender.com/app/docs) *(after sign-in)* |
@@ -87,7 +88,8 @@ flowchart LR
 
 ### Core Technology Stack
 
-* **Frontend:** React, Vite, TypeScript, Tailwind CSS (`frontend/`)
+* **Frontend:** React, Vite, TypeScript, Tailwind CSS, AG Grid Community Edition (`frontend/`)
+* **Operations Command Center:** AG Grid Community (`ag-grid-react`, `ag-grid-community`) powering real-time task allocation, multi-factor specialist matching breakdowns, and PayPal transaction ledgers
 * **Backend API:** Node.js (`>=20`), Express, Prisma ORM, PostgreSQL on Render (`backend/`)
 * **Authentication:** Supabase Auth (PKCE + JWT verification + `HttpOnly` session cookies)
 * **Payments:** PayPal Orders v2 Sandbox Checkout + webhook signature verification (`/api/webhooks/paypal`)
@@ -392,4 +394,4 @@ npm run db:provision:judges
 ---
 
 *TrustToPay — Autonomous Agent Escalation & Verification Protocol*  
-*Frontend, Backend API & Managed PostgreSQL hosted on Render · Built with PayPal Orders v2, Elastic Hybrid Search, Jina AI, Google Gemini & Supabase Auth*
+*Frontend, Backend API & Managed PostgreSQL hosted on Render · Built with PayPal Orders v2, AG Grid Community, Elastic Hybrid Search, Jina AI, Google Gemini & Supabase Auth*

@@ -8,6 +8,7 @@ import {
   Check,
   CheckCheck,
   CreditCard,
+  Gauge,
   Inbox,
   LayoutDashboard,
   LogOut,
@@ -38,6 +39,7 @@ function navFor(role: string | undefined): { primary: NavItem[]; secondary: NavI
     return {
       primary: [
         { to: "/app", label: "Overview", icon: LayoutDashboard, end: true },
+        { to: "/app/command-center", label: "Command Center", icon: Gauge },
         { to: "/app/marketplace", label: "Available Tasks", icon: BriefcaseBusiness },
         { to: "/app/reviews", label: "My Active Tasks", icon: Inbox },
         { to: "/app/onboarding/skills", label: "Skill Verification", icon: Award },
@@ -51,6 +53,7 @@ function navFor(role: string | undefined): { primary: NavItem[]; secondary: NavI
   return {
     primary: [
       { to: "/app", label: "Overview", icon: LayoutDashboard, end: true },
+      { to: "/app/command-center", label: "Command Center", icon: Gauge },
       { to: "/app/workspace", label: "New Task", icon: PlusCircle },
       { to: "/app/requests", label: "My Tasks", icon: Inbox },
       { to: "/app/payments", label: "Payments", icon: CreditCard },

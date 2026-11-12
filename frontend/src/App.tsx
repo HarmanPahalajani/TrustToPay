@@ -23,6 +23,7 @@ import DocsPage from "@/pages/docs";
 import IntegrationsPage from "@/pages/integrations";
 import SkillOnboardingPage from "@/pages/skill-onboarding";
 import SkillAssessmentPage from "@/pages/skill-assessment";
+import CommandCenterPage from "@/pages/command-center";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -108,6 +109,8 @@ export default function App() {
               <Route path="tasks/:id/verify" element={<VerificationCenterPage />} />
               <Route path="payments" element={<PaymentsPage />} />
               <Route path="earnings" element={<EarningsPage />} />
+              <Route path="command-center" element={<CommandCenterPage />} />
+              <Route path="operations" element={<CommandCenterPage />} />
               <Route path="profile" element={<ProfilePage />} />
               <Route path="onboarding/skills" element={<SkillOnboardingPage />} />
               <Route path="assessment/:skillSlug/:level" element={<SkillAssessmentPage />} />

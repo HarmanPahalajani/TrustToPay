@@ -1,3 +1,6 @@
+@import "ag-grid-community/styles/ag-grid.css";
+@import "ag-grid-community/styles/ag-theme-quartz.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -131,4 +134,76 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: #AEB5AF;
+}
+
+/* AG Grid Quartz Theme Customization for TrustToPay */
+.ag-theme-quartz {
+  --ag-font-family: inherit;
+  --ag-font-size: 13px;
+  --ag-background-color: #FFFEFA;
+  --ag-foreground-color: #202722;
+  --ag-header-background-color: #F7F5EF;
+  --ag-header-foreground-color: #4B554F;
+  --ag-odd-row-background-color: #FAF8F2;
+  --ag-border-color: #E5E1D7;
+  --ag-row-border-color: #ECE8DE;
+  --ag-header-column-separator-color: #E5E1D7;
+  --ag-selected-row-background-color: rgba(54, 95, 234, 0.08);
+  --ag-row-hover-color: rgba(54, 95, 234, 0.04);
+  --ag-range-selection-border-color: #365FEA;
+  --ag-control-panel-background-color: #F7F5EF;
+  --ag-input-focus-border-color: #365FEA;
+  --ag-border-radius: 12px;
+  --ag-header-height: 42px;
+  --ag-row-height: 48px;
+  border-radius: 12px;
+}
+
+.ag-theme-quartz .ag-header-cell-label {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.ag-theme-quartz .ag-root-wrapper {
+  border-radius: 12px;
+  border: 1px solid #E5E1D7;
+  box-shadow: 0 1px 3px rgba(16, 23, 42, 0.03);
+  overflow: hidden;
+}
+
+.ag-theme-quartz .ag-paging-panel {
+  border-top: 1px solid #E5E1D7;
+  color: #69736D;
+  font-size: 12px;
+  padding: 8px 16px;
+  background-color: #FAF8F2;
+}
+
+.ag-theme-quartz .ag-row {
+  transition: background-color 150ms ease;
+}
+
+.ag-theme-quartz .ag-cell {
+  display: flex;
+  align-items: center;
+  line-height: normal;
+}
+
+.ag-theme-quartz .ag-cell-wrapper {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}
+
+.ag-theme-quartz .ag-cell-value {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  line-height: normal;
+}
+
+.ag-theme-quartz .ag-cell-focus {
+  border-color: #365FEA !important;
 }

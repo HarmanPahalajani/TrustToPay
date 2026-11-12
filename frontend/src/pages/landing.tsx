@@ -24,6 +24,7 @@ import { PublicHeader, MarketingFooter } from "@/components/layout/public-layout
 import { LiquidGlassPoweredBy } from "@/components/ui/liquid-glass-card";
 import {
   PayPalLogo,
+  AgGridLogo,
   ElasticLogo,
   RenderLogo,
   GeminiLogo,
@@ -575,6 +576,10 @@ export default function LandingPage() {
                 {
                   logo: <PayPalLogo className="h-6" />,
                   desc: "Supports task reward checkout and clean payment tracking.",
+                },
+                {
+                  logo: <AgGridLogo className="h-6" />,
+                  desc: "Powers the operational command center, multi-factor specialist matching, and audit ledgers.",
                 },
                 {
                   logo: <ElasticLogo className="h-6" />,

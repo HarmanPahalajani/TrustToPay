@@ -1,3 +1,4 @@
+import { MatchingCandidatesGrid } from "@/components/grids/matching-candidates-grid";
 import { useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -685,6 +686,17 @@ function MatchingProgressCard({
             ))}
           </div>
         )}
+
+        {task.id && (funded || offers.length > 0) ? (
+          <div className="pt-2 border-t border-[#E5E1D7]">
+            <MatchingCandidatesGrid
+              taskId={task.id}
+              title="Top-5 Matched Candidates (AG Grid)"
+              subtitle="Algorithmic multi-factor ranking from TrustToPay matching engine"
+              height="320px"
+            />
+          </div>
+        ) : null}
       </CardContent>
     </Card>
   );

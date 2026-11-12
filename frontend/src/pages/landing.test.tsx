@@ -31,6 +31,7 @@ describe("LandingPage SaaS redesign, partner strip, and workflow", () => {
     expect(strip).toBeInTheDocument();
     expect(strip.closest("#product")).not.toBeNull();
     expect(strip).toHaveTextContent(/PayPal/i);
+    expect(strip).toHaveTextContent(/ag\s*grid/i);
     expect(strip).toHaveTextContent(/Elastic/i);
     expect(strip).toHaveTextContent(/Render/i);
 
